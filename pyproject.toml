@@ -7,7 +7,9 @@ authors = [
     { name = "Masatoshi Ono", email = "m-ono@resys.jp" }
 ]
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "pyxel>=2.9.8",
+]
 
 [project.scripts]
 ester-mastal = "ester_mastal:main"

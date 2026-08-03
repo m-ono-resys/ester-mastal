@@ -1,7 +1,6 @@
 import json
-import os
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import List, Optional
 from .player import Player
 from .monster import Monster
 
