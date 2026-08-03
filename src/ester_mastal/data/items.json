@@ -1,0 +1,26 @@
+{
+  "herb": {
+    "name": "やくそう",
+    "type": "item",
+    "price": 10,
+    "effect_value": 15
+  },
+  "bamboo_pole": {
+    "name": "たけのやり",
+    "type": "weapon",
+    "price": 15,
+    "effect_value": 3
+  },
+  "copper_sword": {
+    "name": "どうのつるぎ",
+    "type": "weapon",
+    "price": 120,
+    "effect_value": 10
+  },
+  "leather_armor": {
+    "name": "かわのよろい",
+    "type": "armor",
+    "price": 70,
+    "effect_value": 4
+  }
+}
