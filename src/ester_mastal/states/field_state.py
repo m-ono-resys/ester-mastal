@@ -27,6 +27,15 @@ class Direction(Enum):
     RIGHT = auto()
     UP = auto()
 
+class Mode(Enum):
+    EXPLORE = auto()
+    MAIN_MENU = auto()
+    SPELL_MENU = auto()
+    ITEM_MENU = auto()
+    STATS_MENU = auto()
+    MESSAGE = auto()
+    INN_CONFIRM = auto()
+    SHOP_MENU = auto()
 
 class FieldState(BaseState):
     def __init__(self, app):
@@ -42,7 +51,7 @@ class FieldState(BaseState):
         # self.current_map = WORLD_MAP
 
         # モード管理: "EXPLORE", "MAIN_MENU", "SPELL_MENU", "ITEM_MENU", "STATS_MENU", "MESSAGE"
-        self.mode = "EXPLORE"
+        self.mode: Mode = Mode.EXPLORE
         self.cursor = 0  # メインメニュー用カーソル (0:じゅもん, 1:つよさ, 2:どうぐ)
         self.sub_cursor = 0  # サブメニュー用カーソル
 
@@ -105,7 +114,7 @@ class FieldState(BaseState):
         match event["type"]:
             case "NPC":  # 村人会話
                 self.msg_box.push_messages(event["messages"])
-                self.mode = "MESSAGE"
+                self.mode = Mode.MESSAGE
 
             case "CHEST":  # 宝箱
                 if event["is_opened"]:
@@ -124,19 +133,19 @@ class FieldState(BaseState):
                             "たからばこ を あけた！",
                             f"{event['reward_value']} を てにいれた！"
                         ])
-                self.mode = "MESSAGE"
+                self.mode = Mode.MESSAGE
 
             case "INN":  # 宿屋
                 self.sub_cursor = 0  # 0: はい, 1: いいえ
-                self.mode = "INN_CONFIRM"
+                self.mode = Mode.INN_CONFIRM
 
             case "SHOP":  # ショップ
                 self.sub_cursor = 0
-                self.mode = "SHOP_MENU"
+                self.mode = Mode.SHOP_MENU
 
     def update(self):
         match self.mode:
-            case "EXPLORE":
+            case Mode.EXPLORE:
                 dx, dy = 0, 0
                 # 上下左右移動
                 if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.KEY_W):
@@ -187,20 +196,20 @@ class FieldState(BaseState):
 
                 # XキーまたはESCキーでメニューを開く
                 if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.mode = "MAIN_MENU"
+                    self.mode = Mode.MAIN_MENU
                     self.cursor = 0
 
             # --- 宿屋の宿泊確認 ---
-            case "INN_CONFIRM":
+            case Mode.INN_CONFIRM:
                 if not self.current_event:
-                    self.mode = "EXPLORE"
+                    self.mode = Mode.EXPLORE
                     return
                 
                 if pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.KEY_RIGHT):
                     self.sub_cursor = 1 - self.sub_cursor
 
                 if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.mode = "EXPLORE"
+                    self.mode = Mode.EXPLORE
 
                 elif pyxel.btnp(pyxel.KEY_Z) or pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.KEY_RETURN):
                     p = self.app.player
@@ -220,12 +229,12 @@ class FieldState(BaseState):
                     else:  # 「いいえ」選択
                         self.msg_box.push_messages(["また おこしください。"])
 
-                    self.mode = "MESSAGE"
+                    self.mode = Mode.MESSAGE
 
             # --- ショップ（武器防具屋） ---
-            case "SHOP_MENU":
+            case Mode.SHOP_MENU:
                 if not self.current_event:
-                    self.mode = "EXPLORE"
+                    self.mode = Mode.EXPLORE
                     return
                 
                 items = self.current_event["items"]
@@ -235,7 +244,7 @@ class FieldState(BaseState):
                     self.sub_cursor = (self.sub_cursor + 1) % len(items)
 
                 if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.mode = "EXPLORE"
+                    self.mode = Mode.EXPLORE
 
                 elif pyxel.btnp(pyxel.KEY_Z) or pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.KEY_RETURN):
                     p = self.app.player
@@ -258,10 +267,10 @@ class FieldState(BaseState):
                             f"{item['name']} を かった！",
                             "まいど ありがとうございます！"
                         ])
-                    self.mode = "MESSAGE"
+                    self.mode = Mode.MESSAGE
 
             # --- 2. メインメニュー選択 ---
-            case "MAIN_MENU":
+            case Mode.MAIN_MENU:
                 if pyxel.btnp(pyxel.KEY_UP):
                     self.cursor = (self.cursor - 1) % 3
                 elif pyxel.btnp(pyxel.KEY_DOWN):
@@ -269,7 +278,7 @@ class FieldState(BaseState):
 
                 # XキーまたはESCでメニューを閉じる
                 if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.mode = "EXPLORE"
+                    self.mode = Mode.EXPLORE
 
                 # 決定
                 elif (
@@ -284,28 +293,28 @@ class FieldState(BaseState):
                                 self.msg_box.push_messages(
                                     ["じゅもんを おぼえていない！"]
                                 )
-                                self.mode = "MESSAGE"
+                                self.mode = Mode.MESSAGE
                             else:
-                                self.mode = "SPELL_MENU"
+                                self.mode = Mode.SPELL_MENU
                                 self.sub_cursor = 0
 
                         case 1:  # つよさ
-                            self.mode = "STATS_MENU"
+                            self.mode = Mode.STATS_MENU
 
                         case 2:  # どうぐ
                             # ★修正: リストが空かどうか直接チェック
                             if not p.items:
                                 self.msg_box.push_messages(["どうぐを もっていない！"])
-                                self.mode = "MESSAGE"
+                                self.mode = Mode.MESSAGE
                             else:
-                                self.mode = "ITEM_MENU"
+                                self.mode = Mode.ITEM_MENU
                                 self.sub_cursor = 0
 
             # --- 3. 呪文選択・使用 ---
-            case "SPELL_MENU":
+            case Mode.SPELL_MENU:
                 p = self.app.player
                 if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.mode = "MAIN_MENU"
+                    self.mode = Mode.MAIN_MENU
 
                 elif pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.KEY_DOWN):
                     if len(p.spells) > 1:
@@ -331,14 +340,14 @@ class FieldState(BaseState):
                                     f"HPが {healed} かいふくした！",
                                 ]
                             )
-                        self.mode = "MESSAGE"
+                        self.mode = Mode.MESSAGE
 
             # --- 4. 道具選択・使用 ---
-            case "ITEM_MENU":
+            case Mode.ITEM_MENU:
                 p = self.app.player
 
                 if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.mode = "MAIN_MENU"
+                    self.mode = Mode.MAIN_MENU
 
                 # カーソル上下移動
                 elif pyxel.btnp(pyxel.KEY_UP):
@@ -363,10 +372,10 @@ class FieldState(BaseState):
                                 f"HPが {healed} かいふくした！",
                             ]
                         )
-                        self.mode = "MESSAGE"
+                        self.mode = Mode.MESSAGE
 
             # --- 5. ステータス画面 ---
-            case "STATS_MENU":
+            case Mode.STATS_MENU:
                 # どのボタンを押してもメインメニューへ戻る
                 if (
                     pyxel.btnp(pyxel.KEY_Z)
@@ -375,13 +384,13 @@ class FieldState(BaseState):
                     or pyxel.btnp(pyxel.KEY_RETURN)
                     or pyxel.btnp(pyxel.KEY_ESCAPE)
                 ):
-                    self.mode = "MAIN_MENU"
+                    self.mode = Mode.MAIN_MENU
 
             # --- 6. メッセージ表示中 ---
-            case "MESSAGE":
+            case Mode.MESSAGE:
                 all_done = self.msg_box.update()
                 if all_done:
-                    self.mode = "MAIN_MENU"
+                    self.mode = getattr(self, "return_mode", Mode.EXPLORE)
 
     def trigger_battle(self):
         from .battle_state import BattleState
@@ -428,7 +437,40 @@ class FieldState(BaseState):
 
 
         match self.mode:
-            case "INN_CONFIRM":
+            # メインメニュー、呪文、道具、ステータス選択中はいずれも「左側のメイン枠」を表示
+            case Mode.MAIN_MENU | Mode.SPELL_MENU | Mode.ITEM_MENU | Mode.STATS_MENU:
+                draw_window(10, 20, 50, 42)
+                pyxel.text(20, 25, "じゅもん", 7, self.app.font)
+                pyxel.text(20, 35, "つよさ", 7, self.app.font)
+                pyxel.text(20, 45, "どうぐ", 7, self.app.font)
+                pyxel.text(14, 25 + self.cursor * 10, ">", 10, self.app.font)
+
+                # その上で、各サブメニューを右側に重ね描き
+                match self.mode:
+                    case Mode.SPELL_MENU:
+                        draw_window(65, 20, 85, 42)
+                        for i, spell in enumerate(p.spells):
+                            pyxel.text(75, 25 + i * 10, f"{spell.name} M:{spell.mp_cost}", 7, self.app.font)
+                        pyxel.text(69, 25 + self.sub_cursor * 10, ">", 10, self.app.font)
+
+                    case Mode.ITEM_MENU:
+                        draw_window(65, 20, 85, 42)
+                        for i, item in enumerate(p.items):
+                            name = "やくそう" if item == "herb" else item
+                            pyxel.text(75, 25 + i * 10, name, 7, self.app.font)
+                        pyxel.text(69, 25 + self.sub_cursor * 10, ">", 10, self.app.font)
+
+                    case Mode.STATS_MENU:
+                        draw_window(65, 20, 85, 80)
+                        pyxel.text(70, 25, f"なに: {p.name}", 7, self.app.font)
+                        pyxel.text(70, 35, f"レベル: {p.level}", 7, self.app.font)
+                        pyxel.text(70, 45, f"こうげき: {p.attack}", 7, self.app.font)
+                        pyxel.text(70, 55, f"しゅび: {p.defense}", 7, self.app.font)
+                        pyxel.text(70, 65, f"けいけん: {p.exp}", 7, self.app.font)
+                        pyxel.text(70, 75, f"ゴールド: {p.gold}", 7, self.app.font)
+
+
+            case Mode.INN_CONFIRM:
                 if not self.current_event:
                     return
                 
@@ -442,7 +484,7 @@ class FieldState(BaseState):
                 pyxel.text(40, 42, "はい", yes_color, self.app.font)
                 pyxel.text(90, 42, "いいえ", no_color, self.app.font)
 
-            case "SHOP_MENU":
+            case Mode.SHOP_MENU:
                 draw_window(10, 20, 140, 42)
                 if not self.current_event:
                     return
@@ -451,45 +493,45 @@ class FieldState(BaseState):
                     pyxel.text(24, 25 + i * 10, f"{item['name']} ({item['price']}G)", 7, self.app.font)
                 pyxel.text(16, 25 + self.sub_cursor * 10, ">", 10, self.app.font)
 
-            case "MAIN_MENU":
-            # メインメニュー枠
-                draw_window(10, 20, 50, 42)
-                pyxel.text(20, 25, "じゅもん", 7, self.app.font)
-                pyxel.text(20, 35, "つよさ", 7, self.app.font)
-                pyxel.text(20, 45, "どうぐ", 7, self.app.font)
-                pyxel.text(14, 25 + self.cursor * 10, ">", 10, self.app.font)
+            # case Mode.MAIN_MENU:
+            # # メインメニュー枠
+            #     draw_window(10, 20, 50, 42)
+            #     pyxel.text(20, 25, "じゅもん", 7, self.app.font)
+            #     pyxel.text(20, 35, "つよさ", 7, self.app.font)
+            #     pyxel.text(20, 45, "どうぐ", 7, self.app.font)
+            #     pyxel.text(14, 25 + self.cursor * 10, ">", 10, self.app.font)
 
-            # 呪文サブメニュー
-            case "SPELL_MENU":
-                draw_window(65, 20, 85, 42)
-                for i, spell in enumerate(p.spells):
-                    pyxel.text(
-                        75,
-                        25 + i * 10,
-                        f"{spell.name} M:{spell.mp_cost}",
-                        7,
-                        self.app.font,
-                    )
-                pyxel.text(69, 25 + self.sub_cursor * 10, ">", 10, self.app.font)
+            # # 呪文サブメニュー
+            # case Mode.SPELL_MENU:
+            #     draw_window(65, 20, 85, 42)
+            #     for i, spell in enumerate(p.spells):
+            #         pyxel.text(
+            #             75,
+            #             25 + i * 10,
+            #             f"{spell.name} M:{spell.mp_cost}",
+            #             7,
+            #             self.app.font,
+            #         )
+            #     pyxel.text(69, 25 + self.sub_cursor * 10, ">", 10, self.app.font)
 
-            # 道具サブメニュー
-            case "ITEM_MENU":
-                draw_window(65, 20, 85, 42)
-                for i, item in enumerate(p.items):
-                    name = "やくそう" if item == "herb" else item
-                    pyxel.text(75, 25 + i * 10, name, 7, self.app.font)
-                pyxel.text(69, 25 + self.sub_cursor * 10, ">", 10, self.app.font)
+            # # 道具サブメニュー
+            # case Mode.ITEM_MENU:
+            #     draw_window(65, 20, 85, 42)
+            #     for i, item in enumerate(p.items):
+            #         name = "やくそう" if item == "herb" else item
+            #         pyxel.text(75, 25 + i * 10, name, 7, self.app.font)
+            #     pyxel.text(69, 25 + self.sub_cursor * 10, ">", 10, self.app.font)
 
-            # つよさ（詳細ステータス）画面
-            case "STATS_MENU":
-                draw_window(65, 20, 85, 80)
-                pyxel.text(70, 25, f"なに: {p.name}", 7, self.app.font)
-                pyxel.text(70, 35, f"レベル: {p.level}", 7, self.app.font)
-                pyxel.text(70, 45, f"こうげき: {p.attack}", 7, self.app.font)
-                pyxel.text(70, 55, f"しゅび: {p.defense}", 7, self.app.font)
-                pyxel.text(70, 65, f"けいけん: {p.exp}", 7, self.app.font)
-                pyxel.text(70, 75, f"ゴールド: {p.gold}", 7, self.app.font)
+            # # つよさ（詳細ステータス）画面
+            # case Mode.STATS_MENU:
+            #     draw_window(65, 20, 85, 80)
+            #     pyxel.text(70, 25, f"なに: {p.name}", 7, self.app.font)
+            #     pyxel.text(70, 35, f"レベル: {p.level}", 7, self.app.font)
+            #     pyxel.text(70, 45, f"こうげき: {p.attack}", 7, self.app.font)
+            #     pyxel.text(70, 55, f"しゅび: {p.defense}", 7, self.app.font)
+            #     pyxel.text(70, 65, f"けいけん: {p.exp}", 7, self.app.font)
+            #     pyxel.text(70, 75, f"ゴールド: {p.gold}", 7, self.app.font)
 
                 # メッセージウィンドウ
-            case "MESSAGE":
+            case Mode.MESSAGE:
                 self.msg_box.draw()
