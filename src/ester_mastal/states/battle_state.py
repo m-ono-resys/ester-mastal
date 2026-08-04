@@ -1,7 +1,6 @@
 import pyxel
 from .base_state import BaseState
 from ..models.battle import BattleEngine
-from ..ui.window import draw_window
 from ..ui.message_box import MessageBox
 
 class BattleState(BaseState):
@@ -16,28 +15,6 @@ class BattleState(BaseState):
         )
         self.msg_box.push_messages([f"{monster.name} が あらわれた！"])
 
-        # self.message_queue = [f"{monster.name} が あらわれた！"]
-        # self.current_message = ""
-        # self.state = "COMMAND"  # "COMMAND", "MESSAGE"
-
-        # self.next_message()
-
-    def next_message(self):
-        """メッセージキューから1つ取り出して表示"""
-        if self.message_queue:
-            self.current_message = self.message_queue.pop(0)
-        else:
-            self.current_message = ""
-            # 戦闘終了判定
-            if self.engine.is_finished:
-                if self.app.player.is_alive:
-                    from .field_state import FieldState
-                    self.app.change_state(FieldState(self.app))
-                else:
-                    from .game_over_state import GameOverState
-                    self.app.change_state(GameOverState(self.app))
-            else:
-                self.state = "COMMAND"
 
     def update(self):
         if self.state == "COMMAND":
@@ -61,10 +38,6 @@ class BattleState(BaseState):
                     self.msg_box.push_messages(logs)
                     self.state = "MESSAGE"
                         
-                    # self.message_queue.extend(logs)
-                    # self.state = "MESSAGE"
-                    # self.next_message()
-                    
                 elif self.cursor == 1:  # にげる
                     logs, success = self.engine.player_escape()
                     if not success:
@@ -73,9 +46,7 @@ class BattleState(BaseState):
 
                     self.msg_box.push_messages(logs)
                     self.state = "MESSAGE"
-                    # self.message_queue.extend(logs)
-                    # self.state = "MESSAGE"
-                    # self.next_message()
+
 
         elif self.state == "MESSAGE":
             is_all_done = self.msg_box.update()
@@ -92,9 +63,6 @@ class BattleState(BaseState):
                 else:
                     self.state = "COMMAND"
 
-            # キーを押したら次のメッセージへ
-            # if pyxel.btnp(pyxel.KEY_Z) or pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.KEY_RETURN):
-                # self.next_message()
 
     def draw(self):
         pyxel.cls(0) # 背景黒
@@ -124,6 +92,3 @@ class BattleState(BaseState):
         if self.state == "MESSAGE":
             self.msg_box.draw()
             
-            # pyxel.rectb(10, 65, 140, 45, 7)
-            # pyxel.text(15, 75, self.current_message, 7, self.app.font)
-            # pyxel.text(135, 100, "▼", (pyxel.frame_count // 10) % 2 * 7, self.app.font)
