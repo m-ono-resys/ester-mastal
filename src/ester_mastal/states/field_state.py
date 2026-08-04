@@ -60,9 +60,7 @@ class FieldState(BaseState):
         self.current_event = None  # 現在進行中のイベントデータ
 
         # メッセージボックス（UI）
-        self.msg_box = MessageBox(
-            x=10, y=65, width=140, height=45, speed=2, font=self.app.font
-        )
+        self.msg_box = MessageBox(x=10, y=130, width=172, height=50, speed=2, font=self.app.font)
 
     def get_facing_pos(self) -> tuple[int, int]:
         """プレイヤーが現在向いている目の前のマス座標を取得"""
@@ -98,7 +96,7 @@ class FieldState(BaseState):
     def can_move_to(self, grid_x: int, grid_y: int) -> bool:
         """衝突判定: マップ端および障害物（山・海）のチェック"""
         # 画面サイズ内チェック (横10マス, 縦6マス)
-        if grid_x < 0 or grid_x >= 12 or grid_y < 0 or grid_y >= 8:
+        if grid_x < 0 or grid_x >= 12 or grid_y < 0 or grid_y >= 11:
             return False
 
         # イベントオブジェクト（NPC/宝箱など）がある場所も移動制限
@@ -436,9 +434,9 @@ class FieldState(BaseState):
     def draw(self):
         pyxel.cls(0)  # 緑色のフィールド背景
 
-        # ★ タイルマップ0 の該当オフセット (u, v) から 192x128px 分を描画
+        # ★ タイルマップ0 の該当オフセット (u, v) から 192x176px 分を描画
         cfg = MAP_CONFIG[self.current_map_id]
-        pyxel.bltm(0, 16, 0, cfg["u"], cfg["v"], 192, 128)
+        pyxel.bltm(0, 16, 0, cfg["u"], cfg["v"], 192, 176)
 
         # # 簡易なグリッド背景描画
         # for x in range(0, 160, 8):
@@ -460,10 +458,10 @@ class FieldState(BaseState):
         # pyxel.rect(px, py, 8, 8, 8)  # 赤い四角をプレイヤーとする
 
         # 簡易UI
-        pyxel.rect(0, 0, 160, 16, 0)
+        pyxel.rect(0, 0, 192, 16, 0)
         p = self.app.player
         pyxel.text(
-            4, 4, f"HERO LV:{p.level} HP:{p.hp}/{p.max_hp} G:{p.gold}", 7, self.app.font
+            6, 4, f"HERO LV:{p.level} HP:{p.hp}/{p.max_hp} G:{p.gold}", 7, self.app.font
         )
         # pyxel.text(4, 110, "MOVE: ARROW KEYS", 7)
 
@@ -471,59 +469,59 @@ class FieldState(BaseState):
         match self.mode:
             # メインメニュー、呪文、道具、ステータス選択中はいずれも「左側のメイン枠」を表示
             case Mode.MAIN_MENU | Mode.SPELL_MENU | Mode.ITEM_MENU | Mode.STATS_MENU:
-                draw_window(10, 20, 50, 42)
-                pyxel.text(20, 25, "じゅもん", 7, self.app.font)
-                pyxel.text(20, 35, "つよさ", 7, self.app.font)
-                pyxel.text(20, 45, "どうぐ", 7, self.app.font)
-                pyxel.text(14, 25 + self.cursor * 10, ">", 10, self.app.font)
+                draw_window(10, 24, 56, 44)
+                pyxel.text(22, 30, "じゅもん", 7, self.app.font)
+                pyxel.text(22, 40, "つよさ", 7, self.app.font)
+                pyxel.text(22, 50, "どうぐ", 7, self.app.font)
+                pyxel.text(14, 30 + self.cursor * 10, ">", 10, self.app.font)
 
                 # その上で、各サブメニューを右側に重ね描き
                 match self.mode:
                     case Mode.SPELL_MENU:
-                        draw_window(65, 20, 85, 42)
+                        draw_window(70, 24, 110, 44)
                         for i, spell in enumerate(p.spells):
-                            pyxel.text(75, 25 + i * 10, f"{spell.name} M:{spell.mp_cost}", 7, self.app.font)
-                        pyxel.text(69, 25 + self.sub_cursor * 10, ">", 10, self.app.font)
+                            pyxel.text(80, 30 + i * 10, f"{spell.name} M:{spell.mp_cost}", 7, self.app.font)
+                        pyxel.text(74, 30 + self.sub_cursor * 10, ">", 10, self.app.font)
 
                     case Mode.ITEM_MENU:
-                        draw_window(65, 20, 85, 42)
+                        draw_window(70, 24, 110, 44)
                         for i, item in enumerate(p.items):
                             name = "やくそう" if item == "herb" else item
-                            pyxel.text(75, 25 + i * 10, name, 7, self.app.font)
-                        pyxel.text(69, 25 + self.sub_cursor * 10, ">", 10, self.app.font)
+                            pyxel.text(80, 30 + i * 10, name, 7, self.app.font)
+                        pyxel.text(74, 30 + self.sub_cursor * 10, ">", 10, self.app.font)
 
                     case Mode.STATS_MENU:
-                        draw_window(65, 20, 85, 80)
-                        pyxel.text(70, 25, f"なに: {p.name}", 7, self.app.font)
-                        pyxel.text(70, 35, f"レベル: {p.level}", 7, self.app.font)
-                        pyxel.text(70, 45, f"こうげき: {p.attack}", 7, self.app.font)
-                        pyxel.text(70, 55, f"しゅび: {p.defense}", 7, self.app.font)
-                        pyxel.text(70, 65, f"けいけん: {p.exp}", 7, self.app.font)
-                        pyxel.text(70, 75, f"ゴールド: {p.gold}", 7, self.app.font)
+                        draw_window(70, 24, 110, 85)
+                        pyxel.text(76, 30, f"なに: {p.name}", 7, self.app.font)
+                        pyxel.text(76, 40, f"レベル: {p.level}", 7, self.app.font)
+                        pyxel.text(76, 50, f"こうげき: {p.attack}", 7, self.app.font)
+                        pyxel.text(76, 60, f"しゅび: {p.defense}", 7, self.app.font)
+                        pyxel.text(76, 70, f"けいけん: {p.exp}", 7, self.app.font)
+                        pyxel.text(76, 80, f"ゴールド: {p.gold}", 7, self.app.font)
 
 
             case Mode.INN_CONFIRM:
                 if not self.current_event:
                     return
                 
-                draw_window(10, 20, 140, 42)
+                draw_window(10, 130, 172, 48)
                 price = self.current_event.get("price", 10)
-                pyxel.text(18, 26, f"ひとばん {price}G ですが とまりますか？", 7, self.app.font)
+                pyxel.text(18, 138, f"ひとばん {price}G ですが とまりますか？", 7, self.app.font)
                 
                 # 「はい / いいえ」の描画
                 yes_color = 10 if self.sub_cursor == 0 else 7
                 no_color = 10 if self.sub_cursor == 1 else 7
-                pyxel.text(40, 42, "はい", yes_color, self.app.font)
-                pyxel.text(90, 42, "いいえ", no_color, self.app.font)
+                pyxel.text(50, 156, "はい", yes_color, self.app.font)
+                pyxel.text(110, 156, "いいえ", no_color, self.app.font)
 
             case Mode.SHOP_MENU:
-                draw_window(10, 20, 140, 42)
+                draw_window(10, 120, 172, 60)
                 if not self.current_event:
                     return
                 items = self.current_event["items"]
                 for i, item in enumerate(items):
-                    pyxel.text(24, 25 + i * 10, f"{item['name']} ({item['price']}G)", 7, self.app.font)
-                pyxel.text(16, 25 + self.sub_cursor * 10, ">", 10, self.app.font)
+                    pyxel.text(24, 128 + i * 11, f"{item['name']} ({item['price']}G)", 7, self.app.font)
+                pyxel.text(16, 128 + self.sub_cursor * 11, ">", 10, self.app.font)
 
             # case Mode.MAIN_MENU:
             # # メインメニュー枠
