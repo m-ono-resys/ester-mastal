@@ -1,5 +1,12 @@
-from dataclasses import dataclass
-from typing import List
+from dataclasses import dataclass, field
+
+
+@dataclass
+class Spell:
+    name: str
+    mp_cost: int
+    heal_amount: int = 0
+    damage_amount: int = 0
 
 
 @dataclass
@@ -14,6 +21,8 @@ class Player:
     level: int = 1
     exp: int = 0
     gold: int = 0
+    spells: list[Spell] = field(default_factory=list)
+    items: list[str] = field(default_factory=list)
 
     @property
     def is_alive(self) -> bool:
@@ -31,12 +40,12 @@ class Player:
         self.hp = max(0, self.hp - damage)
         return damage
 
-    def check_level_up(self) -> List[str]:
+    def check_level_up(self) -> list[str]:
         """レベルアップ判定（必要経験値テーブル）"""
         logs = []
         # 次のレベルに必要な累積経験値テーブル
         exp_table = {2: 10, 3: 30, 4: 70, 5: 150}
-        
+
         next_level = self.level + 1
         if next_level in exp_table and self.exp >= exp_table[next_level]:
             self.level = next_level
@@ -47,11 +56,11 @@ class Player:
             self.attack += 2
             self.defense += 2
             logs.append(f"{self.name} は レベル {self.level} に あがった！")
-            
-            # # レベル2でホイミ習得例
-            # if self.level == 2:
-            #     hoimi = Spell(name="ホイミ", mp_cost=3, heal_amount=15)
-            #     self.spells.append(hoimi)
-            #     logs.append(f"{self.name} は {hoimi.name} の じゅもんを おぼえた！")
-                
+
+            # レベル2でホイミ習得例
+            if self.level == 2:
+                hoimi = Spell(name="ホイミ", mp_cost=3, heal_amount=15)
+                self.spells.append(hoimi)
+                logs.append(f"{self.name} は {hoimi.name} の じゅもんを おぼえた！")
+
         return logs

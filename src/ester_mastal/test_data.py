@@ -1,5 +1,6 @@
-from ester_mastal.models.repository import GameRepository
 from ester_mastal.models.battle import BattleEngine
+from ester_mastal.models.repository import GameRepository
+
 
 def main():
     repo = GameRepository()
@@ -13,7 +14,7 @@ def main():
 
     # 2. 戦闘テスト
     battle = BattleEngine(hero, slime)
-    logs = battle.player_attack() # 一撃で倒せる想定で手動で経験値を加算してテスト
+    logs = battle.player_attack()  # 一撃で倒せる想定で手動で経験値を加算してテスト
     for log in logs:
         print(" >", log)
 
@@ -25,6 +26,7 @@ def main():
         print(" >", log)
 
     print(f"【成長後】 {hero.name}: LV{hero.level} HP{hero.hp} MP{hero.mp}")
+
 
 if __name__ == "__main__":
     main()

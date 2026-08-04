@@ -5,7 +5,8 @@
     "max_hp": 15,
     "max_mp": 0,
     "attack": 8,
-    "defense": 5
+    "defense": 5,
+    "learn_spell": null
   },
   {
     "level": 2,
@@ -13,7 +14,8 @@
     "max_hp": 22,
     "max_mp": 6,
     "attack": 12,
-    "defense": 8
+    "defense": 8,
+    "learn_spell": "hoimi"
   },
   {
     "level": 3,
@@ -21,7 +23,8 @@
     "max_hp": 30,
     "max_mp": 12,
     "attack": 18,
-    "defense": 12
+    "defense": 12,
+    "learn_spell": "mera"
   },
   {
     "level": 4,
@@ -29,7 +32,8 @@
     "max_hp": 42,
     "max_mp": 18,
     "attack": 26,
-    "defense": 18
+    "defense": 18,
+    "learn_spell": null
   },
   {
     "level": 5,
@@ -37,6 +41,7 @@
     "max_hp": 60,
     "max_mp": 26,
     "attack": 36,
-    "defense": 25
+    "defense": 25,
+    "learn_spell": "behoimi"
   }
 ]

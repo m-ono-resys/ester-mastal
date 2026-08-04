@@ -1,10 +1,12 @@
-from ester_mastal.models.player import Player
-from ester_mastal.models.monster import Monster
 from ester_mastal.models.battle import BattleEngine
+from ester_mastal.models.monster import Monster
+from ester_mastal.models.player import Player
+
 
 def print_logs(logs):
     for log in logs:
         print(f" > {log}")
+
 
 def main():
     # 1. プレイヤーとモンスターの生成
@@ -17,7 +19,7 @@ def main():
 
     print("=== 戦闘テスト開始 ===")
     battle = BattleEngine(hero, slime)
-    
+
     # 最初に出てくるメッセージ
     print(f"{slime.name} が あらわれた！")
 
@@ -26,19 +28,18 @@ def main():
         print(f"\n[{hero.name}] HP:{hero.hp}/{hero.max_hp} MP:{hero.mp}/{hero.max_mp}")
         print(f"[{slime.name}] HP:{slime.hp}/{slime.max_hp}")
         print("1: たたかう | 2: じゅもん | 3: にげる")
-        
+
         choice = input("コマンドを入力してください > ")
 
         if choice == "1":
             logs = battle.player_attack()
             print_logs(logs)
         elif choice == "2":
-            continue
-            # if not hero.spells:
-            #     print(" > じゅもんを おぼえていない！")
-            #     continue
-            # logs = battle.player_cast_spell(hero.spells[0])
-            # print_logs(logs)
+            if not hero.spells:
+                print(" > じゅもんを おぼえていない！")
+                continue
+            logs = battle.player_cast_spell(hero.spells[0])
+            print_logs(logs)
         elif choice == "3":
             logs, success = battle.player_escape()
             print_logs(logs)
@@ -54,6 +55,7 @@ def main():
 
     print("\n=== 戦闘終了 ===")
     print(f"結果: レベル={hero.level}, 経験値={hero.exp}, 所持金={hero.gold}")
+
 
 if __name__ == "__main__":
     main()
