@@ -11,7 +11,7 @@ class BattleState(BaseState):
         self.cursor = 0  # 0: たたかう, 1: にげる
         self.state = "MESSAGE"  # 最初は「〇〇があらわれた！」表示からスタート
 
-        self.msg_box = MessageBox(x=10, y=120, width=172, height=58, speed=2, font=self.app.font)
+        self.msg_box = MessageBox(x=10, y=120, width=172, height=60, speed=2, font=self.app.font)
         self.msg_box.push_messages([f"{monster.name} が あらわれた！"])
 
 
@@ -66,14 +66,30 @@ class BattleState(BaseState):
     def draw(self):
         pyxel.cls(0) # 背景黒
         
-        # モンスター枠・表示
+        # 1. モンスター枠＆スプライト描画（大きめ枠: 幅112px、高さ64px）
         m = self.engine.monster
-        draw_window(56, 16, 80, 50)
-        pyxel.text(68, 32, m.name, 10, self.app.font)
+        box_w, box_h = 112, 96
+        box_x = (192 - box_w) // 2  # 画面横中央 (X=40)
+        box_y = 12
+
+        # 二重枠線の描画
+        draw_window(box_x, box_y, box_w, box_h)
+
+        # モンスターのスプライトを枠の「完全な中央」に描画
+        sprite_x = box_x + (box_w - m.sprite_w) // 2
+        sprite_y = box_y + (box_h - m.sprite_h) // 2
+
+        pyxel.blt(
+            sprite_x, sprite_y,
+            0,
+            m.sprite_u, m.sprite_v,
+            m.sprite_w, m.sprite_h,
+            m.colkey
+        )
         
         # プレイヤー状態ウィンドウ
         p = self.app.player
-        draw_window(10, 120, 75, 58)
+        draw_window(10, 120, 80, 60)
         pyxel.text(16, 126, f"{p.name}", 7, self.app.font)
         pyxel.text(16, 138, f"HP: {p.hp}/{p.max_hp}", 7, self.app.font)
         pyxel.text(16, 150, f"MP: {p.mp}/{p.max_mp}", 7, self.app.font)
@@ -81,12 +97,12 @@ class BattleState(BaseState):
 
         # コマンドウィンドウ（コマンド選択時）
         if self.state == "COMMAND":
-            draw_window(95, 120, 87, 58)
+            draw_window(98, 120, 84, 60)
             pyxel.text(112, 134, " たたかう", 7, self.app.font)
             pyxel.text(112, 152, " にげる", 7, self.app.font)
             # カーソル描画
             cursor_y = 134 if self.cursor == 0 else 152
-            pyxel.text(102, cursor_y, ">", 10, self.app.font)
+            pyxel.text(104, cursor_y, ">", 10, self.app.font)
 
         # メッセージウィンドウ（テキスト表示時）
         if self.state == "MESSAGE":

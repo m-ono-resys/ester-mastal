@@ -10,6 +10,11 @@ class Monster:
     defense: int
     exp_yield: int
     gold_yield: int
+    sprite_u: int = 0
+    sprite_v: int = 64
+    sprite_w: int = 32
+    sprite_h: int = 32
+    colkey: int = 8
 
     @property
     def is_alive(self) -> bool:

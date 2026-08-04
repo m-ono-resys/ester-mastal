@@ -5,7 +5,14 @@
     "attack": 7,
     "defense": 3,
     "exp": 2,
-    "gold": 4
+    "gold": 4,
+    "sprite": {
+      "u": 0,
+      "v": 64,
+      "w": 32,
+      "h": 32,
+      "colkey": 8
+    }
   },
   "rarutaes": {
     "name": "ラルターエス",

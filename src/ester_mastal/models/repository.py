@@ -41,6 +41,7 @@ class GameRepository:
             raise ValueError(f"Monster ID '{monster_id}' not found.")
 
         data = self.monsters_data[monster_id]
+        sprite = data.get("sprite", {}) 
         return Monster(
             name=data["name"],
             max_hp=data["hp"],
@@ -49,6 +50,11 @@ class GameRepository:
             defense=data["defense"],
             exp_yield=data["exp"],
             gold_yield=data["gold"],
+            sprite_u=sprite.get("u", 0),
+            sprite_v=sprite.get("v", 32),
+            sprite_w=sprite.get("w", 16),
+            sprite_h=sprite.get("h", 16),
+            colkey=sprite.get("colkey", 0),
         )
 
     def get_spell(self, spell_id: str) -> Spell:
