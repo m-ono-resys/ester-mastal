@@ -75,7 +75,7 @@ class GameRepository:
             level=1,
             exp=0,
             gold=0,
-            items=[{"herb": 2}],
+            items=["herb", "herb"],
         )
 
     def check_level_up(self, player: Player) -> list[str]:

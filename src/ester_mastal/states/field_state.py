@@ -87,14 +87,96 @@ class FieldState(BaseState):
                     self.mode = "STATS_MENU"
 
                 elif self.cursor == 2:  # どうぐ
-                    # アイテムを1つ以上持っているか確認
-                    has_items = any(count > 0 for count in p.items.values())
-                    if not has_items:
+                    # ★修正: リストが空かどうか直接チェック
+                    if not p.items:
                         self.msg_box.push_messages(["どうぐを もっていない！"])
                         self.mode = "MESSAGE"
                     else:
                         self.mode = "ITEM_MENU"
                         self.sub_cursor = 0
+
+        # --- 3. 呪文選択・使用 ---
+        elif self.mode == "SPELL_MENU":
+            p = self.app.player
+            if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
+                self.mode = "MAIN_MENU"
+
+            elif pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.KEY_DOWN):
+                if len(p.spells) > 1:
+                    self.sub_cursor = (self.sub_cursor + 1) % len(p.spells)
+
+            elif (
+                pyxel.btnp(pyxel.KEY_Z)
+                or pyxel.btnp(pyxel.KEY_SPACE)
+                or pyxel.btnp(pyxel.KEY_RETURN)
+            ):
+                selected_spell = p.spells[self.sub_cursor]
+
+                # 回復呪文（ホイミなど）の場合
+                if selected_spell.heal_amount > 0:
+                    if p.mp < selected_spell.mp_cost:
+                        self.msg_box.push_messages(["MPが たりない！"])
+                    else:
+                        p.mp -= selected_spell.mp_cost
+                        healed = p.heal(selected_spell.heal_amount)
+                        self.msg_box.push_messages(
+                            [
+                                f"{p.name} は {selected_spell.name} を となえた！",
+                                f"HPが {healed} かいふくした！",
+                            ]
+                        )
+                    self.mode = "MESSAGE"
+
+        # --- 4. 道具選択・使用 ---
+        elif self.mode == "ITEM_MENU":
+            p = self.app.player
+            # item_list = [item_id for item_id, count in p.items.items() if count > 0]
+
+            if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
+                self.mode = "MAIN_MENU"
+
+            # カーソル上下移動
+            elif pyxel.btnp(pyxel.KEY_UP):
+                if p.items:
+                    self.sub_cursor = (self.sub_cursor - 1) % len(p.items)
+            elif pyxel.btnp(pyxel.KEY_DOWN):
+                if p.items:
+                    self.sub_cursor = (self.sub_cursor + 1) % len(p.items)
+
+            elif (
+                pyxel.btnp(pyxel.KEY_Z)
+                or pyxel.btnp(pyxel.KEY_SPACE)
+                or pyxel.btnp(pyxel.KEY_RETURN)
+            ) and p.items:
+                item = p.items.pop(self.sub_cursor)
+
+                if item in ["herb"]:  # やくそう
+                    healed = p.heal(15)
+                    self.msg_box.push_messages(
+                        [
+                            f"{p.name} は やくそうを つかった！",
+                            f"HPが {healed} かいふくした！",
+                        ]
+                    )
+                    self.mode = "MESSAGE"
+
+        # --- 5. ステータス画面 ---
+        elif self.mode == "STATS_MENU":
+            # どのボタンを押してもメインメニューへ戻る
+            if (
+                pyxel.btnp(pyxel.KEY_Z)
+                or pyxel.btnp(pyxel.KEY_X)
+                or pyxel.btnp(pyxel.KEY_SPACE)
+                or pyxel.btnp(pyxel.KEY_RETURN)
+                or pyxel.btnp(pyxel.KEY_ESCAPE)
+            ):
+                self.mode = "MAIN_MENU"
+
+        # --- 6. メッセージ表示中 ---
+        elif self.mode == "MESSAGE":
+            all_done = self.msg_box.update()
+            if all_done:
+                self.mode = "MAIN_MENU"
 
     def trigger_battle(self):
         from .battle_state import BattleState
@@ -121,5 +203,51 @@ class FieldState(BaseState):
         # 簡易UI
         pyxel.rect(0, 0, 160, 12, 0)
         p = self.app.player
-        pyxel.text(4, 3, f"HERO LV:{p.level} HP:{p.hp}/{p.max_hp} G:{p.gold}", 7)
+        pyxel.text(
+            4, 3, f"HERO LV:{p.level} HP:{p.hp}/{p.max_hp} G:{p.gold}", 7, self.app.font
+        )
         pyxel.text(4, 110, "MOVE: ARROW KEYS", 7)
+
+        # --- メニュー表示中の重ね描き（オーバーレイ） ---
+        if self.mode != "EXPLORE":
+            # メインメニュー枠
+            draw_window(10, 20, 50, 42)
+            pyxel.text(20, 25, "じゅもん", 7, self.app.font)
+            pyxel.text(20, 35, "つよさ", 7, self.app.font)
+            pyxel.text(20, 45, "どうぐ", 7, self.app.font)
+            pyxel.text(14, 25 + self.cursor * 10, ">", 10, self.app.font)
+
+            # 呪文サブメニュー
+            if self.mode == "SPELL_MENU":
+                draw_window(65, 20, 85, 42)
+                for i, spell in enumerate(p.spells):
+                    pyxel.text(
+                        75,
+                        25 + i * 10,
+                        f"{spell.name} M:{spell.mp_cost}",
+                        7,
+                        self.app.font,
+                    )
+                pyxel.text(69, 25 + self.sub_cursor * 10, ">", 10, self.app.font)
+
+            # 道具サブメニュー
+            elif self.mode == "ITEM_MENU":
+                draw_window(65, 20, 85, 42)
+                for i, item in enumerate(p.items):
+                    name = "やくそう" if item == "herb" else item
+                    pyxel.text(75, 25 + i * 10, name, 7, self.app.font)
+                pyxel.text(69, 25 + self.sub_cursor * 10, ">", 10, self.app.font)
+
+            # つよさ（詳細ステータス）画面
+            elif self.mode == "STATS_MENU":
+                draw_window(65, 20, 85, 80)
+                pyxel.text(70, 25, f"なに: {p.name}", 7, self.app.font)
+                pyxel.text(70, 35, f"レベル: {p.level}", 7, self.app.font)
+                pyxel.text(70, 45, f"こうげき: {p.attack}", 7, self.app.font)
+                pyxel.text(70, 55, f"しゅび: {p.defense}", 7, self.app.font)
+                pyxel.text(70, 65, f"けいけん: {p.exp}", 7, self.app.font)
+                pyxel.text(70, 75, f"ゴールド: {p.gold}", 7, self.app.font)
+
+            # メッセージウィンドウ
+            elif self.mode == "MESSAGE":
+                self.msg_box.draw()

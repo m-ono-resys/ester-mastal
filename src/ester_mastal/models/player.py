@@ -22,7 +22,7 @@ class Player:
     exp: int = 0
     gold: int = 0
     spells: list[Spell] = field(default_factory=list)
-    items: dict[str, int] = field(default_factory=dict)
+    items: list[str] = field(default_factory=list)
 
     @property
     def is_alive(self) -> bool:
