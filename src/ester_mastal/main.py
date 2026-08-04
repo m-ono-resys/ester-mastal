@@ -6,8 +6,8 @@ from ester_mastal.states.title_state import TitleState
 
 class App:
     def __init__(self):
-        # 画面サイズ: 160x120ピクセル（レトロ感のある低解像度）
-        pyxel.init(160, 120, title="DQ1-Like RPG", fps=30)
+        # 画面サイズ: 192x192ピクセル（レトロ感のある低解像度）
+        pyxel.init(192, 192, title="DQ1-Like RPG", fps=30)
 
         pyxel.load("./assets/game.pyxres")
 
