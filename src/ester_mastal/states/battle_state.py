@@ -2,6 +2,7 @@ import pyxel
 from .base_state import BaseState
 from ..models.battle import BattleEngine
 from ..ui.message_box import MessageBox
+from ..ui.window import draw_window
 
 class BattleState(BaseState):
     def __init__(self, app, monster):
@@ -10,9 +11,7 @@ class BattleState(BaseState):
         self.cursor = 0  # 0: たたかう, 1: にげる
         self.state = "MESSAGE"  # 最初は「〇〇があらわれた！」表示からスタート
 
-        self.msg_box = MessageBox(
-            x=10, y=65, width=140, height=45, speed=2, font=self.app.font
-        )
+        self.msg_box = MessageBox(x=10, y=120, width=172, height=58, speed=2, font=self.app.font)
         self.msg_box.push_messages([f"{monster.name} が あらわれた！"])
 
 
@@ -69,24 +68,25 @@ class BattleState(BaseState):
         
         # モンスター枠・表示
         m = self.engine.monster
-        pyxel.rectb(45, 15, 70, 45, 7)
-        pyxel.text(55, 30, m.name, 10, self.app.font)
+        draw_window(56, 16, 80, 50)
+        pyxel.text(68, 32, m.name, 10, self.app.font)
         
         # プレイヤー状態ウィンドウ
         p = self.app.player
-        pyxel.rectb(10, 65, 60, 45, 7)
-        pyxel.text(15, 70, f"{p.name}", 7, self.app.font)
-        pyxel.text(15, 80, f"HP: {p.hp}/{p.max_hp}", 7, self.app.font)
-        pyxel.text(15, 90, f"MP: {p.mp}/{p.max_mp}", 7, self.app.font)
+        draw_window(10, 120, 75, 58)
+        pyxel.text(16, 126, f"{p.name}", 7, self.app.font)
+        pyxel.text(16, 138, f"HP: {p.hp}/{p.max_hp}", 7, self.app.font)
+        pyxel.text(16, 150, f"MP: {p.mp}/{p.max_mp}", 7, self.app.font)
+        pyxel.text(16, 162, f"LV:{p.level}", 7, self.app.font)
 
         # コマンドウィンドウ（コマンド選択時）
         if self.state == "COMMAND":
-            pyxel.rectb(80, 65, 70, 45, 7)
-            pyxel.text(90, 75, " たたかう", 7, self.app.font)
-            pyxel.text(90, 90, " にげる", 7, self.app.font)
+            draw_window(95, 120, 87, 58)
+            pyxel.text(112, 134, " たたかう", 7, self.app.font)
+            pyxel.text(112, 152, " にげる", 7, self.app.font)
             # カーソル描画
-            cursor_y = 75 if self.cursor == 0 else 90
-            pyxel.text(84, cursor_y, ">", 10, self.app.font)
+            cursor_y = 134 if self.cursor == 0 else 152
+            pyxel.text(102, cursor_y, ">", 10, self.app.font)
 
         # メッセージウィンドウ（テキスト表示時）
         if self.state == "MESSAGE":
