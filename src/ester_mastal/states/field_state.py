@@ -3,7 +3,8 @@ import random
 
 import pyxel
 
-from ester_mastal.data.events import MAP_EVENTS
+from ..data.events import MAP_EVENTS
+from ..data.maps import MapId, MAP_CONFIG, WARP_POINTS
 
 from ..ui.message_box import MessageBox
 from ..ui.window import draw_window
@@ -48,7 +49,8 @@ class FieldState(BaseState):
         self.player_y = 1
         self.direction: Direction = Direction.DOWN  # ★ 向き: "UP", "DOWN", "LEFT", "RIGHT"
 
-        # self.current_map = WORLD_MAP
+        # ★ 現在どのマップにいるか（初期はWORLD）
+        self.current_map_id: MapId = MapId.WORLD
 
         # モード管理: "EXPLORE", "MAIN_MENU", "SPELL_MENU", "ITEM_MENU", "STATS_MENU", "MESSAGE"
         self.mode: Mode = Mode.EXPLORE
@@ -75,10 +77,17 @@ class FieldState(BaseState):
                 return (self.player_x + 1, self.player_y)
 
     def get_tile_type(self, grid_x: int, grid_y: int) -> str:
-        """指定した16x16グリッドのタイル種別を pyxres のタイルマップから取得"""
-        # 16x16タイルの左上になる8x8タイルの座標を計算
-        tm_x = grid_x * 2
-        tm_y = grid_y * 2
+        """Tilemap 0 上の u, v オフセットを加味してタイル種別を取得"""
+        cfg = MAP_CONFIG[self.current_map_id]
+
+        # u, v (ピクセル) を 8x8 タイル数に変換
+        offset_tile_x = cfg["u"] // 8
+        offset_tile_y = cfg["v"] // 8
+
+        # 現在のマップ領域内の指定マスの 8x8 タイル座標を計算
+        tm_x = offset_tile_x + (grid_x * 2)
+        tm_y = offset_tile_y + (grid_y * 2)
+
 
         # タイルマップ0からその位置のマップチップ情報(tx, ty)を取得
         tile_info = pyxel.tilemaps[0].pget(tm_x, tm_y)  # (tx, ty) が返る
@@ -93,7 +102,7 @@ class FieldState(BaseState):
             return False
 
         # イベントオブジェクト（NPC/宝箱など）がある場所も移動制限
-        if (grid_x, grid_y) in MAP_EVENTS:
+        if (self.current_map_id, grid_x, grid_y) in MAP_EVENTS:
             return False
 
         tile_type = self.get_tile_type(grid_x, grid_y)
@@ -105,11 +114,15 @@ class FieldState(BaseState):
     def interact(self):
         """目の前の対象（NPC・宝箱・宿屋・ショップ）と会話・調べる"""
         target_pos = self.get_facing_pos()
-        if target_pos not in MAP_EVENTS:
+        # ★ 現在の MapId を考慮してイベントを検索
+        event_key = (self.current_map_id, target_pos[0], target_pos[1])
+        event = MAP_EVENTS.get(event_key)
+
+        if not event:
             return
 
-        event = MAP_EVENTS[target_pos]
         self.current_event = event
+        self.return_mode = Mode.EXPLORE
 
         match event["type"]:
             case "NPC":  # 村人会話
@@ -170,10 +183,29 @@ class FieldState(BaseState):
                         self.player_x = next_x
                         self.player_y = next_y
 
-                        # タイルに応じたイベント
+                        # ★ 1. マップ遷移（ワープ）判定
+                        warp_key = (self.current_map_id, self.player_x, self.player_y)
+                        if warp_key in WARP_POINTS:
+                            warp = WARP_POINTS[warp_key]
+                            self.current_map_id = warp["target_map"]
+                            self.player_x = warp["target_x"]
+                            self.player_y = warp["target_y"]
+                            
+                            if "message" in warp:
+                                self.msg_box.push_messages([warp["message"]])
+                                self.mode = Mode.MESSAGE
+                            return
+
+                        # ★ 2. マップごとのエンカウント判定
+                        cfg = MAP_CONFIG[self.current_map_id]
                         tile_type = self.get_tile_type(self.player_x, self.player_y)
-                        if tile_type == "GRASS" and random.random() < 0:
+                        if tile_type == "GRASS" and random.random() < cfg["encount_rate"]:
                             self.trigger_battle()
+
+                        # # タイルに応じたイベント
+                        # tile_type = self.get_tile_type(self.player_x, self.player_y)
+                        # if tile_type == "GRASS" and random.random() < 0:
+                        #     self.trigger_battle()
 
                         # match tile_type:
                         #     case "GRASS":
@@ -293,6 +325,7 @@ class FieldState(BaseState):
                                 self.msg_box.push_messages(
                                     ["じゅもんを おぼえていない！"]
                                 )
+                                self.return_mode = Mode.MAIN_MENU
                                 self.mode = Mode.MESSAGE
                             else:
                                 self.mode = Mode.SPELL_MENU
@@ -403,10 +436,9 @@ class FieldState(BaseState):
     def draw(self):
         pyxel.cls(0)  # 緑色のフィールド背景
 
-        # ★ 1. Pyxel Editorのタイルマップ0を画面描画
-        # pyxel.bltm(x, y, tm, u, v, w, h, [colkey])
-        # (x=0, y=16 の位置に、タイルマップ0の (0,0) から幅160px、高さ112px分を描画)
-        pyxel.bltm(0, 16, 0, 0, 0, 192, 128)
+        # ★ タイルマップ0 の該当オフセット (u, v) から 192x128px 分を描画
+        cfg = MAP_CONFIG[self.current_map_id]
+        pyxel.bltm(0, 16, 0, cfg["u"], cfg["v"], 192, 128)
 
         # # 簡易なグリッド背景描画
         # for x in range(0, 160, 8):
