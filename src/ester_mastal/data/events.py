@@ -1,8 +1,8 @@
 from .maps import MapId
 
 MAP_EVENTS = {
-    # 村人NPC (x=3, y=1)
-    (MapId.TOWN, 3, 1): {
+    # 村人NPC (x=5, y=5)
+    (MapId.TOWN, 5, 5): {
         "type": "NPC",
         "name": "むらびと",
         "messages": [
@@ -12,8 +12,8 @@ MAP_EVENTS = {
     },
     # 宿屋 (x=1, y=3)
     (MapId.TOWN, 1, 3): {"type": "INN", "name": "やどや", "price": 10},
-    # 武器屋 (x=8, y=1)
-    (MapId.TOWN, 8, 1): {
+    # 武器屋 (x=4, y=2)
+    (MapId.TOWN, 4, 2): {
         "type": "SHOP",
         "name": "ぶきや",
         "items": [
