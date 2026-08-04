@@ -55,7 +55,7 @@ class FieldState(BaseState):
     def can_move_to(self, grid_x: int, grid_y: int) -> bool:
         """衝突判定: マップ端および障害物（山・海）のチェック"""
         # 画面サイズ内チェック (横10マス, 縦6マス)
-        if grid_x < 0 or grid_x >= 10 or grid_y < 0 or grid_y >= 6:
+        if grid_x < 0 or grid_x >= 12 or grid_y < 0 or grid_y >= 8:
             return False
 
         tile_type = self.get_tile_type(grid_x, grid_y)
