@@ -5,9 +5,10 @@ from .player import Player, Spell
 
 
 class BattleEngine:
-    def __init__(self, player: Player, monster: Monster):
+    def __init__(self, player: Player, monster: Monster, repo):
         self.player = player
         self.monster = monster
+        self.repo = repo
         self.is_finished = False
 
     def calculate_physical_damage(self, attacker_atk: int, defender_def: int) -> int:
@@ -110,6 +111,6 @@ class BattleEngine:
         self.player.gold += self.monster.gold_yield
 
         # レベルアップチェック
-        lvl_logs = self.player.check_level_up()
+        lvl_logs = self.repo.check_level_up(self.player)
         logs.extend(lvl_logs)
         return logs

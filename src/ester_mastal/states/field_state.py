@@ -348,14 +348,17 @@ class FieldState(BaseState):
                         match item["type"]:
                             case "ITEM":
                                 p.items.append(item["id"])
+                                msg = f"{item['name']} を かった！"
                             case "WEAPON":
-                                p.attack += item["atk"]  # 攻撃力直接上昇
+                                p.equip_weapon(item["name"], item["atk"])
+                                msg = f"{item['name']} を そうびした！"
                             case "ARMOR":
-                                p.defense += item["def"]  # 防御力直接上昇
+                                p.equip_armor(item["name"], item["def"])
+                                msg = f"{item['name']} を そうびした！"
 
                         self.msg_box.push_messages(
                             [
-                                f"{item['name']} を かった！",
+                                msg,
                                 "まいど ありがとうございます！",
                             ]
                         )

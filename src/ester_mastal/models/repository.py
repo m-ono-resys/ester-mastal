@@ -41,7 +41,7 @@ class GameRepository:
             raise ValueError(f"Monster ID '{monster_id}' not found.")
 
         data = self.monsters_data[monster_id]
-        sprite = data.get("sprite", {}) 
+        sprite = data.get("sprite", {})
         return Monster(
             name=data["name"],
             max_hp=data["hp"],
@@ -76,11 +76,11 @@ class GameRepository:
             hp=lv1_data["max_hp"],
             max_mp=lv1_data["max_mp"],
             mp=lv1_data["max_mp"],
-            attack=lv1_data["attack"],
-            defense=lv1_data["defense"],
+            base_attack=lv1_data["base_attack"],
+            base_defense=lv1_data["base_defense"],
             level=1,
-            exp=0,
-            gold=0,
+            exp=10,
+            gold=200,
             items=["herb", "herb"],
         )
 
@@ -96,8 +96,8 @@ class GameRepository:
                 player.hp = player.max_hp  # レベルアップ時全回復
                 player.max_mp = entry["max_mp"]
                 player.mp = player.max_mp
-                player.attack = entry["attack"]
-                player.defense = entry["defense"]
+                player.base_attack = entry["base_attack"]
+                player.base_defense = entry["base_defense"]
                 logs.append(f"{player.name} は レベル {player.level} に あがった！")
 
                 # 習得呪文があるかチェック

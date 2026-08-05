@@ -16,13 +16,39 @@ class Player:
     hp: int
     max_mp: int
     mp: int
-    attack: int
-    defense: int
+    base_attack: int  # ★ 素の攻撃力
+    base_defense: int  # ★ 素の防御力
     level: int = 1
     exp: int = 0
     gold: int = 0
     spells: list[Spell] = field(default_factory=list)
     items: list[str] = field(default_factory=list)
+
+    # ★ 装備品データ（初期は何も装備していない）
+    equipped_weapon: str = "なし"
+    equipped_armor: str = "なし"
+    weapon_atk: int = 0  # 武器による加算攻撃力
+    armor_def: int = 0  # 防具による加算防御力
+
+    # ★ 実際の攻撃力（素の攻撃力 ＋ 武器の攻撃力）
+    @property
+    def attack(self) -> int:
+        return self.base_attack + self.weapon_atk
+
+    # ★ 実際の防御力（素の防御力 ＋ 防具の防御力）
+    @property
+    def defense(self) -> int:
+        return self.base_defense + self.armor_def
+
+    def equip_weapon(self, name: str, atk: int):
+        """新しい武器に付け替える（上書き）"""
+        self.equipped_weapon = name
+        self.weapon_atk = atk
+
+    def equip_armor(self, name: str, def_val: int):
+        """新しい防具に付け替える（上書き）"""
+        self.equipped_armor = name
+        self.armor_def = def_val
 
     @property
     def is_alive(self) -> bool:
@@ -40,27 +66,27 @@ class Player:
         self.hp = max(0, self.hp - damage)
         return damage
 
-    def check_level_up(self) -> list[str]:
-        """レベルアップ判定（必要経験値テーブル）"""
-        logs = []
-        # 次のレベルに必要な累積経験値テーブル
-        exp_table = {2: 10, 3: 30, 4: 70, 5: 150}
+    # def check_level_up(self) -> list[str]:
+    #     """レベルアップ判定（必要経験値テーブル）"""
+    #     logs = []
+    #     # 次のレベルに必要な累積経験値テーブル
+    #     exp_table = {2: 10, 3: 30, 4: 70, 5: 150}
 
-        next_level = self.level + 1
-        if next_level in exp_table and self.exp >= exp_table[next_level]:
-            self.level = next_level
-            self.max_hp += 5
-            self.hp = self.max_hp
-            self.max_mp += 3
-            self.mp = self.max_mp
-            self.attack += 2
-            self.defense += 2
-            logs.append(f"{self.name} は レベル {self.level} に あがった！")
+    #     next_level = self.level + 1
+    #     if next_level in exp_table and self.exp >= exp_table[next_level]:
+    #         self.level = next_level
+    #         self.max_hp += 5
+    #         self.hp = self.max_hp
+    #         self.max_mp += 3
+    #         self.mp = self.max_mp
+    #         self.attack += 2
+    #         self.defense += 2
+    #         logs.append(f"{self.name} は レベル {self.level} に あがった！")
 
-            # レベル2でホイミ習得例
-            if self.level == 2:
-                hoimi = Spell(name="ホイミ", mp_cost=3, heal_amount=15)
-                self.spells.append(hoimi)
-                logs.append(f"{self.name} は {hoimi.name} の じゅもんを おぼえた！")
+    #         # レベル2でホイミ習得例
+    #         if self.level == 2:
+    #             hoimi = Spell(name="ホイミ", mp_cost=3, heal_amount=15)
+    #             self.spells.append(hoimi)
+    #             logs.append(f"{self.name} は {hoimi.name} の じゅもんを おぼえた！")
 
-        return logs
+    #     return logs

@@ -1,42 +1,45 @@
 import pyxel
-from .base_state import BaseState
+
 from ..models.battle import BattleEngine
 from ..ui.message_box import MessageBox
 from ..ui.window import draw_window
+from .base_state import BaseState
+
 
 class BattleState(BaseState):
     def __init__(self, app, monster):
         super().__init__(app)
-        self.engine = BattleEngine(self.app.player, monster)
+        self.engine = BattleEngine(self.app.player, monster, self.app.repo)
         self.cursor = 0  # 0: たたかう, 1: にげる
         self.state = "MESSAGE"  # 最初は「〇〇があらわれた！」表示からスタート
 
-        self.msg_box = MessageBox(x=10, y=120, width=172, height=60, speed=2, font=self.app.font)
+        self.msg_box = MessageBox(
+            x=10, y=120, width=172, height=60, speed=2, font=self.app.font
+        )
         self.msg_box.push_messages([f"{monster.name} が あらわれた！"])
-
 
     def update(self):
         if self.state == "COMMAND":
             # コマンド選択 (上下移動)
             if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.KEY_DOWN):
                 self.cursor = 1 - self.cursor
-            
+
             # 決定
-            if pyxel.btnp(pyxel.KEY_Z) or pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.KEY_RETURN):
+            if (
+                pyxel.btnp(pyxel.KEY_Z)
+                or pyxel.btnp(pyxel.KEY_SPACE)
+                or pyxel.btnp(pyxel.KEY_RETURN)
+            ):
                 if self.cursor == 0:  # たたかう
                     logs = self.engine.player_attack()
-                    if not self.engine.monster.is_alive:
-                        # 勝利時はレベルアップチェックも含む
-                        lvl_logs = self.app.repo.check_level_up(self.app.player)
-                        logs.extend(lvl_logs)
-                    else:
+                    if self.engine.monster.is_alive:
                         # 敵の反撃
                         m_logs = self.engine.monster_turn()
                         logs.extend(m_logs)
 
                     self.msg_box.push_messages(logs)
                     self.state = "MESSAGE"
-                        
+
                 elif self.cursor == 1:  # にげる
                     logs, success = self.engine.player_escape()
                     if not success:
@@ -46,7 +49,6 @@ class BattleState(BaseState):
                     self.msg_box.push_messages(logs)
                     self.state = "MESSAGE"
 
-
         elif self.state == "MESSAGE":
             is_all_done = self.msg_box.update()
 
@@ -55,17 +57,18 @@ class BattleState(BaseState):
                 if self.engine.is_finished:
                     if self.app.player.is_alive:
                         from .field_state import FieldState
+
                         self.app.change_state(FieldState(self.app))
                     else:
                         from .game_over_state import GameOverState
+
                         self.app.change_state(GameOverState(self.app))
                 else:
                     self.state = "COMMAND"
 
-
     def draw(self):
-        pyxel.cls(0) # 背景黒
-        
+        pyxel.cls(0)  # 背景黒
+
         # 1. モンスター枠＆スプライト描画（大きめ枠: 幅112px、高さ64px）
         m = self.engine.monster
         box_w, box_h = 112, 96
@@ -80,13 +83,16 @@ class BattleState(BaseState):
         sprite_y = box_y + (box_h - m.sprite_h) // 2
 
         pyxel.blt(
-            sprite_x, sprite_y,
+            sprite_x,
+            sprite_y,
             0,
-            m.sprite_u, m.sprite_v,
-            m.sprite_w, m.sprite_h,
-            m.colkey
+            m.sprite_u,
+            m.sprite_v,
+            m.sprite_w,
+            m.sprite_h,
+            m.colkey,
         )
-        
+
         # プレイヤー状態ウィンドウ
         p = self.app.player
         draw_window(10, 120, 80, 60)
@@ -107,4 +113,3 @@ class BattleState(BaseState):
         # メッセージウィンドウ（テキスト表示時）
         if self.state == "MESSAGE":
             self.msg_box.draw()
-            
