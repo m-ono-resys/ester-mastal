@@ -9,6 +9,8 @@ from ..ui.message_box import MessageBox
 from ..ui.window import draw_window
 from .base_state import BaseState
 
+# --- 1. 定数・共通ヘルパー関数 (DRY原則) ---
+
 TILE_MAPPING = {
     (0, 1): "GRASS",
     (1, 0): "ENTRANCE",
@@ -39,42 +41,113 @@ class Mode(Enum):
     STATS_MENU = auto()
     MESSAGE = auto()
     INN_CONFIRM = auto()
-    SHOP_MAIN_MENU = auto()  # ★ 道具屋あいさつ & 「かう / うる」選択
-    SHOP_BUY_MENU = auto()  # ★ 「かう」商品リスト
-    SHOP_SELL_MENU = auto()  # ★ 「うる」所持品リスト
-    START_BOSS_BATTLE = auto()  # ★ ボス会話終了後の戦闘開始フラグ
+    SHOP_MAIN_MENU = auto()
+    SHOP_BUY_MENU = auto()
+    SHOP_SELL_MENU = auto()
+    START_BOSS_BATTLE = auto()
+
+
+# --- 入力＆UIヘルパー ---
+
+
+def is_confirm() -> bool:
+    """決定キー判定 (Z / SPACE / RETURN)"""
+    return (
+        pyxel.btnp(pyxel.KEY_Z)
+        or pyxel.btnp(pyxel.KEY_SPACE)
+        or pyxel.btnp(pyxel.KEY_RETURN)
+    )
+
+
+def is_cancel() -> bool:
+    """キャンセルキー判定 (X / ESCAPE)"""
+    return pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE)
+
+
+def navigate_menu(length: int, current_idx: int) -> int:
+    """上下キーによるメニューカーソル移動の共通化"""
+    if length <= 0:
+        return 0
+    if pyxel.btnp(pyxel.KEY_UP):
+        return (current_idx - 1) % length
+    elif pyxel.btnp(pyxel.KEY_DOWN):
+        return (current_idx + 1) % length
+    return current_idx
+
+
+def draw_menu_window(
+    x: int,
+    y: int,
+    w: int,
+    h: int,
+    items: list[str],
+    selected_idx: int,
+    font,
+    line_height: int = 11,
+):
+    """リスト選択式メニューウィンドウの共通描画"""
+    draw_window(x, y, w, h)
+    for i, item_text in enumerate(items):
+        pyxel.text(x + 14, y + 8 + i * line_height, item_text, 7, font)
+    if 0 <= selected_idx < len(items):
+        pyxel.text(x + 6, y + 8 + selected_idx * line_height, ">", 10, font)
+
+
+# --- 2. FieldState メインクラス ---
 
 
 class FieldState(BaseState):
     def __init__(self, app):
         super().__init__(app)
 
-        self.tile_size = 16  # 16x16ピクセル
-
-        # プレイヤーのグリッド位置（マス目単位）
+        self.tile_size = 16
         self.player_x = 1
         self.player_y = 1
-        self.direction: Direction = (
-            Direction.DOWN
-        )  # ★ 向き: "UP", "DOWN", "LEFT", "RIGHT"
-
-        # ★ 現在どのマップにいるか（初期はWORLD）
+        self.direction: Direction = Direction.DOWN
         self.current_map_id: MapId = MapId.WORLD
 
-        # モード管理: "EXPLORE", "MAIN_MENU", "SPELL_MENU", "ITEM_MENU", "STATS_MENU", "MESSAGE"
         self.mode: Mode = Mode.EXPLORE
-        self.cursor = 0  # メインメニュー用カーソル (0:じゅもん, 1:つよさ, 2:どうぐ)
-        self.sub_cursor = 0  # サブメニュー用カーソル
+        self.return_mode: Mode = Mode.EXPLORE
+        self.cursor = 0
+        self.sub_cursor = 0
+        self.shop_cursor = 0
 
-        self.current_event = None  # 現在進行中のイベントデータ
+        self.current_event = None
+        self.pending_boss_id = None
 
-        # メッセージボックス（UI）
         self.msg_box = MessageBox(
             x=10, y=130, width=172, height=50, speed=2, font=self.app.font
         )
 
+        # ★ Dispatcher テーブル（モードと更新/描画メソッドのバインディング）
+        self._update_handlers = {
+            Mode.EXPLORE: self._update_explore,
+            Mode.MAIN_MENU: self._update_main_menu,
+            Mode.SPELL_MENU: self._update_spell_menu,
+            Mode.ITEM_MENU: self._update_item_menu,
+            Mode.STATS_MENU: self._update_stats_menu,
+            Mode.INN_CONFIRM: self._update_inn_confirm,
+            Mode.SHOP_MAIN_MENU: self._update_shop_main_menu,
+            Mode.SHOP_BUY_MENU: self._update_shop_buy_menu,
+            Mode.SHOP_SELL_MENU: self._update_shop_sell_menu,
+            Mode.MESSAGE: self._update_message,
+        }
+
+        self._draw_handlers = {
+            Mode.MAIN_MENU: self._draw_menu_overlay,
+            Mode.SPELL_MENU: self._draw_menu_overlay,
+            Mode.ITEM_MENU: self._draw_menu_overlay,
+            Mode.STATS_MENU: self._draw_menu_overlay,
+            Mode.INN_CONFIRM: self._draw_inn_confirm,
+            Mode.SHOP_MAIN_MENU: self._draw_shop_main_menu,
+            Mode.SHOP_BUY_MENU: self._draw_shop_buy_menu,
+            Mode.SHOP_SELL_MENU: self._draw_shop_sell_menu,
+            Mode.MESSAGE: self.msg_box.draw,
+        }
+
+    # --- ヘルパーメソッド ---
+
     def get_facing_pos(self) -> tuple[int, int]:
-        """プレイヤーが現在向いている目の前のマス座標を取得"""
         match self.direction:
             case Direction.UP:
                 return (self.player_x, self.player_y - 1)
@@ -86,65 +159,128 @@ class FieldState(BaseState):
                 return (self.player_x + 1, self.player_y)
 
     def get_tile_type(self, grid_x: int, grid_y: int) -> str:
-        """Tilemap 0 上の u, v オフセットを加味してタイル種別を取得"""
         cfg = MAP_CONFIG[self.current_map_id]
-
-        # u, v (ピクセル) を 8x8 タイル数に変換
-        offset_tile_x = cfg["u"] // 8
-        offset_tile_y = cfg["v"] // 8
-
-        # 現在のマップ領域内の指定マスの 8x8 タイル座標を計算
-        tm_x = offset_tile_x + (grid_x * 2)
-        tm_y = offset_tile_y + (grid_y * 2)
-
-        # タイルマップ0からその位置のマップチップ情報(tx, ty)を取得
-        tile_info = pyxel.tilemaps[0].pget(tm_x, tm_y)  # (tx, ty) が返る
-
-        # 対応表から属性を取得（未知のタイルは平地扱い）
+        tm_x = (cfg["u"] // 8) + (grid_x * 2)
+        tm_y = (cfg["v"] // 8) + (grid_y * 2)
+        tile_info = pyxel.tilemaps[0].pget(tm_x, tm_y)
         return TILE_MAPPING.get(tile_info, "GRASS")
 
     def can_move_to(self, grid_x: int, grid_y: int) -> bool:
-        """衝突判定: マップ端および障害物（山・海）のチェック"""
-        # 画面サイズ内チェック (横10マス, 縦6マス)
         if grid_x < 0 or grid_x >= 12 or grid_y < 0 or grid_y >= 11:
             return False
-
-        # イベントオブジェクト（NPC/宝箱など）がある場所も移動制限
         if (self.current_map_id, grid_x, grid_y) in MAP_EVENTS:
             return False
 
         tile_type = self.get_tile_type(grid_x, grid_y)
+        return tile_type not in ["MOUNTAIN", "WALL"]
 
-        # 壁・山の移動不可判定
-        IMPASSABLE = ["MOUNTAIN", "WALL"]
-        return tile_type not in IMPASSABLE
+    def show_message(self, messages: list[str], return_mode: Mode = Mode.EXPLORE):
+        """メッセージを表示して完了後に指定モードへ遷移する汎用メソッド"""
+        self.msg_box.push_messages(messages)
+        self.return_mode = return_mode
+        self.mode = Mode.MESSAGE
+
+    # --- メインループ (update / draw) ---
+
+    def update(self):
+        handler = self._update_handlers.get(self.mode)
+        if handler:
+            handler()
+
+    def draw(self):
+        pyxel.cls(0)
+
+        # 1. マップ & プレイヤー描画
+        cfg = MAP_CONFIG[self.current_map_id]
+        pyxel.bltm(0, 16, 0, cfg["u"], cfg["v"], 192, 176)
+        pyxel.blt(
+            self.player_x * self.tile_size,
+            self.player_y * self.tile_size + 16,
+            0,
+            0,
+            0,
+            16,
+            16,
+            8,
+        )
+
+        # 2. 上部HUD
+        draw_window(0, 0, 192, 16)
+        p = self.app.player
+        pyxel.text(
+            6, 4, f"HERO LV:{p.level} HP:{p.hp}/{p.max_hp} G:{p.gold}", 7, self.app.font
+        )
+
+        # 3. 各モード別UIの描画（Dispatcher）
+        handler = self._draw_handlers.get(self.mode)
+        if handler:
+            handler()
+
+    # --- モード別 Update ハンドラー群 ---
+
+    def _update_explore(self):
+        dx, dy = 0, 0
+        if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.KEY_W):
+            dy, self.direction = -1, Direction.UP
+        elif pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.KEY_S):
+            dy, self.direction = 1, Direction.DOWN
+        elif pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.KEY_A):
+            dx, self.direction = -1, Direction.LEFT
+        elif pyxel.btnp(pyxel.KEY_RIGHT) or pyxel.btnp(pyxel.KEY_D):
+            dx, self.direction = 1, Direction.RIGHT
+
+        if dx != 0 or dy != 0:
+            next_x, next_y = self.player_x + dx, self.player_y + dy
+            if self.can_move_to(next_x, next_y):
+                self.player_x, self.player_y = next_x, next_y
+
+                # ワープ判定
+                warp_key = (self.current_map_id, self.player_x, self.player_y)
+                if warp_key in WARP_POINTS:
+                    warp = WARP_POINTS[warp_key]
+                    self.current_map_id, self.player_x, self.player_y = (
+                        warp["target_map"],
+                        warp["target_x"],
+                        warp["target_y"],
+                    )
+                    if "message" in warp:
+                        self.show_message([warp["message"]])
+                    return
+
+                # エンカウント判定
+                cfg = MAP_CONFIG[self.current_map_id]
+                if (
+                    self.get_tile_type(self.player_x, self.player_y) == "GRASS"
+                    and random.random() < cfg["encount_rate"]
+                ):
+                    self.trigger_battle()
+
+        if is_confirm():
+            self.interact()
+        elif is_cancel():
+            self.mode = Mode.MAIN_MENU
+            self.cursor = 0
 
     def interact(self):
-        """目の前の対象（NPC・宝箱・宿屋・ショップ）と会話・調べる"""
         target_pos = self.get_facing_pos()
-        # ★ 現在の MapId を考慮してイベントを検索
         event_key = (self.current_map_id, target_pos[0], target_pos[1])
         event = MAP_EVENTS.get(event_key)
-
         if not event:
             return
 
         self.current_event = event
-        self.return_mode = Mode.EXPLORE
 
         match event["type"]:
-            case "NPC":  # 村人会話
-                self.msg_box.push_messages(event["messages"])
-                self.mode = Mode.MESSAGE
-
-            case "CHEST":  # 宝箱
+            case "NPC":
+                self.show_message(event["messages"])
+            case "CHEST":
                 if event["is_opened"]:
-                    self.msg_box.push_messages(["たからばこ は からっぽ だ。"])
+                    self.show_message(["たからばこ は からっぽ だ。"])
                 else:
                     event["is_opened"] = True
                     if event["reward_type"] == "gold":
                         self.app.player.gold += event["reward_value"]
-                        self.msg_box.push_messages(
+                        self.show_message(
                             [
                                 "たからばこ を あけた！",
                                 f"{event['reward_value']} ゴールド を てにいれた！",
@@ -152,549 +288,284 @@ class FieldState(BaseState):
                         )
                     elif event["reward_type"] == "item":
                         self.app.player.items.append(event["reward_value"])
-                        self.msg_box.push_messages(
+                        self.show_message(
                             [
                                 "たからばこ を あけた！",
                                 f"{event['reward_value']} を てにいれた！",
                             ]
                         )
-                self.mode = Mode.MESSAGE
-
-            case "INN":  # 宿屋
-                self.sub_cursor = 0  # 0: はい, 1: いいえ
+            case "INN":
+                self.sub_cursor = 0
                 self.mode = Mode.INN_CONFIRM
-
-            case "SHOP":  # ショップ
+            case "SHOP":
                 self.sub_cursor = 0
                 self.mode = Mode.SHOP_MAIN_MENU
-
-            # interact() 内の BOSS 処理
             case "BOSS":
-                self.msg_box.push_messages(event["messages"])
                 self.pending_boss_id = event["monster_id"]
-                self.return_mode = Mode.START_BOSS_BATTLE
-                self.mode = Mode.MESSAGE
+                self.show_message(event["messages"], return_mode=Mode.START_BOSS_BATTLE)
 
-    def update(self):
-        match self.mode:
-            case Mode.EXPLORE:
-                dx, dy = 0, 0
-                # 上下左右移動
-                if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.KEY_W):
-                    dy = -1
-                    self.direction = Direction.UP
-                elif pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.KEY_S):
-                    dy = 1
-                    self.direction = Direction.DOWN
-                elif pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.KEY_A):
-                    dx = -1
-                    self.direction = Direction.LEFT
-                elif pyxel.btnp(pyxel.KEY_RIGHT) or pyxel.btnp(pyxel.KEY_D):
-                    dx = 1
-                    self.direction = Direction.RIGHT
-
-                if dx != 0 or dy != 0:
-                    next_x = self.player_x + dx
-                    next_y = self.player_y + dy
-
-                    # 衝突判定を通過したら移動
-                    if self.can_move_to(next_x, next_y):
-                        self.player_x = next_x
-                        self.player_y = next_y
-
-                        # ★ 1. マップ遷移（ワープ）判定
-                        warp_key = (self.current_map_id, self.player_x, self.player_y)
-                        if warp_key in WARP_POINTS:
-                            warp = WARP_POINTS[warp_key]
-                            self.current_map_id = warp["target_map"]
-                            self.player_x = warp["target_x"]
-                            self.player_y = warp["target_y"]
-
-                            if "message" in warp:
-                                self.msg_box.push_messages([warp["message"]])
-                                self.mode = Mode.MESSAGE
-                            return
-
-                        # ★ 2. マップごとのエンカウント判定
-                        cfg = MAP_CONFIG[self.current_map_id]
-                        tile_type = self.get_tile_type(self.player_x, self.player_y)
-                        if (
-                            tile_type == "GRASS"
-                            and random.random() < cfg["encount_rate"]
-                        ):
-                            self.trigger_battle()
-
-                        # # タイルに応じたイベント
-                        # tile_type = self.get_tile_type(self.player_x, self.player_y)
-                        # if tile_type == "GRASS" and random.random() < 0:
-                        #     self.trigger_battle()
-
-                        # match tile_type:
-                        #     case "GRASS":
-                        #         if random.random() < 0.15:
-                        #             self.trigger_battle()
-                        #     case "VILLAGE":
-                        #         p = self.app.player
-                        #         p.hp = p.max_hp
-                        #         p.mp = p.max_mp
-                        #         self.msg_box.push_messages(
-                        #             [
-                        #                 "まち に とうちゃくした！",
-                        #                 "HPと MPが かんぜんかいふく！",
-                        #             ]
-                        #         )
-                        #         self.mode = "MESSAGE"
-
-                if (
-                    pyxel.btnp(pyxel.KEY_Z)
-                    or pyxel.btnp(pyxel.KEY_SPACE)
-                    or pyxel.btnp(pyxel.KEY_RETURN)
-                ):
-                    self.interact()
-
-                # XキーまたはESCキーでメニューを開く
-                if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.mode = Mode.MAIN_MENU
-                    self.cursor = 0
-
-            # --- 宿屋の宿泊確認 ---
-            case Mode.INN_CONFIRM:
-                if not self.current_event:
-                    self.mode = Mode.EXPLORE
-                    return
-
-                if pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.KEY_RIGHT):
-                    self.sub_cursor = 1 - self.sub_cursor
-
-                if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.mode = Mode.EXPLORE
-
-                elif (
-                    pyxel.btnp(pyxel.KEY_Z)
-                    or pyxel.btnp(pyxel.KEY_SPACE)
-                    or pyxel.btnp(pyxel.KEY_RETURN)
-                ):
-                    p = self.app.player
-                    # price = self.current_event.get("price", 10)
-
-                    if self.sub_cursor == 0:  # 「はい」選択
-                        p.hp = p.max_hp
-                        p.mp = p.max_mp
-                        self.msg_box.push_messages(
-                            ["よく ねむれたかい？", "いってらっしゃい！"]
+    def _update_main_menu(self):
+        self.cursor = navigate_menu(3, self.cursor)
+        if is_cancel():
+            self.mode = Mode.EXPLORE
+        elif is_confirm():
+            p = self.app.player
+            match self.cursor:
+                case 0:  # じゅもん
+                    if not p.spells:
+                        self.show_message(
+                            ["じゅもんを おぼえていない！"], return_mode=Mode.MAIN_MENU
                         )
-                    else:  # 「いいえ」選択
-                        self.msg_box.push_messages(["むりしないでね"])
-
-                    self.mode = Mode.MESSAGE
-
-            # --- ショップ（武器防具屋） ---
-            case Mode.SHOP_MAIN_MENU:
-                if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.KEY_DOWN):
-                    self.sub_cursor = 1 - self.sub_cursor
-
-                # キャンセル (X / ESC) ➔ 店を出る
-                if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.msg_box.push_messages(["また おこしください！"])
-                    self.return_mode = Mode.EXPLORE
-                    self.mode = Mode.MESSAGE
-
-                # 決定 (Z / SPACE / RETURN)
-                elif (
-                    pyxel.btnp(pyxel.KEY_Z)
-                    or pyxel.btnp(pyxel.KEY_SPACE)
-                    or pyxel.btnp(pyxel.KEY_RETURN)
-                ):
-                    if self.sub_cursor == 0:  # 「かう」
-                        self.shop_cursor = 0
-                        self.mode = Mode.SHOP_BUY_MENU
-                    else:  # 「うる」
-                        p = self.app.player
-                        if not p.items:
-                            self.msg_box.push_messages(
-                                ["うれる どうぐを もっていない！"]
-                            )
-                            self.return_mode = Mode.SHOP_MAIN_MENU
-                            self.mode = Mode.MESSAGE
-                        else:
-                            self.shop_cursor = 0
-                            self.mode = Mode.SHOP_SELL_MENU
-
-            # --- 道具屋: 「かう」商品選択 ---
-            case Mode.SHOP_BUY_MENU:
-                if not self.current_event:
-                    self.mode = Mode.EXPLORE
-                    return
-
-                items = self.current_event["items"]
-                if pyxel.btnp(pyxel.KEY_UP):
-                    self.sub_cursor = (self.sub_cursor - 1) % len(items)
-                elif pyxel.btnp(pyxel.KEY_DOWN):
-                    self.sub_cursor = (self.sub_cursor + 1) % len(items)
-
-                if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.mode = Mode.SHOP_MAIN_MENU
-
-                elif (
-                    pyxel.btnp(pyxel.KEY_Z)
-                    or pyxel.btnp(pyxel.KEY_SPACE)
-                    or pyxel.btnp(pyxel.KEY_RETURN)
-                ):
-                    p = self.app.player
-                    item = items[self.sub_cursor]
-
-                    if p.gold < item["price"]:
-                        self.msg_box.push_messages(["ゴールド が たりないようです。"])
-                        self.return_mode = Mode.SHOP_BUY_MENU
                     else:
-                        p.gold -= item["price"]
-                        # アイテム購入処理
-                        match item["type"]:
-                            case "ITEM":
-                                p.items.append(item["id"])
-                                msg = f"{item['name']} を かった！"
-                            case "WEAPON":
-                                p.equip_weapon(item["name"], item["atk"])
-                                msg = f"{item['name']} を そうびした！"
-                            case "ARMOR":
-                                p.equip_armor(item["name"], item["def"])
-                                msg = f"{item['name']} を そうびした！"
-
-                        self.msg_box.push_messages(
-                            [
-                                msg,
-                                "まいど ありがとうございます！",
-                            ]
+                        self.mode = Mode.SPELL_MENU
+                        self.sub_cursor = 0
+                case 1:  # つよさ
+                    self.mode = Mode.STATS_MENU
+                case 2:  # どうぐ
+                    if not p.items:
+                        self.show_message(
+                            ["どうぐを もっていない！"], return_mode=Mode.MAIN_MENU
                         )
-                        self.return_mode = Mode.SHOP_BUY_MENU
-                    self.mode = Mode.MESSAGE
+                    else:
+                        self.mode = Mode.ITEM_MENU
+                        self.sub_cursor = 0
 
-            # --- 道具屋: 「うる」所持品選択 ---
-            case Mode.SHOP_SELL_MENU:
+    def _update_spell_menu(self):
+        p = self.app.player
+        if is_cancel():
+            self.mode = Mode.MAIN_MENU
+        else:
+            self.sub_cursor = navigate_menu(len(p.spells), self.sub_cursor)
+            if is_confirm() and p.spells:
+                spell = p.spells[self.sub_cursor]
+                if spell.heal_amount > 0:
+                    if p.mp < spell.mp_cost:
+                        self.show_message(
+                            ["MPが たりない！"], return_mode=Mode.SPELL_MENU
+                        )
+                    else:
+                        p.mp -= spell.mp_cost
+                        healed = p.heal(spell.heal_amount)
+                        self.show_message(
+                            [
+                                f"{p.name} は {spell.name} を となえた！",
+                                f"HPが {healed} かいふくした！",
+                            ],
+                            return_mode=Mode.EXPLORE,
+                        )
+
+    def _update_item_menu(self):
+        p = self.app.player
+        if is_cancel():
+            self.mode = Mode.MAIN_MENU
+        else:
+            self.sub_cursor = navigate_menu(len(p.items), self.sub_cursor)
+            if is_confirm() and p.items:
+                item = p.items.pop(self.sub_cursor)
+                if item in ["herb"]:
+                    healed = p.heal(15)
+                    self.show_message(
+                        [
+                            f"{p.name} は やくそうを つかった！",
+                            f"HPが {healed} かいふくした！",
+                        ],
+                        return_mode=Mode.EXPLORE,
+                    )
+
+    def _update_stats_menu(self):
+        if is_confirm() or is_cancel():
+            self.mode = Mode.MAIN_MENU
+
+    def _update_inn_confirm(self):
+        if not self.current_event:
+            self.mode = Mode.EXPLORE
+            return
+
+        if pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.KEY_RIGHT):
+            self.sub_cursor = 1 - self.sub_cursor
+
+        if is_cancel():
+            self.mode = Mode.EXPLORE
+        elif is_confirm():
+            p = self.app.player
+            if self.sub_cursor == 0:  # はい
+                p.hp, p.mp = p.max_hp, p.max_mp
+                self.show_message(["よく ねむれたかい？", "いってらっしゃい！"])
+            else:  # いいえ
+                self.show_message(["むりしないでね"])
+
+    def _update_shop_main_menu(self):
+        self.sub_cursor = navigate_menu(2, self.sub_cursor)
+        if is_cancel():
+            self.show_message(["また おこしください！"])
+        elif is_confirm():
+            if self.sub_cursor == 0:  # かう
+                self.shop_cursor = 0
+                self.mode = Mode.SHOP_BUY_MENU
+            else:  # うる
                 p = self.app.player
                 if not p.items:
-                    self.mode = Mode.SHOP_MAIN_MENU
-                    return
-
-                if pyxel.btnp(pyxel.KEY_UP):
-                    self.shop_cursor = (self.shop_cursor - 1) % len(p.items)
-                elif pyxel.btnp(pyxel.KEY_DOWN):
-                    self.shop_cursor = (self.shop_cursor + 1) % len(p.items)
-
-                # 戻る
-                if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.mode = Mode.SHOP_MAIN_MENU
-
-                # 売却決定
-                elif (
-                    pyxel.btnp(pyxel.KEY_Z)
-                    or pyxel.btnp(pyxel.KEY_SPACE)
-                    or pyxel.btnp(pyxel.KEY_RETURN)
-                ):
-                    item_id = p.items.pop(self.shop_cursor)
-                    item_name = "やくそう" if item_id == "herb" else item_id
-
-                    # 買値の半額（定価10Gなら5G）で売却
-                    sell_price = 5 if item_id == "herb" else 10
-                    p.gold += sell_price
-
-                    self.msg_box.push_messages(
-                        [
-                            f"{item_name} を {sell_price}G で うった！",
-                            "ありがとう ございました！",
-                        ]
+                    self.show_message(
+                        ["うれる どうぐを もっていない！"],
+                        return_mode=Mode.SHOP_MAIN_MENU,
                     )
-                    self.return_mode = (
-                        Mode.SHOP_SELL_MENU if p.items else Mode.SHOP_MAIN_MENU
+                else:
+                    self.shop_cursor = 0
+                    self.mode = Mode.SHOP_SELL_MENU
+
+    def _update_shop_buy_menu(self):
+        if not self.current_event:
+            self.mode = Mode.EXPLORE
+            return
+
+        items = self.current_event["items"]
+        if is_cancel():
+            self.mode = Mode.SHOP_MAIN_MENU
+        else:
+            self.sub_cursor = navigate_menu(len(items), self.sub_cursor)
+            if is_confirm():
+                p = self.app.player
+                item = items[self.sub_cursor]
+                if p.gold < item["price"]:
+                    self.show_message(
+                        ["ゴールド が たりないようです。"],
+                        return_mode=Mode.SHOP_BUY_MENU,
                     )
-                    self.mode = Mode.MESSAGE
+                else:
+                    p.gold -= item["price"]
+                    match item["type"]:
+                        case "ITEM":
+                            p.items.append(item["id"])
+                            msg = f"{item['name']} を かった！"
+                        case "WEAPON":
+                            p.equip_weapon(item["name"], item["atk"])
+                            msg = f"{item['name']} を そうびした！"
+                        case "ARMOR":
+                            p.equip_armor(item["name"], item["def"])
+                            msg = f"{item['name']} を そうびした！"
 
-            # --- 2. メインメニュー選択 ---
-            case Mode.MAIN_MENU:
-                if pyxel.btnp(pyxel.KEY_UP):
-                    self.cursor = (self.cursor - 1) % 3
-                elif pyxel.btnp(pyxel.KEY_DOWN):
-                    self.cursor = (self.cursor + 1) % 3
+                    self.show_message(
+                        [msg, "まいど ありがとうございます！"],
+                        return_mode=Mode.SHOP_BUY_MENU,
+                    )
 
-                # XキーまたはESCでメニューを閉じる
-                if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.mode = Mode.EXPLORE
+    def _update_shop_sell_menu(self):
+        p = self.app.player
+        if not p.items or is_cancel():
+            self.mode = Mode.SHOP_MAIN_MENU
+            return
 
-                # 決定
-                elif (
-                    pyxel.btnp(pyxel.KEY_Z)
-                    or pyxel.btnp(pyxel.KEY_SPACE)
-                    or pyxel.btnp(pyxel.KEY_RETURN)
-                ):
-                    p = self.app.player
-                    match self.cursor:
-                        case 0:  # じゅもん
-                            if not p.spells:
-                                self.msg_box.push_messages(
-                                    ["じゅもんを おぼえていない！"]
-                                )
-                                self.return_mode = Mode.MAIN_MENU
-                                self.mode = Mode.MESSAGE
-                            else:
-                                self.mode = Mode.SPELL_MENU
-                                self.sub_cursor = 0
+        self.shop_cursor = navigate_menu(len(p.items), self.shop_cursor)
+        if is_confirm():
+            item_id = p.items.pop(self.shop_cursor)
+            item_name = "やくそう" if item_id == "herb" else item_id
+            sell_price = 5 if item_id == "herb" else 10
+            p.gold += sell_price
 
-                        case 1:  # つよさ
-                            self.mode = Mode.STATS_MENU
+            next_mode = Mode.SHOP_SELL_MENU if p.items else Mode.SHOP_MAIN_MENU
+            self.show_message(
+                [
+                    f"{item_name} を {sell_price}G で うった！",
+                    "ありがとう ございました！",
+                ],
+                return_mode=next_mode,
+            )
 
-                        case 2:  # どうぐ
-                            # ★修正: リストが空かどうか直接チェック
-                            if not p.items:
-                                self.msg_box.push_messages(["どうぐを もっていない！"])
-                                self.mode = Mode.MESSAGE
-                            else:
-                                self.mode = Mode.ITEM_MENU
-                                self.sub_cursor = 0
+    def _update_message(self):
+        if self.msg_box.update():
+            if self.return_mode == Mode.START_BOSS_BATTLE:
+                monster = self.app.repo.create_monster(self.pending_boss_id)
+                from .battle_state import BattleState
 
-            # --- 3. 呪文選択・使用 ---
-            case Mode.SPELL_MENU:
-                p = self.app.player
-                if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.mode = Mode.MAIN_MENU
-
-                elif pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.KEY_DOWN):
-                    if len(p.spells) > 1:
-                        self.sub_cursor = (self.sub_cursor + 1) % len(p.spells)
-
-                elif (
-                    pyxel.btnp(pyxel.KEY_Z)
-                    or pyxel.btnp(pyxel.KEY_SPACE)
-                    or pyxel.btnp(pyxel.KEY_RETURN)
-                ):
-                    selected_spell = p.spells[self.sub_cursor]
-
-                    # 回復呪文（ホイミなど）の場合
-                    if selected_spell.heal_amount > 0:
-                        if p.mp < selected_spell.mp_cost:
-                            self.msg_box.push_messages(["MPが たりない！"])
-                        else:
-                            p.mp -= selected_spell.mp_cost
-                            healed = p.heal(selected_spell.heal_amount)
-                            self.msg_box.push_messages(
-                                [
-                                    f"{p.name} は {selected_spell.name} を となえた！",
-                                    f"HPが {healed} かいふくした！",
-                                ]
-                            )
-                        self.mode = Mode.MESSAGE
-
-            # --- 4. 道具選択・使用 ---
-            case Mode.ITEM_MENU:
-                p = self.app.player
-
-                if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.mode = Mode.MAIN_MENU
-
-                # カーソル上下移動
-                elif pyxel.btnp(pyxel.KEY_UP):
-                    if p.items:
-                        self.sub_cursor = (self.sub_cursor - 1) % len(p.items)
-                elif pyxel.btnp(pyxel.KEY_DOWN):
-                    if p.items:
-                        self.sub_cursor = (self.sub_cursor + 1) % len(p.items)
-
-                elif (
-                    pyxel.btnp(pyxel.KEY_Z)
-                    or pyxel.btnp(pyxel.KEY_SPACE)
-                    or pyxel.btnp(pyxel.KEY_RETURN)
-                ) and p.items:
-                    item = p.items.pop(self.sub_cursor)
-
-                    if item in ["herb"]:  # やくそう
-                        healed = p.heal(15)
-                        self.msg_box.push_messages(
-                            [
-                                f"{p.name} は やくそうを つかった！",
-                                f"HPが {healed} かいふくした！",
-                            ]
-                        )
-                        self.mode = Mode.MESSAGE
-
-            # --- 5. ステータス画面 ---
-            case Mode.STATS_MENU:
-                # どのボタンを押してもメインメニューへ戻る
-                if (
-                    pyxel.btnp(pyxel.KEY_Z)
-                    or pyxel.btnp(pyxel.KEY_X)
-                    or pyxel.btnp(pyxel.KEY_SPACE)
-                    or pyxel.btnp(pyxel.KEY_RETURN)
-                    or pyxel.btnp(pyxel.KEY_ESCAPE)
-                ):
-                    self.mode = Mode.MAIN_MENU
-
-            # --- 6. メッセージ表示中 ---
-            case Mode.MESSAGE:
-                if self.msg_box.update():
-                    target_mode = getattr(self, "return_mode", Mode.EXPLORE)
-                    if target_mode == Mode.START_BOSS_BATTLE:
-                        # 会話終了直後にボス戦開始！
-                        monster = self.app.repo.create_monster(self.pending_boss_id)
-                        from .battle_state import BattleState
-
-                        self.app.change_state(BattleState(self.app, monster))
-                    else:
-                        self.mode = target_mode
+                self.app.change_state(BattleState(self.app, monster))
+            else:
+                self.mode = self.return_mode
 
     def trigger_battle(self):
         from .battle_state import BattleState
 
-        # スライムまたはドラキーをランダム出現
         monster_id = random.choice(["entenstr", "rarutaes"])
         monster = self.app.repo.create_monster(monster_id)
         self.app.change_state(BattleState(self.app, monster))
 
-    def draw(self):
-        pyxel.cls(0)  # 緑色のフィールド背景
+    # --- モード別 Draw ハンドラー群 ---
 
-        # ★ タイルマップ0 の該当オフセット (u, v) から 192x176px 分を描画
-        cfg = MAP_CONFIG[self.current_map_id]
-        pyxel.bltm(0, 16, 0, cfg["u"], cfg["v"], 192, 176)
-
-        # ★ 2. 16x16 勇者キャラクターの描画
-        player_px = self.player_x * self.tile_size
-        player_py = self.player_y * self.tile_size + 16
-
-        # イメージバンク0の (x=0, y=16) に16x16の勇者ドット絵がある場合の例
-        # (最後の引数 0 は黒色を透明色として透過描画する指定です)
-        pyxel.blt(player_px, player_py, 0, 0, 0, 16, 16, 8)
-
-        # 簡易UI
-        pyxel.rect(0, 0, 192, 16, 0)
+    def _draw_menu_overlay(self):
         p = self.app.player
-        pyxel.text(
-            6, 4, f"HERO LV:{p.level} HP:{p.hp}/{p.max_hp} G:{p.gold}", 7, self.app.font
+        # 左側メインメニュー描画
+        draw_menu_window(
+            10, 24, 56, 44, ["じゅもん", "つよさ", "どうぐ"], self.cursor, self.app.font
         )
 
+        # 右側サブメニューの重ね描き
         match self.mode:
-            # メインメニュー、呪文、道具、ステータス選択中はいずれも「左側のメイン枠」を表示
-            case Mode.MAIN_MENU | Mode.SPELL_MENU | Mode.ITEM_MENU | Mode.STATS_MENU:
-                draw_window(10, 24, 56, 44)
-                pyxel.text(22, 30, "じゅもん", 7, self.app.font)
-                pyxel.text(22, 40, "つよさ", 7, self.app.font)
-                pyxel.text(22, 50, "どうぐ", 7, self.app.font)
-                pyxel.text(14, 30 + self.cursor * 10, ">", 10, self.app.font)
-
-                # その上で、各サブメニューを右側に重ね描き
-                match self.mode:
-                    case Mode.SPELL_MENU:
-                        draw_window(70, 24, 110, 44)
-                        for i, spell in enumerate(p.spells):
-                            pyxel.text(
-                                80,
-                                30 + i * 10,
-                                f"{spell.name} M:{spell.mp_cost}",
-                                7,
-                                self.app.font,
-                            )
-                        pyxel.text(
-                            74, 30 + self.sub_cursor * 10, ">", 10, self.app.font
-                        )
-
-                    case Mode.ITEM_MENU:
-                        draw_window(70, 24, 110, 44)
-                        for i, item in enumerate(p.items):
-                            name = "やくそう" if item == "herb" else item
-                            pyxel.text(80, 30 + i * 10, name, 7, self.app.font)
-                        pyxel.text(
-                            74, 30 + self.sub_cursor * 10, ">", 10, self.app.font
-                        )
-
-                    case Mode.STATS_MENU:
-                        draw_window(70, 24, 110, 85)
-                        pyxel.text(76, 30, f"なに: {p.name}", 7, self.app.font)
-                        pyxel.text(76, 40, f"レベル: {p.level}", 7, self.app.font)
-                        pyxel.text(76, 50, f"こうげき: {p.attack}", 7, self.app.font)
-                        pyxel.text(76, 60, f"しゅび: {p.defense}", 7, self.app.font)
-                        pyxel.text(
-                            76, 70, f"ぶき: {p.equipped_weapon}", 7, self.app.font
-                        )
-                        pyxel.text(
-                            76, 80, f"よろい: {p.equipped_armor}", 7, self.app.font
-                        )
-                        pyxel.text(76, 90, f"けいけん: {p.exp}", 7, self.app.font)
-                        pyxel.text(76, 100, f"ゴールド: {p.gold}", 7, self.app.font)
-
-            case Mode.INN_CONFIRM:
-                if not self.current_event:
-                    return
-
-                draw_window(10, 130, 172, 48)
-                # price = self.current_event.get("price", 10)
-                pyxel.text(
-                    18,
-                    138,
-                    "おかあさん「おかえりなさい やすんでいくかい？」",
-                    7,
-                    self.app.font,
+            case Mode.SPELL_MENU:
+                spell_texts = [f"{s.name} M:{s.mp_cost}" for s in p.spells]
+                draw_menu_window(
+                    70, 24, 110, 44, spell_texts, self.sub_cursor, self.app.font
                 )
+            case Mode.ITEM_MENU:
+                item_texts = [
+                    "やくそう" if item == "herb" else item for item in p.items
+                ]
+                draw_menu_window(
+                    70, 24, 110, 44, item_texts, self.sub_cursor, self.app.font
+                )
+            case Mode.STATS_MENU:
+                draw_window(70, 24, 110, 85)
+                stats = [
+                    f"なに: {p.name}",
+                    f"レベル: {p.level}",
+                    f"こうげき: {p.attack}",
+                    f"しゅび: {p.defense}",
+                    f"ぶき: {p.equipped_weapon}",
+                    f"よろい: {p.equipped_armor}",
+                    f"けいけん: {p.exp}",
+                    f"ゴールド: {p.gold}",
+                ]
+                for i, text in enumerate(stats):
+                    pyxel.text(76, 30 + i * 10, text, 7, self.app.font)
 
-                # 「はい / いいえ」の描画
-                yes_color = 10 if self.sub_cursor == 0 else 7
-                no_color = 10 if self.sub_cursor == 1 else 7
-                pyxel.text(50, 156, "はい", yes_color, self.app.font)
-                pyxel.text(110, 156, "いいえ", no_color, self.app.font)
+    def _draw_inn_confirm(self):
+        if not self.current_event:
+            return
+        draw_window(10, 130, 172, 48)
+        pyxel.text(
+            18, 138, "おかあさん「おかえりなさい やすんでいくかい？」", 7, self.app.font
+        )
+        yes_col = 10 if self.sub_cursor == 0 else 7
+        no_col = 10 if self.sub_cursor == 1 else 7
+        pyxel.text(50, 156, "はい", yes_col, self.app.font)
+        pyxel.text(110, 156, "いいえ", no_col, self.app.font)
 
-            case Mode.SHOP_MAIN_MENU:
-                # 1. 店員のあいさつウィンドウ
-                draw_window(10, 120, 172, 60)
-                pyxel.text(18, 128, "いらっしゃいませ！", 7, self.app.font)
-                pyxel.text(18, 140, "ここは どうぐや です。", 7, self.app.font)
-                pyxel.text(18, 152, "なにに しますか？", 7, self.app.font)
+    def _draw_shop_main_menu(self):
+        draw_window(10, 120, 172, 60)
+        pyxel.text(18, 128, "いらっしゃいませ！", 7, self.app.font)
+        pyxel.text(18, 140, "ここは どうぐや です。", 7, self.app.font)
+        pyxel.text(18, 152, "なにに しますか？", 7, self.app.font)
+        draw_menu_window(
+            10, 45, 60, 42, ["かう", "うる"], self.sub_cursor, self.app.font
+        )
 
-                # 2. 「かう / うる」選択ウィンドウ
-                draw_window(10, 45, 60, 42)
-                pyxel.text(24, 52, "かう", 7, self.app.font)
-                pyxel.text(24, 66, "うる", 7, self.app.font)
-                cursor_y = 52 if self.sub_cursor == 0 else 66
-                pyxel.text(16, cursor_y, ">", 10, self.app.font)
+    def _draw_shop_buy_menu(self):
+        if not self.current_event:
+            return
+        p = self.app.player
+        draw_window(10, 24, 172, 22)
+        pyxel.text(18, 31, f"しょじきん: {p.gold}G", 7, self.app.font)
 
-            # --- 道具屋: 「かう」商品リスト画面 ---
-            case Mode.SHOP_BUY_MENU:
-                if not self.current_event:
-                    return
-                # 所持金ウィンドウ
-                draw_window(10, 24, 172, 22)
-                pyxel.text(18, 31, f"しょじきん: {p.gold}G", 7, self.app.font)
+        items_texts = [
+            f"{item['name']} ({item['price']}G)" for item in self.current_event["items"]
+        ]
+        draw_menu_window(10, 50, 172, 70, items_texts, self.sub_cursor, self.app.font)
 
-                # 商品リストウィンドウ
-                draw_window(10, 50, 172, 70)
+    def _draw_shop_sell_menu(self):
+        p = self.app.player
+        draw_window(10, 24, 172, 22)
+        pyxel.text(18, 31, f"しょじきん: {p.gold}G", 7, self.app.font)
 
-                items = self.current_event["items"]
-                for i, item in enumerate(items):
-                    pyxel.text(
-                        24,
-                        58 + i * 11,
-                        f"{item['name']} ({item['price']}G)",
-                        7,
-                        self.app.font,
-                    )
-                pyxel.text(16, 58 + self.sub_cursor * 11, ">", 10, self.app.font)
-
-            # --- 道具屋: 「うる」所持品リスト画面 ---
-            case Mode.SHOP_SELL_MENU:
-                # 所持金ウィンドウ
-                draw_window(10, 24, 172, 22)
-                pyxel.text(18, 31, f"しょじきん: {p.gold}G", 7, self.app.font)
-
-                # 所持品リストウィンドウ
-                draw_window(10, 50, 172, 70)
-                for i, item_id in enumerate(p.items):
-                    item_name = "やくそう" if item_id == "herb" else item_id
-                    sell_price = 5 if item_id == "herb" else 10
-                    pyxel.text(
-                        24,
-                        58 + i * 11,
-                        f"{item_name} (うる: {sell_price}G)",
-                        7,
-                        self.app.font,
-                    )
-                pyxel.text(16, 58 + self.shop_cursor * 11, ">", 10, self.app.font)
-
-            # メッセージウィンドウ
-            case Mode.MESSAGE:
-                self.msg_box.draw()
+        item_texts = [
+            f"{('やくそう' if i == 'herb' else i)} (うる: {5 if i == 'herb' else 10}G)"
+            for i in p.items
+        ]
+        draw_menu_window(10, 50, 172, 70, item_texts, self.shop_cursor, self.app.font)
