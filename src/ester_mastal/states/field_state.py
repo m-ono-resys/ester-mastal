@@ -1,11 +1,10 @@
-from enum import Enum, auto
 import random
+from enum import Enum, auto
 
 import pyxel
 
 from ..data.events import MAP_EVENTS
-from ..data.maps import MapId, MAP_CONFIG, WARP_POINTS
-
+from ..data.maps import MAP_CONFIG, WARP_POINTS, MapId
 from ..ui.message_box import MessageBox
 from ..ui.window import draw_window
 from .base_state import BaseState
@@ -22,11 +21,13 @@ TILE_MAPPING = {
     (2, 6): "TABLE",
 }
 
+
 class Direction(Enum):
     DOWN = auto()
     LEFT = auto()
     RIGHT = auto()
     UP = auto()
+
 
 class Mode(Enum):
     EXPLORE = auto()
@@ -36,7 +37,10 @@ class Mode(Enum):
     STATS_MENU = auto()
     MESSAGE = auto()
     INN_CONFIRM = auto()
-    SHOP_MENU = auto()
+    SHOP_MAIN_MENU = auto()  # ★ 道具屋あいさつ & 「かう / うる」選択
+    SHOP_BUY_MENU = auto()  # ★ 「かう」商品リスト
+    SHOP_SELL_MENU = auto()  # ★ 「うる」所持品リスト
+
 
 class FieldState(BaseState):
     def __init__(self, app):
@@ -47,7 +51,9 @@ class FieldState(BaseState):
         # プレイヤーのグリッド位置（マス目単位）
         self.player_x = 1
         self.player_y = 1
-        self.direction: Direction = Direction.DOWN  # ★ 向き: "UP", "DOWN", "LEFT", "RIGHT"
+        self.direction: Direction = (
+            Direction.DOWN
+        )  # ★ 向き: "UP", "DOWN", "LEFT", "RIGHT"
 
         # ★ 現在どのマップにいるか（初期はWORLD）
         self.current_map_id: MapId = MapId.WORLD
@@ -60,7 +66,9 @@ class FieldState(BaseState):
         self.current_event = None  # 現在進行中のイベントデータ
 
         # メッセージボックス（UI）
-        self.msg_box = MessageBox(x=10, y=130, width=172, height=50, speed=2, font=self.app.font)
+        self.msg_box = MessageBox(
+            x=10, y=130, width=172, height=50, speed=2, font=self.app.font
+        )
 
     def get_facing_pos(self) -> tuple[int, int]:
         """プレイヤーが現在向いている目の前のマス座標を取得"""
@@ -85,7 +93,6 @@ class FieldState(BaseState):
         # 現在のマップ領域内の指定マスの 8x8 タイル座標を計算
         tm_x = offset_tile_x + (grid_x * 2)
         tm_y = offset_tile_y + (grid_y * 2)
-
 
         # タイルマップ0からその位置のマップチップ情報(tx, ty)を取得
         tile_info = pyxel.tilemaps[0].pget(tm_x, tm_y)  # (tx, ty) が返る
@@ -134,16 +141,20 @@ class FieldState(BaseState):
                     event["is_opened"] = True
                     if event["reward_type"] == "gold":
                         self.app.player.gold += event["reward_value"]
-                        self.msg_box.push_messages([
-                            "たからばこ を あけた！",
-                            f"{event['reward_value']} ゴールド を てにいれた！"
-                        ])
+                        self.msg_box.push_messages(
+                            [
+                                "たからばこ を あけた！",
+                                f"{event['reward_value']} ゴールド を てにいれた！",
+                            ]
+                        )
                     elif event["reward_type"] == "item":
                         self.app.player.items.append(event["reward_value"])
-                        self.msg_box.push_messages([
-                            "たからばこ を あけた！",
-                            f"{event['reward_value']} を てにいれた！"
-                        ])
+                        self.msg_box.push_messages(
+                            [
+                                "たからばこ を あけた！",
+                                f"{event['reward_value']} を てにいれた！",
+                            ]
+                        )
                 self.mode = Mode.MESSAGE
 
             case "INN":  # 宿屋
@@ -152,7 +163,7 @@ class FieldState(BaseState):
 
             case "SHOP":  # ショップ
                 self.sub_cursor = 0
-                self.mode = Mode.SHOP_MENU
+                self.mode = Mode.SHOP_MAIN_MENU
 
     def update(self):
         match self.mode:
@@ -188,7 +199,7 @@ class FieldState(BaseState):
                             self.current_map_id = warp["target_map"]
                             self.player_x = warp["target_x"]
                             self.player_y = warp["target_y"]
-                            
+
                             if "message" in warp:
                                 self.msg_box.push_messages([warp["message"]])
                                 self.mode = Mode.MESSAGE
@@ -197,7 +208,10 @@ class FieldState(BaseState):
                         # ★ 2. マップごとのエンカウント判定
                         cfg = MAP_CONFIG[self.current_map_id]
                         tile_type = self.get_tile_type(self.player_x, self.player_y)
-                        if tile_type == "GRASS" and random.random() < cfg["encount_rate"]:
+                        if (
+                            tile_type == "GRASS"
+                            and random.random() < cfg["encount_rate"]
+                        ):
                             self.trigger_battle()
 
                         # # タイルに応じたイベント
@@ -221,7 +235,11 @@ class FieldState(BaseState):
                         #         )
                         #         self.mode = "MESSAGE"
 
-                if pyxel.btnp(pyxel.KEY_Z) or pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.KEY_RETURN):
+                if (
+                    pyxel.btnp(pyxel.KEY_Z)
+                    or pyxel.btnp(pyxel.KEY_SPACE)
+                    or pyxel.btnp(pyxel.KEY_RETURN)
+                ):
                     self.interact()
 
                 # XキーまたはESCキーでメニューを開く
@@ -234,39 +252,76 @@ class FieldState(BaseState):
                 if not self.current_event:
                     self.mode = Mode.EXPLORE
                     return
-                
+
                 if pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.KEY_RIGHT):
                     self.sub_cursor = 1 - self.sub_cursor
 
                 if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
                     self.mode = Mode.EXPLORE
 
-                elif pyxel.btnp(pyxel.KEY_Z) or pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.KEY_RETURN):
+                elif (
+                    pyxel.btnp(pyxel.KEY_Z)
+                    or pyxel.btnp(pyxel.KEY_SPACE)
+                    or pyxel.btnp(pyxel.KEY_RETURN)
+                ):
                     p = self.app.player
                     price = self.current_event.get("price", 10)
 
                     if self.sub_cursor == 0:  # 「はい」選択
                         if p.gold < price:
-                            self.msg_box.push_messages(["ゴールド が たりないようです。"])
+                            self.msg_box.push_messages(
+                                ["ゴールド が たりないようです。"]
+                            )
                         else:
                             p.gold -= price
                             p.hp = p.max_hp
                             p.mp = p.max_mp
-                            self.msg_box.push_messages([
-                                "よく ねむれましたか？",
-                                "それでは いってらっしゃい！"
-                            ])
+                            self.msg_box.push_messages(
+                                ["よく ねむれましたか？", "それでは いってらっしゃい！"]
+                            )
                     else:  # 「いいえ」選択
                         self.msg_box.push_messages(["また おこしください。"])
 
                     self.mode = Mode.MESSAGE
 
             # --- ショップ（武器防具屋） ---
-            case Mode.SHOP_MENU:
+            case Mode.SHOP_MAIN_MENU:
+                if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.KEY_DOWN):
+                    self.sub_cursor = 1 - self.sub_cursor
+
+                # キャンセル (X / ESC) ➔ 店を出る
+                if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
+                    self.msg_box.push_messages(["また おこしください！"])
+                    self.return_mode = Mode.EXPLORE
+                    self.mode = Mode.MESSAGE
+
+                # 決定 (Z / SPACE / RETURN)
+                elif (
+                    pyxel.btnp(pyxel.KEY_Z)
+                    or pyxel.btnp(pyxel.KEY_SPACE)
+                    or pyxel.btnp(pyxel.KEY_RETURN)
+                ):
+                    if self.sub_cursor == 0:  # 「かう」
+                        self.shop_cursor = 0
+                        self.mode = Mode.SHOP_BUY_MENU
+                    else:  # 「うる」
+                        p = self.app.player
+                        if not p.items:
+                            self.msg_box.push_messages(
+                                ["うれる どうぐを もっていない！"]
+                            )
+                            self.return_mode = Mode.SHOP_MAIN_MENU
+                            self.mode = Mode.MESSAGE
+                        else:
+                            self.shop_cursor = 0
+                            self.mode = Mode.SHOP_SELL_MENU
+
+            # --- 道具屋: 「かう」商品選択 ---
+            case Mode.SHOP_BUY_MENU:
                 if not self.current_event:
                     self.mode = Mode.EXPLORE
                     return
-                
+
                 items = self.current_event["items"]
                 if pyxel.btnp(pyxel.KEY_UP):
                     self.sub_cursor = (self.sub_cursor - 1) % len(items)
@@ -274,14 +329,19 @@ class FieldState(BaseState):
                     self.sub_cursor = (self.sub_cursor + 1) % len(items)
 
                 if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
-                    self.mode = Mode.EXPLORE
+                    self.mode = Mode.SHOP_MAIN_MENU
 
-                elif pyxel.btnp(pyxel.KEY_Z) or pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.KEY_RETURN):
+                elif (
+                    pyxel.btnp(pyxel.KEY_Z)
+                    or pyxel.btnp(pyxel.KEY_SPACE)
+                    or pyxel.btnp(pyxel.KEY_RETURN)
+                ):
                     p = self.app.player
                     item = items[self.sub_cursor]
 
                     if p.gold < item["price"]:
                         self.msg_box.push_messages(["ゴールド が たりないようです。"])
+                        self.return_mode = Mode.SHOP_BUY_MENU
                     else:
                         p.gold -= item["price"]
                         # アイテム購入処理
@@ -293,10 +353,53 @@ class FieldState(BaseState):
                             case "ARMOR":
                                 p.defense += item["def"]  # 防御力直接上昇
 
-                        self.msg_box.push_messages([
-                            f"{item['name']} を かった！",
-                            "まいど ありがとうございます！"
-                        ])
+                        self.msg_box.push_messages(
+                            [
+                                f"{item['name']} を かった！",
+                                "まいど ありがとうございます！",
+                            ]
+                        )
+                        self.return_mode = Mode.SHOP_BUY_MENU
+                    self.mode = Mode.MESSAGE
+
+            # --- 道具屋: 「うる」所持品選択 ---
+            case Mode.SHOP_SELL_MENU:
+                p = self.app.player
+                if not p.items:
+                    self.mode = Mode.SHOP_MAIN_MENU
+                    return
+
+                if pyxel.btnp(pyxel.KEY_UP):
+                    self.shop_cursor = (self.shop_cursor - 1) % len(p.items)
+                elif pyxel.btnp(pyxel.KEY_DOWN):
+                    self.shop_cursor = (self.shop_cursor + 1) % len(p.items)
+
+                # 戻る
+                if pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE):
+                    self.mode = Mode.SHOP_MAIN_MENU
+
+                # 売却決定
+                elif (
+                    pyxel.btnp(pyxel.KEY_Z)
+                    or pyxel.btnp(pyxel.KEY_SPACE)
+                    or pyxel.btnp(pyxel.KEY_RETURN)
+                ):
+                    item_id = p.items.pop(self.shop_cursor)
+                    item_name = "やくそう" if item_id == "herb" else item_id
+
+                    # 買値の半額（定価10Gなら5G）で売却
+                    sell_price = 5 if item_id == "herb" else 10
+                    p.gold += sell_price
+
+                    self.msg_box.push_messages(
+                        [
+                            f"{item_name} を {sell_price}G で うった！",
+                            "ありがとう ございました！",
+                        ]
+                    )
+                    self.return_mode = (
+                        Mode.SHOP_SELL_MENU if p.items else Mode.SHOP_MAIN_MENU
+                    )
                     self.mode = Mode.MESSAGE
 
             # --- 2. メインメニュー選択 ---
@@ -465,7 +568,6 @@ class FieldState(BaseState):
         )
         # pyxel.text(4, 110, "MOVE: ARROW KEYS", 7)
 
-
         match self.mode:
             # メインメニュー、呪文、道具、ステータス選択中はいずれも「左側のメイン枠」を表示
             case Mode.MAIN_MENU | Mode.SPELL_MENU | Mode.ITEM_MENU | Mode.STATS_MENU:
@@ -480,15 +582,25 @@ class FieldState(BaseState):
                     case Mode.SPELL_MENU:
                         draw_window(70, 24, 110, 44)
                         for i, spell in enumerate(p.spells):
-                            pyxel.text(80, 30 + i * 10, f"{spell.name} M:{spell.mp_cost}", 7, self.app.font)
-                        pyxel.text(74, 30 + self.sub_cursor * 10, ">", 10, self.app.font)
+                            pyxel.text(
+                                80,
+                                30 + i * 10,
+                                f"{spell.name} M:{spell.mp_cost}",
+                                7,
+                                self.app.font,
+                            )
+                        pyxel.text(
+                            74, 30 + self.sub_cursor * 10, ">", 10, self.app.font
+                        )
 
                     case Mode.ITEM_MENU:
                         draw_window(70, 24, 110, 44)
                         for i, item in enumerate(p.items):
                             name = "やくそう" if item == "herb" else item
                             pyxel.text(80, 30 + i * 10, name, 7, self.app.font)
-                        pyxel.text(74, 30 + self.sub_cursor * 10, ">", 10, self.app.font)
+                        pyxel.text(
+                            74, 30 + self.sub_cursor * 10, ">", 10, self.app.font
+                        )
 
                     case Mode.STATS_MENU:
                         draw_window(70, 24, 110, 85)
@@ -499,29 +611,81 @@ class FieldState(BaseState):
                         pyxel.text(76, 70, f"けいけん: {p.exp}", 7, self.app.font)
                         pyxel.text(76, 80, f"ゴールド: {p.gold}", 7, self.app.font)
 
-
             case Mode.INN_CONFIRM:
                 if not self.current_event:
                     return
-                
+
                 draw_window(10, 130, 172, 48)
                 price = self.current_event.get("price", 10)
-                pyxel.text(18, 138, f"ひとばん {price}G ですが とまりますか？", 7, self.app.font)
-                
+                pyxel.text(
+                    18,
+                    138,
+                    f"ひとばん {price}G ですが とまりますか？",
+                    7,
+                    self.app.font,
+                )
+
                 # 「はい / いいえ」の描画
                 yes_color = 10 if self.sub_cursor == 0 else 7
                 no_color = 10 if self.sub_cursor == 1 else 7
                 pyxel.text(50, 156, "はい", yes_color, self.app.font)
                 pyxel.text(110, 156, "いいえ", no_color, self.app.font)
 
-            case Mode.SHOP_MENU:
+            case Mode.SHOP_MAIN_MENU:
+                # 1. 店員のあいさつウィンドウ
                 draw_window(10, 120, 172, 60)
+                pyxel.text(18, 128, "いらっしゃいませ！", 7, self.app.font)
+                pyxel.text(18, 140, "ここは どうぐや です。", 7, self.app.font)
+                pyxel.text(18, 152, "なにに しますか？", 7, self.app.font)
+
+                # 2. 「かう / うる」選択ウィンドウ
+                draw_window(10, 45, 60, 42)
+                pyxel.text(24, 52, "かう", 7, self.app.font)
+                pyxel.text(24, 66, "うる", 7, self.app.font)
+                cursor_y = 52 if self.sub_cursor == 0 else 66
+                pyxel.text(16, cursor_y, ">", 10, self.app.font)
+
+            # --- 道具屋: 「かう」商品リスト画面 ---
+            case Mode.SHOP_BUY_MENU:
                 if not self.current_event:
                     return
+                # 所持金ウィンドウ
+                draw_window(10, 24, 172, 22)
+                pyxel.text(18, 31, f"しょじきん: {p.gold}G", 7, self.app.font)
+
+                # 商品リストウィンドウ
+                draw_window(10, 50, 172, 70)
+
                 items = self.current_event["items"]
                 for i, item in enumerate(items):
-                    pyxel.text(24, 128 + i * 11, f"{item['name']} ({item['price']}G)", 7, self.app.font)
-                pyxel.text(16, 128 + self.sub_cursor * 11, ">", 10, self.app.font)
+                    pyxel.text(
+                        24,
+                        58 + i * 11,
+                        f"{item['name']} ({item['price']}G)",
+                        7,
+                        self.app.font,
+                    )
+                pyxel.text(16, 58 + self.sub_cursor * 11, ">", 10, self.app.font)
+
+            # --- 道具屋: 「うる」所持品リスト画面 ---
+            case Mode.SHOP_SELL_MENU:
+                # 所持金ウィンドウ
+                draw_window(10, 24, 172, 22)
+                pyxel.text(18, 31, f"しょじきん: {p.gold}G", 7, self.app.font)
+
+                # 所持品リストウィンドウ
+                draw_window(10, 50, 172, 70)
+                for i, item_id in enumerate(p.items):
+                    item_name = "やくそう" if item_id == "herb" else item_id
+                    sell_price = 5 if item_id == "herb" else 10
+                    pyxel.text(
+                        24,
+                        58 + i * 11,
+                        f"{item_name} (うる: {sell_price}G)",
+                        7,
+                        self.app.font,
+                    )
+                pyxel.text(16, 58 + self.shop_cursor * 11, ">", 10, self.app.font)
 
             # case Mode.MAIN_MENU:
             # # メインメニュー枠
@@ -562,6 +726,6 @@ class FieldState(BaseState):
             #     pyxel.text(70, 65, f"けいけん: {p.exp}", 7, self.app.font)
             #     pyxel.text(70, 75, f"ゴールド: {p.gold}", 7, self.app.font)
 
-                # メッセージウィンドウ
+            # メッセージウィンドウ
             case Mode.MESSAGE:
                 self.msg_box.draw()
