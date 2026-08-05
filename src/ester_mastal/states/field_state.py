@@ -42,6 +42,7 @@ class Mode(Enum):
     SHOP_MAIN_MENU = auto()  # ★ 道具屋あいさつ & 「かう / うる」選択
     SHOP_BUY_MENU = auto()  # ★ 「かう」商品リスト
     SHOP_SELL_MENU = auto()  # ★ 「うる」所持品リスト
+    START_BOSS_BATTLE = auto()  # ★ ボス会話終了後の戦闘開始フラグ
 
 
 class FieldState(BaseState):
@@ -166,6 +167,13 @@ class FieldState(BaseState):
             case "SHOP":  # ショップ
                 self.sub_cursor = 0
                 self.mode = Mode.SHOP_MAIN_MENU
+
+            # interact() 内の BOSS 処理
+            case "BOSS":
+                self.msg_box.push_messages(event["messages"])
+                self.pending_boss_id = event["monster_id"]
+                self.return_mode = Mode.START_BOSS_BATTLE
+                self.mode = Mode.MESSAGE
 
     def update(self):
         match self.mode:
@@ -521,9 +529,19 @@ class FieldState(BaseState):
 
             # --- 6. メッセージ表示中 ---
             case Mode.MESSAGE:
-                all_done = self.msg_box.update()
-                if all_done:
-                    self.mode = getattr(self, "return_mode", Mode.EXPLORE)
+                if self.msg_box.update():
+                    target_mode = getattr(self, "return_mode", Mode.EXPLORE)
+                    if target_mode == Mode.START_BOSS_BATTLE:
+                        # 会話終了直後にボス戦開始！
+                        monster = self.app.repo.create_monster(self.pending_boss_id)
+                        from .battle_state import BattleState
+
+                        self.app.change_state(BattleState(self.app, monster))
+                    else:
+                        self.mode = target_mode
+            # all_done = self.msg_box.update()
+            # if all_done:
+            #     self.mode = getattr(self, "return_mode", Mode.EXPLORE)
 
     def trigger_battle(self):
         from .battle_state import BattleState

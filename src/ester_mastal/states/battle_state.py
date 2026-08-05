@@ -2,6 +2,7 @@ from enum import Enum, auto
 
 import pyxel
 
+from ..audio import play_se
 from ..models.battle import BattleEngine
 from ..ui.message_box import MessageBox
 from ..ui.window import draw_window
@@ -41,10 +42,12 @@ class BattleState(BaseState):
                     or pyxel.btnp(pyxel.KEY_RETURN)
                 ):
                     if self.cursor == 0:  # たたかう
+                        play_se(0)  # ★ 攻撃SE
                         logs = self.engine.player_attack()
                         if self.engine.monster.is_alive:
                             # 敵の反撃
                             m_logs = self.engine.monster_turn()
+                            play_se(2)  # ★ ダメージSE
                             logs.extend(m_logs)
 
                         self.msg_box.push_messages(logs)
@@ -66,9 +69,14 @@ class BattleState(BaseState):
                     # 戦闘終了判定
                     if self.engine.is_finished:
                         if self.app.player.is_alive:
-                            from .field_state import FieldState
+                            if self.engine.monster.is_boss:
+                                from .ending_state import EndingState
 
-                            self.app.change_state(FieldState(self.app))
+                                self.app.change_state(EndingState(self.app))
+                            else:
+                                from .field_state import FieldState
+
+                                self.app.change_state(FieldState(self.app))
                         else:
                             from .game_over_state import GameOverState
 

@@ -9,7 +9,11 @@ class MapId(Enum):
 
 # ★ 各マップの Tilemap 0 上の位置 (u, v) と エンカウント率の定義
 MAP_CONFIG = {
-    MapId.WORLD: {"u": 0, "v": 0, "encount_rate": 0.0},
+    MapId.WORLD: {
+        "u": 0,
+        "v": 0,
+        "encount_rate": 0.0,  # エンカウント率　15%
+    },
     MapId.TOWN: {
         "u": 192,  # 例: Tilemap 0 上で横に 192px (24タイル) ズレた場所
         "v": 0,
@@ -18,7 +22,7 @@ MAP_CONFIG = {
     MapId.DUNGEON: {
         "u": 384,  # 例: Tilemap 0 上で横に 384px (48タイル) ズレた場所
         "v": 0,
-        "encount_rate": 0.25,
+        "encount_rate": 0.0,  # エンカウント率　25%
     },
 }
 

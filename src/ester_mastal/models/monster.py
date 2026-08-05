@@ -10,6 +10,7 @@ class Monster:
     defense: int
     exp_yield: int
     gold_yield: int
+    is_boss: bool = False
     sprite_u: int = 0
     sprite_v: int = 64
     sprite_w: int = 32

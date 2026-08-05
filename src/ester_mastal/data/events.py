@@ -41,4 +41,16 @@ MAP_EVENTS = {
         "reward_value": 50,
         "is_opened": False,
     },
+    # ダンジョンの最奥 (x=5, y=2) に竜王を配置
+    (MapId.DUNGEON, 5, 2): {
+        "type": "BOSS",
+        "name": "りゅうおう",
+        "messages": [
+            "よくぞ ここまで たどりついた！",
+            "わしが あくの しはいしゃ りゅうおう だ！",
+            "わしの てかとなれば せかいの はんぶんを やろう！",
+            "…と でも いうとおもったか！ くらえ！",
+        ],
+        "monster_id": "deramil",
+    },
 }

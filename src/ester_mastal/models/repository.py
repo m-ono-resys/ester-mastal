@@ -50,6 +50,7 @@ class GameRepository:
             defense=data["defense"],
             exp_yield=data["exp"],
             gold_yield=data["gold"],
+            is_boss=data.get("is_boss", False),
             sprite_u=sprite.get("u", 0),
             sprite_v=sprite.get("v", 32),
             sprite_w=sprite.get("w", 16),
@@ -69,14 +70,14 @@ class GameRepository:
 
     def create_initial_player(self, name: str) -> Player:
         """初期（LV1）のプレイヤーを生成"""
-        lv1_data = self.exp_table_data[0]
+        lv1_data = self.exp_table_data[4]
         return Player(
             name=name,
             max_hp=lv1_data["max_hp"],
             hp=lv1_data["max_hp"],
             max_mp=lv1_data["max_mp"],
             mp=lv1_data["max_mp"],
-            base_attack=lv1_data["base_attack"],
+            base_attack=lv1_data["base_attack"] + 100,
             base_defense=lv1_data["base_defense"],
             level=1,
             exp=10,

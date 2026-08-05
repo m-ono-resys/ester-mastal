@@ -43,6 +43,7 @@
     "attack": 48,
     "defense": 28,
     "exp": 200,
-    "gold": 500
+    "gold": 500,
+    "is_boss": true
   }
 }
