@@ -11,7 +11,7 @@
       "v": 64,
       "w": 32,
       "h": 32,
-      "colkey": 8
+      "colkey": 0
     }
   },
   "rarutaes": {
@@ -20,7 +20,14 @@
     "attack": 11,
     "defense": 6,
     "exp": 5,
-    "gold": 8
+    "gold": 8,
+    "sprite": {
+      "u": 32,
+      "v": 64,
+      "w": 32,
+      "h": 32,
+      "colkey": 0
+    }
   },
   "mentatol": {
     "name": "メンタートル",
