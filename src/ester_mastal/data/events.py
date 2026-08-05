@@ -11,7 +11,7 @@ MAP_EVENTS = {
         ],
     },
     # 宿屋 (x=1, y=3)
-    (MapId.TOWN, 1, 3): {"type": "INN", "name": "やどや", "price": 10},
+    (MapId.TOWN, 8, 8): {"type": "INN", "name": "やどや", "price": 10},
     # 武器屋 (x=4, y=2)
     (MapId.TOWN, 4, 2): {
         "type": "SHOP",

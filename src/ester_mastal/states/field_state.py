@@ -19,6 +19,8 @@ TILE_MAPPING = {
     (6, 2): "DEMON_CASTLE",
     (0, 6): "WALL",
     (2, 6): "TABLE",
+    (0, 8): "FLOOR",
+    (4, 6): "BED",
 }
 
 
