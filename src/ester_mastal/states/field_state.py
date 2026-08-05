@@ -611,8 +611,14 @@ class FieldState(BaseState):
                         pyxel.text(76, 40, f"レベル: {p.level}", 7, self.app.font)
                         pyxel.text(76, 50, f"こうげき: {p.attack}", 7, self.app.font)
                         pyxel.text(76, 60, f"しゅび: {p.defense}", 7, self.app.font)
-                        pyxel.text(76, 70, f"けいけん: {p.exp}", 7, self.app.font)
-                        pyxel.text(76, 80, f"ゴールド: {p.gold}", 7, self.app.font)
+                        pyxel.text(
+                            76, 70, f"ぶき: {p.equipped_weapon}", 7, self.app.font
+                        )
+                        pyxel.text(
+                            76, 80, f"よろい: {p.equipped_armor}", 7, self.app.font
+                        )
+                        pyxel.text(76, 90, f"けいけん: {p.exp}", 7, self.app.font)
+                        pyxel.text(76, 100, f"ゴールド: {p.gold}", 7, self.app.font)
 
             case Mode.INN_CONFIRM:
                 if not self.current_event:
