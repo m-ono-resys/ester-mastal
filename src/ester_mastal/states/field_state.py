@@ -267,22 +267,16 @@ class FieldState(BaseState):
                     or pyxel.btnp(pyxel.KEY_RETURN)
                 ):
                     p = self.app.player
-                    price = self.current_event.get("price", 10)
+                    # price = self.current_event.get("price", 10)
 
                     if self.sub_cursor == 0:  # 「はい」選択
-                        if p.gold < price:
-                            self.msg_box.push_messages(
-                                ["ゴールド が たりないようです。"]
-                            )
-                        else:
-                            p.gold -= price
-                            p.hp = p.max_hp
-                            p.mp = p.max_mp
-                            self.msg_box.push_messages(
-                                ["よく ねむれましたか？", "それでは いってらっしゃい！"]
-                            )
+                        p.hp = p.max_hp
+                        p.mp = p.max_mp
+                        self.msg_box.push_messages(
+                            ["よく ねむれたかい？", "いってらっしゃい！"]
+                        )
                     else:  # 「いいえ」選択
-                        self.msg_box.push_messages(["また おこしください。"])
+                        self.msg_box.push_messages(["むりしないでね"])
 
                     self.mode = Mode.MESSAGE
 
@@ -627,11 +621,11 @@ class FieldState(BaseState):
                     return
 
                 draw_window(10, 130, 172, 48)
-                price = self.current_event.get("price", 10)
+                # price = self.current_event.get("price", 10)
                 pyxel.text(
                     18,
                     138,
-                    f"ひとばん {price}G ですが とまりますか？",
+                    "おかあさん「おかえりなさい やすんでいくかい？」",
                     7,
                     self.app.font,
                 )
