@@ -5,6 +5,8 @@ import pyxel
 
 from ..data.events import MAP_EVENTS
 from ..data.maps import MAP_CONFIG, WARP_POINTS, MapId
+from ..ui.input import is_cancel, is_confirm, navigate_menu
+from ..ui.menu import draw_menu_window
 from ..ui.message_box import MessageBox
 from ..ui.window import draw_window
 from .base_state import BaseState
@@ -45,52 +47,6 @@ class Mode(Enum):
     SHOP_BUY_MENU = auto()
     SHOP_SELL_MENU = auto()
     START_BOSS_BATTLE = auto()
-
-
-# --- 入力＆UIヘルパー ---
-
-
-def is_confirm() -> bool:
-    """決定キー判定 (Z / SPACE / RETURN)"""
-    return (
-        pyxel.btnp(pyxel.KEY_Z)
-        or pyxel.btnp(pyxel.KEY_SPACE)
-        or pyxel.btnp(pyxel.KEY_RETURN)
-    )
-
-
-def is_cancel() -> bool:
-    """キャンセルキー判定 (X / ESCAPE)"""
-    return pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE)
-
-
-def navigate_menu(length: int, current_idx: int) -> int:
-    """上下キーによるメニューカーソル移動の共通化"""
-    if length <= 0:
-        return 0
-    if pyxel.btnp(pyxel.KEY_UP):
-        return (current_idx - 1) % length
-    elif pyxel.btnp(pyxel.KEY_DOWN):
-        return (current_idx + 1) % length
-    return current_idx
-
-
-def draw_menu_window(
-    x: int,
-    y: int,
-    w: int,
-    h: int,
-    items: list[str],
-    selected_idx: int,
-    font,
-    line_height: int = 11,
-):
-    """リスト選択式メニューウィンドウの共通描画"""
-    draw_window(x, y, w, h)
-    for i, item_text in enumerate(items):
-        pyxel.text(x + 14, y + 8 + i * line_height, item_text, 7, font)
-    if 0 <= selected_idx < len(items):
-        pyxel.text(x + 6, y + 8 + selected_idx * line_height, ">", 10, font)
 
 
 # --- 2. FieldState メインクラス ---
