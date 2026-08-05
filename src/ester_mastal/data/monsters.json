@@ -44,6 +44,13 @@
     "defense": 28,
     "exp": 200,
     "gold": 500,
-    "is_boss": true
+    "is_boss": true,
+    "sprite": {
+      "u": 0,
+      "v": 96,
+      "w": 48,
+      "h": 64,
+      "colkey": 0
+    }
   }
 }
