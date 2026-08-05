@@ -539,9 +539,6 @@ class FieldState(BaseState):
                         self.app.change_state(BattleState(self.app, monster))
                     else:
                         self.mode = target_mode
-            # all_done = self.msg_box.update()
-            # if all_done:
-            #     self.mode = getattr(self, "return_mode", Mode.EXPLORE)
 
     def trigger_battle(self):
         from .battle_state import BattleState
@@ -558,12 +555,6 @@ class FieldState(BaseState):
         cfg = MAP_CONFIG[self.current_map_id]
         pyxel.bltm(0, 16, 0, cfg["u"], cfg["v"], 192, 176)
 
-        # # 簡易なグリッド背景描画
-        # for x in range(0, 160, 8):
-        #     pyxel.line(x, 0, x, 120, 11)
-        # for y in range(0, 120, 8):
-        #     pyxel.line(0, y, 160, y, 11)
-
         # ★ 2. 16x16 勇者キャラクターの描画
         player_px = self.player_x * self.tile_size
         player_py = self.player_y * self.tile_size + 16
@@ -572,18 +563,12 @@ class FieldState(BaseState):
         # (最後の引数 0 は黒色を透明色として透過描画する指定です)
         pyxel.blt(player_px, player_py, 0, 0, 0, 16, 16, 8)
 
-        # # プレイヤーの描画（ドットまたは文字）
-        # px = self.player_x * self.grid_size
-        # py = self.player_y * self.grid_size
-        # pyxel.rect(px, py, 8, 8, 8)  # 赤い四角をプレイヤーとする
-
         # 簡易UI
         pyxel.rect(0, 0, 192, 16, 0)
         p = self.app.player
         pyxel.text(
             6, 4, f"HERO LV:{p.level} HP:{p.hp}/{p.max_hp} G:{p.gold}", 7, self.app.font
         )
-        # pyxel.text(4, 110, "MOVE: ARROW KEYS", 7)
 
         match self.mode:
             # メインメニュー、呪文、道具、ステータス選択中はいずれも「左側のメイン枠」を表示
@@ -709,45 +694,6 @@ class FieldState(BaseState):
                         self.app.font,
                     )
                 pyxel.text(16, 58 + self.shop_cursor * 11, ">", 10, self.app.font)
-
-            # case Mode.MAIN_MENU:
-            # # メインメニュー枠
-            #     draw_window(10, 20, 50, 42)
-            #     pyxel.text(20, 25, "じゅもん", 7, self.app.font)
-            #     pyxel.text(20, 35, "つよさ", 7, self.app.font)
-            #     pyxel.text(20, 45, "どうぐ", 7, self.app.font)
-            #     pyxel.text(14, 25 + self.cursor * 10, ">", 10, self.app.font)
-
-            # # 呪文サブメニュー
-            # case Mode.SPELL_MENU:
-            #     draw_window(65, 20, 85, 42)
-            #     for i, spell in enumerate(p.spells):
-            #         pyxel.text(
-            #             75,
-            #             25 + i * 10,
-            #             f"{spell.name} M:{spell.mp_cost}",
-            #             7,
-            #             self.app.font,
-            #         )
-            #     pyxel.text(69, 25 + self.sub_cursor * 10, ">", 10, self.app.font)
-
-            # # 道具サブメニュー
-            # case Mode.ITEM_MENU:
-            #     draw_window(65, 20, 85, 42)
-            #     for i, item in enumerate(p.items):
-            #         name = "やくそう" if item == "herb" else item
-            #         pyxel.text(75, 25 + i * 10, name, 7, self.app.font)
-            #     pyxel.text(69, 25 + self.sub_cursor * 10, ">", 10, self.app.font)
-
-            # # つよさ（詳細ステータス）画面
-            # case Mode.STATS_MENU:
-            #     draw_window(65, 20, 85, 80)
-            #     pyxel.text(70, 25, f"なに: {p.name}", 7, self.app.font)
-            #     pyxel.text(70, 35, f"レベル: {p.level}", 7, self.app.font)
-            #     pyxel.text(70, 45, f"こうげき: {p.attack}", 7, self.app.font)
-            #     pyxel.text(70, 55, f"しゅび: {p.defense}", 7, self.app.font)
-            #     pyxel.text(70, 65, f"けいけん: {p.exp}", 7, self.app.font)
-            #     pyxel.text(70, 75, f"ゴールド: {p.gold}", 7, self.app.font)
 
             # メッセージウィンドウ
             case Mode.MESSAGE:
