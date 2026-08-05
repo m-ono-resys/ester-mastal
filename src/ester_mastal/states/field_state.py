@@ -299,7 +299,10 @@ class FieldState(BaseState):
                 self.mode = Mode.INN_CONFIRM
             case "SHOP":
                 self.sub_cursor = 0
-                self.mode = Mode.SHOP_MAIN_MENU
+                greeting = event.get(
+                    "greeting", "いらっしゃいませ！\nなにに しますか？"
+                )
+                self.show_message([greeting], return_mode=Mode.SHOP_MAIN_MENU)
             case "BOSS":
                 self.pending_boss_id = event["monster_id"]
                 self.show_message(event["messages"], return_mode=Mode.START_BOSS_BATTLE)
@@ -539,10 +542,7 @@ class FieldState(BaseState):
         pyxel.text(110, 156, "いいえ", no_col, self.app.font)
 
     def _draw_shop_main_menu(self):
-        draw_window(10, 120, 172, 60)
-        pyxel.text(18, 128, "いらっしゃいませ！", 7, self.app.font)
-        pyxel.text(18, 140, "ここは どうぐや です。", 7, self.app.font)
-        pyxel.text(18, 152, "なにに しますか？", 7, self.app.font)
+        self.msg_box.draw()
         draw_menu_window(
             10, 45, 60, 42, ["かう", "うる"], self.sub_cursor, self.app.font
         )

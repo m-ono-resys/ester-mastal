@@ -15,7 +15,8 @@ MAP_EVENTS = {
     # 武器屋 (x=4, y=2)
     (MapId.TOWN, 4, 2): {
         "type": "SHOP",
-        "name": "ぶきや",
+        "name": "どうぐや",
+        "greeting": "いらっしゃいませ！\nここは どうぐや です。\nなにに しますか？",
         "items": [
             {"id": "herb", "name": "やくそう", "price": 10, "type": "ITEM"},
             {
