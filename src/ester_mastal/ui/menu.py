@@ -6,7 +6,7 @@ from .input import is_confirm, navigate_menu
 from .window import draw_window
 
 
-class EnumManu[T: Enum]:
+class EnumMenu[T: Enum]:
     def __init__(
         self,
         x: int,
