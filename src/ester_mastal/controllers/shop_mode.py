@@ -3,11 +3,12 @@ from enum import Enum, auto
 import pyxel
 
 from ..ui.input import is_cancel, is_confirm, navigate_menu
-from ..ui.menu import EnumManu
+from ..ui.menu import EnumMenu
 from ..ui.window import draw_window
 
 
 class ShopState(Enum):
+    GREETING = auto()
     BUY = "かう"
     SELL = "うる"
     EXIT = "やめる"
@@ -21,8 +22,12 @@ class ShopMode:
         self.sub_cursor = 0
         self.shop_cursor = 0
         self.current_event = None
-        self.shop_main_menu = EnumManu(
-            x=50, y=60, w=60, choices=list(ShopState), font=font
+        self.shop_main_menu = EnumMenu(
+            x=50,
+            y=60,
+            w=60,
+            choices=[ShopState.BUY, ShopState.SELL, ShopState.EXIT],
+            font=font,
         )
 
     def start(self, event):
@@ -30,6 +35,20 @@ class ShopMode:
         self.current_event = event
         self.sub_cursor = 0
         self.shop_cursor = 0
+
+    def update(self) -> bool:
+        match self.shop_main_menu.update():
+            case ShopState.BUY:
+                # 買う処理
+                return False
+
+            case ShopState.SELL:
+                # 売る処理
+                return False
+
+            case ShopState.EXIT | None | _:
+                self.msg_box.push_messages(["また おこしください！"])
+                return True
 
     # --- 「かう / うる」選択の処理 ---
     def update_main(self) -> str:  # 次のモード名を文字列またはEnumで返す
