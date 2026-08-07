@@ -2,7 +2,7 @@ import pyxel
 
 from ester_mastal.audio import init_audio
 from ester_mastal.models.repository import GameRepository
-from ester_mastal.states.title_state import TitleState
+from ester_mastal.states.title_scene import TitleState
 
 
 class App:

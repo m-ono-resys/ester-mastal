@@ -9,7 +9,7 @@ from ..ui.input import is_cancel, is_confirm, navigate_menu
 from ..ui.menu import draw_menu_window
 from ..ui.message_box import MessageBox
 from ..ui.window import draw_window
-from .base_state import BaseState
+from .base_scene import BaseScene
 
 # --- 1. 定数・共通ヘルパー関数 (DRY原則) ---
 
@@ -52,7 +52,7 @@ class Mode(Enum):
 # --- 2. FieldState メインクラス ---
 
 
-class FieldState(BaseState):
+class FieldScene(BaseScene):
     def __init__(self, app):
         super().__init__(app)
 
@@ -434,14 +434,14 @@ class FieldState(BaseState):
         if self.msg_box.update():
             if self.return_mode == Mode.START_BOSS_BATTLE:
                 monster = self.app.repo.create_monster(self.pending_boss_id)
-                from .battle_state import BattleState
+                from .battle_scene import BattleState
 
                 self.app.change_state(BattleState(self.app, monster))
             else:
                 self.mode = self.return_mode
 
     def trigger_battle(self):
-        from .battle_state import BattleState
+        from .battle_scene import BattleState
 
         monster_id = random.choice(["entenstr", "rarutaes"])
         monster = self.app.repo.create_monster(monster_id)

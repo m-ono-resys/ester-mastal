@@ -1,14 +1,14 @@
 import pyxel
 
-from .base_state import BaseState
+from .base_scene import BaseScene
 
 
-class GameOverState(BaseState):
+class GameOverScene(BaseScene):
     def update(self):
         if pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.KEY_Z):
-            from .title_state import TitleState
+            from .title_scene import TitleScene
 
-            self.app.change_state(TitleState(self.app))
+            self.app.change_state(TitleScene(self.app))
 
     def draw(self):
         pyxel.cls(0)

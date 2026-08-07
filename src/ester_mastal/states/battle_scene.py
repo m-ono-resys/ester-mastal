@@ -6,7 +6,7 @@ from ..audio import play_se
 from ..models.battle import BattleEngine
 from ..ui.message_box import MessageBox
 from ..ui.window import draw_window
-from .base_state import BaseState
+from .base_scene import BaseScene
 
 
 class States(Enum):
@@ -14,7 +14,7 @@ class States(Enum):
     COMMAND = auto()
 
 
-class BattleState(BaseState):
+class BattleScene(BaseScene):
     def __init__(self, app, monster):
         super().__init__(app)
         self.engine = BattleEngine(self.app.player, monster, self.app.repo)
@@ -70,17 +70,17 @@ class BattleState(BaseState):
                     if self.engine.is_finished:
                         if self.app.player.is_alive:
                             if self.engine.monster.is_boss:
-                                from .ending_state import EndingState
+                                from .ending_scene import EndingScene
 
-                                self.app.change_state(EndingState(self.app))
+                                self.app.change_state(EndingScene(self.app))
                             else:
-                                from .field_state import FieldState
+                                from .field_scene import FieldScene
 
-                                self.app.change_state(FieldState(self.app))
+                                self.app.change_state(FieldScene(self.app))
                         else:
-                            from .game_over_state import GameOverState
+                            from .game_over_scene import GameOverScene
 
-                            self.app.change_state(GameOverState(self.app))
+                            self.app.change_state(GameOverScene(self.app))
                     else:
                         self.state = States.COMMAND
 

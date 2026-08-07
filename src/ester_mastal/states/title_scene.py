@@ -1,17 +1,17 @@
 import pyxel
 
-from .base_state import BaseState
+from .base_scene import BaseScene
 
 
-class TitleState(BaseState):
+class TitleScene(BaseScene):
     def update(self):
         # SPACEキーまたはZキーでゲーム開始
         if pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.KEY_Z):
-            from .field_state import FieldState
+            from .field_scene import FieldScene
 
             # プレイヤー初期化してフィールドへ
             self.app.player = self.app.repo.create_initial_player("ゆうしゃ")
-            self.app.change_state(FieldState(self.app))
+            self.app.change_state(FieldScene(self.app))
 
     def draw(self):
         pyxel.cls(0)  # 黒でクリア

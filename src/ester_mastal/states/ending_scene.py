@@ -1,12 +1,11 @@
-# states/ending_state.py
 import pyxel
 
 from ..audio import play_se
 from ..ui.window import draw_window
-from .base_state import BaseState
+from .base_scene import BaseScene
 
 
-class EndingState(BaseState):
+class EndingScene(BaseScene):
     def __init__(self, app):
         super().__init__(app)
         play_se(3)  # ★ 勝利ファンファーレ再生！
@@ -20,9 +19,9 @@ class EndingState(BaseState):
             or pyxel.btnp(pyxel.KEY_SPACE)
             or pyxel.btnp(pyxel.KEY_RETURN)
         ):
-            from .title_state import TitleState
+            from .title_scene import TitleScene
 
-            self.app.change_state(TitleState(self.app))
+            self.app.change_state(TitleScene(self.app))
 
     def draw(self):
         pyxel.cls(0)
