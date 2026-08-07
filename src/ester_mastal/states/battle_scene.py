@@ -4,8 +4,9 @@ import pyxel
 
 from ..audio import play_se
 from ..models.battle import BattleEngine
-from ..ui.message_box import MessageBox
-from ..ui.window import draw_window
+from ..ui.message_window import MessageWindow
+
+# from ..ui.window import draw_window
 from .base_scene import BaseScene
 
 
@@ -23,10 +24,8 @@ class BattleScene(BaseScene):
             States.MESSAGE
         )  # 最初は「〇〇があらわれた！」表示からスタート
 
-        self.msg_box = MessageBox(
-            x=10, y=120, width=172, height=60, speed=2, font=self.app.font
-        )
-        self.msg_box.push_messages([f"{monster.name} が あらわれた！"])
+        self.msg_window = MessageWindow(app, x=10, y=120, width=172, height=60, speed=2)
+        self.msg_window.push_messages([f"{monster.name} が あらわれた！"])
 
     def update(self):
         match self.state:
@@ -50,7 +49,7 @@ class BattleScene(BaseScene):
                             play_se(2)  # ★ ダメージSE
                             logs.extend(m_logs)
 
-                        self.msg_box.push_messages(logs)
+                        self.msg_window.push_messages(logs)
                         self.state = States.MESSAGE
 
                     elif self.cursor == 1:  # にげる
@@ -59,11 +58,11 @@ class BattleScene(BaseScene):
                             m_logs = self.engine.monster_turn()
                             logs.extend(m_logs)
 
-                        self.msg_box.push_messages(logs)
+                        self.msg_window.push_messages(logs)
                         self.state = States.MESSAGE
 
             case States.MESSAGE:
-                is_all_done = self.msg_box.update()
+                is_all_done = self.msg_window.update()
 
                 if is_all_done:
                     # 戦闘終了判定
@@ -94,7 +93,7 @@ class BattleScene(BaseScene):
         box_y = 12
 
         # 二重枠線の描画
-        draw_window(box_x, box_y, box_w, box_h)
+        # draw_window(box_x, box_y, box_w, box_h)
 
         # モンスターのスプライトを枠の「完全な中央」に描画
         sprite_x = box_x + (box_w - m.sprite_w) // 2
@@ -131,4 +130,4 @@ class BattleScene(BaseScene):
 
             case States.MESSAGE:
                 # メッセージウィンドウ（テキスト表示時）
-                self.msg_box.draw()
+                self.msg_window.draw()

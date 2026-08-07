@@ -10,7 +10,7 @@ class TitleScene(BaseScene):
             from .field_scene import FieldScene
 
             # プレイヤー初期化してフィールドへ
-            self.app.player = self.app.repo.create_initial_player("ゆうしゃ")
+            # self.app.player = self.app.repo.create_initial_player("ゆうしゃ")
             self.app.change_state(FieldScene(self.app))
 
     def draw(self):

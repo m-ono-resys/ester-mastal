@@ -1,5 +1,6 @@
 import pyxel
 
+
 def draw_window(x: int, y: int, width: int, height: int, bg_col: int = 0, border_col: int = 7):
     """
     ドラクエ風の黒背景＋二重白枠ウィンドウを描画する

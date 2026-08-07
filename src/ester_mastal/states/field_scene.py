@@ -3,11 +3,13 @@ from enum import Enum, auto
 
 import pyxel
 
+from ester_mastal.ui.hud_status_window import HudStatusWindow
+
 from ..data.events import MAP_EVENTS
 from ..data.maps import MAP_CONFIG, WARP_POINTS, MapId
 from ..ui.input import is_cancel, is_confirm, navigate_menu
 from ..ui.menu import draw_menu_window
-from ..ui.message_box import MessageBox
+from ..ui.message_window import MessageWindow
 from ..ui.window import draw_window
 from .base_scene import BaseScene
 
@@ -56,6 +58,8 @@ class FieldScene(BaseScene):
     def __init__(self, app):
         super().__init__(app)
 
+        self.hud = HudStatusWindow(app, 0, 0, 192, 16)
+
         self.tile_size = 16
         self.player_x = 1
         self.player_y = 1
@@ -71,8 +75,13 @@ class FieldScene(BaseScene):
         self.current_event = None
         self.pending_boss_id = None
 
-        self.msg_box = MessageBox(
-            x=10, y=130, width=172, height=50, speed=2, font=self.app.font
+        self.msg_box = MessageWindow(
+            app=app,
+            x=10,
+            y=130,
+            width=172,
+            height=50,
+            speed=2,
         )
 
         # ★ Dispatcher テーブル（モードと更新/描画メソッドのバインディング）
@@ -161,11 +170,12 @@ class FieldScene(BaseScene):
         )
 
         # 2. 上部HUD
-        draw_window(0, 0, 192, 16)
-        p = self.app.player
-        pyxel.text(
-            6, 4, f"HERO LV:{p.level} HP:{p.hp}/{p.max_hp} G:{p.gold}", 7, self.app.font
-        )
+        self.hud.draw()
+        # draw_window(0, 0, 192, 16)
+        # p = self.app.player
+        # pyxel.text(
+        #     6, 4, f"HERO LV:{p.level} HP:{p.hp}/{p.max_hp} G:{p.gold}", 7, self.app.font
+        # )
 
         # 3. 各モード別UIの描画（Dispatcher）
         handler = self._draw_handlers.get(self.mode)
@@ -434,18 +444,18 @@ class FieldScene(BaseScene):
         if self.msg_box.update():
             if self.return_mode == Mode.START_BOSS_BATTLE:
                 monster = self.app.repo.create_monster(self.pending_boss_id)
-                from .battle_scene import BattleState
+                from .battle_scene import BattleScene
 
-                self.app.change_state(BattleState(self.app, monster))
+                self.app.change_state(BattleScene(self.app, monster))
             else:
                 self.mode = self.return_mode
 
     def trigger_battle(self):
-        from .battle_scene import BattleState
+        from .battle_scene import BattleScene
 
         monster_id = random.choice(["entenstr", "rarutaes"])
         monster = self.app.repo.create_monster(monster_id)
-        self.app.change_state(BattleState(self.app, monster))
+        self.app.change_state(BattleScene(self.app, monster))
 
     # --- モード別 Draw ハンドラー群 ---
 
