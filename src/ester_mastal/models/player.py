@@ -1,12 +1,7 @@
 from dataclasses import dataclass, field
 
-
-@dataclass
-class Spell:
-    name: str
-    mp_cost: int
-    heal_amount: int = 0
-    damage_amount: int = 0
+from .item import Item, ItemCode, ItemType
+from .spell import SpellCode
 
 
 @dataclass
@@ -21,47 +16,67 @@ class Player:
     level: int = 1
     exp: int = 0
     gold: int = 0
-    spells: list[Spell] = field(default_factory=list)
-    items: list[str] = field(default_factory=list)
+    spells: list[SpellCode] = field(default_factory=list)
+    inventory: list[ItemCode] = field(default_factory=list)
 
     # ★ 装備品データ（初期は何も装備していない）
-    equipped_weapon: str = "なし"
-    equipped_armor: str = "なし"
-    weapon_atk: int = 0  # 武器による加算攻撃力
-    armor_def: int = 0  # 防具による加算防御力
+    equipped_weapon: Item | None = None
+    equipped_armor: Item | None = None
 
     # ★ 実際の攻撃力（素の攻撃力 ＋ 武器の攻撃力）
     @property
     def attack(self) -> int:
-        return self.base_attack + self.weapon_atk
+        if self.equipped_weapon and self.equipped_weapon.item_type == ItemType.WEAPON:
+            return self.base_attack + self.equipped_weapon.effect_value
+        return self.base_attack
 
     # ★ 実際の防御力（素の防御力 ＋ 防具の防御力）
     @property
     def defense(self) -> int:
-        return self.base_defense + self.armor_def
+        if self.equipped_armor and self.equipped_armor.item_type == ItemType.ARMOR:
+                    return self.base_defense + self.equipped_armor.effect_value
+        return self.base_defense
 
-    def equip_weapon(self, name: str, atk: int):
-        """新しい武器に付け替える（上書き）"""
-        self.equipped_weapon = name
-        self.weapon_atk = atk
+    def equip_weapon(self, weapon: Item) -> bool:
+        """武器を装備する。成功すれば True"""
+        if weapon.item_type == ItemType.WEAPON:
+            self.equipped_weapon = weapon
+            return True
+        return False
 
-    def equip_armor(self, name: str, def_val: int):
-        """新しい防具に付け替える（上書き）"""
-        self.equipped_armor = name
-        self.armor_def = def_val
+    def equip_armor(self, armor: Item) -> bool:
+        """防具を装備する。成功すれば True"""
+        if armor.item_type == ItemType.ARMOR:
+            self.equipped_armor = armor
+            return True
+        return False
 
     @property
     def is_alive(self) -> bool:
         return self.hp > 0
 
-    def heal(self, amount: int) -> int:
+    def heal_hp(self, amount: int) -> int:
         """HPを回復し、実際に回復した値を返す"""
         old_hp = self.hp
         self.hp = min(self.max_hp, self.hp + amount)
         return self.hp - old_hp
+
+    def heal_mp(self, amount: int) -> int:
+        """MPを回復し、実際に回復した値を返す"""
+        old_mp = self.mp
+        self.mp = min(self.max_mp, self.mp + amount)
+        return self.hp - old_mp
 
     def take_damage(self, amount: int) -> int:
         """ダメージを受け、実際に受けたダメージを返す"""
         damage = max(1, amount)
         self.hp = max(0, self.hp - damage)
         return damage
+
+    # --- インベントリ操作 ---
+    def has_item(self, item_code: ItemCode) -> bool:
+        return item_code in self.inventory
+
+    def remove_item(self, item_code: ItemCode) -> None:
+        if self.has_item(item_code):
+            self.inventory.remove(item_code)

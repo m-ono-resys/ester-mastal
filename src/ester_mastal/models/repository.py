@@ -1,8 +1,12 @@
 import json
 from pathlib import Path
 
+from ester_mastal.data.items import ItemCode
+from ester_mastal.data.spells import SPELL_MASTER, SpellCode
+
 from .monster import Monster
-from .player import Player, Spell
+from .player import Player
+from .spell import Spell
 
 
 class GameRepository:
@@ -20,7 +24,7 @@ class GameRepository:
         else:
             self.data_dir = Path(data_dir)
         self.monsters_data = self._load_json("monsters.json")
-        self.spells_data = self._load_json("spells.json")
+        self.spells_data = SPELL_MASTER
         self.exp_table_data = self._load_json("exp_table.json")
         self.items_data = self._load_json("items.json")
 
@@ -58,15 +62,9 @@ class GameRepository:
             colkey=sprite.get("colkey", 0),
         )
 
-    def get_spell(self, spell_id: str) -> Spell:
+    def get_spell(self, spell_id: SpellCode) -> Spell:
         """IDから呪文インスタンスを取得"""
-        data = self.spells_data[spell_id]
-        return Spell(
-            name=data["name"],
-            mp_cost=data["mp_cost"],
-            heal_amount=data["heal_amount"],
-            damage_amount=data["damage_amount"],
-        )
+        return self.spells_data[spell_id]
 
     def create_initial_player(self, name: str) -> Player:
         """初期（LV1）のプレイヤーを生成"""
@@ -82,7 +80,7 @@ class GameRepository:
             level=1,
             exp=10,
             gold=200,
-            items=["herb", "herb"],
+            inventory=[ItemCode.POTION],
         )
 
     def check_level_up(self, player: Player) -> list[str]:
@@ -102,12 +100,12 @@ class GameRepository:
                 logs.append(f"{player.name} は レベル {player.level} に あがった！")
 
                 # 習得呪文があるかチェック
-                spell_id = entry.get("learn_spell")
-                if spell_id:
-                    spell = self.get_spell(spell_id)
-                    player.spells.append(spell)
-                    logs.append(
-                        f"{player.name} は {spell.name} の じゅもんを おぼえた！"
-                    )
+                # spell_id = entry.get("learn_spell")
+                # if spell_id:
+                #     spell = self.get_spell(spell_id)
+                #     player.spells.append(spell)
+                #     logs.append(
+                #         f"{player.name} は {spell.name} の じゅもんを おぼえた！"
+                #     )
 
         return logs

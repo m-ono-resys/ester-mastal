@@ -476,7 +476,7 @@ class FieldState(BaseState):
                     f"なに: {p.name}",
                     f"レベル: {p.level}",
                     f"こうげき: {p.attack}",
-                    f"しゅび: {p.defense}",
+                    f"まもり: {p.defense}",
                     f"ぶき: {p.equipped_weapon}",
                     f"よろい: {p.equipped_armor}",
                     f"けいけん: {p.exp}",
