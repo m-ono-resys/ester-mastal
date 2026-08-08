@@ -2,8 +2,8 @@ import pyxel
 
 from ester_mastal.audio import init_audio
 from ester_mastal.models.repository import GameRepository
-from ester_mastal.states.base_scene import BaseScene
-from ester_mastal.states.title_scene import TitleScene
+from ester_mastal.scenes.base_scene import BaseScene
+from ester_mastal.scenes.title_scene import TitleScene
 
 
 class App:
