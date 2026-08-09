@@ -1,6 +1,13 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pyxel
 
 from .base_window import BaseWindow
+
+if TYPE_CHECKING:
+    from .window_manager import WindowManager
 
 
 class MessageWindow(BaseWindow):
@@ -11,9 +18,10 @@ class MessageWindow(BaseWindow):
         y: int,
         width: int,
         height: int,
+        messages: list[str] | None = None,  # ★ __init__ で初期メッセージを直接受け取れるように拡張
         speed: int = 2,
-        max_chars_per_line: int = 18,  # 1行あたりの最大文字数
-        max_lines_per_page: int = 2,   # 1ページあたりの最大行数（ドラクエは2行）
+        max_chars_per_line: int = 18,
+        max_lines_per_page: int = 2,# ★ ウィンドウが閉じた時のコールバック機能
     ):
         super().__init__(app, x, y, width, height)
         self.speed = speed
@@ -26,6 +34,10 @@ class MessageWindow(BaseWindow):
         self.frame_timer = 0
         self.is_waiting_input = False
         self.is_completed = True
+
+        # 初期メッセージが指定されている場合は即座にキューに追加
+        if messages:
+            self.push_messages(messages)
 
     def _split_into_pages(self, text: str) -> list[str]:
         """長文を1行18文字・1ページ2行に自動分割する関数"""
@@ -66,17 +78,22 @@ class MessageWindow(BaseWindow):
             self.is_completed = True
             self.is_waiting_input = False
 
-    def handle_input(self, window_manager):
-        """入力処理（決定キーによる文字送り・ページ送り・終了処理）"""
+    def handle_input(self, window_manager: WindowManager):
+        """入力処理とタイマーアニメーション更新（WindowManager.update から呼ばれる）"""
+        # ★ 1. キーを押していなくても文字送りアニメーションを毎フレーム進行させる
+        self.update_window()
+
         if self.is_completed:
             return
 
+        # 2. 決定キーが押された時の処理
         if self.is_confirm():
-            # 1. 文字送り中の場合は「一括全表示（早送り）」
+            # 文字送り中の場合は「一括全表示（早送り）」
             if self.visible_char_count < len(self.current_text):
                 self.visible_char_count = len(self.current_text)
+                self.is_waiting_input = True
 
-            # 2. 入力待ち中の場合は「次のページへ」
+            # 入力待ち中の場合は「次のページへ」
             elif self.is_waiting_input:
                 self._next_message()
                 # すべてのメッセージを表示し終えたらウィンドウを閉じる

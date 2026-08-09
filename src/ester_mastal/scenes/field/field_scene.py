@@ -3,15 +3,18 @@ from enum import Enum, auto
 
 import pyxel
 
-from ester_mastal.ui.hud_status_window import HudStatusWindow
-
-from ..data.events import MAP_EVENTS
-from ..data.maps import MAP_CONFIG, WARP_POINTS, MapId
-from ..ui.input import is_cancel, is_confirm, navigate_menu
-from ..ui.menu import draw_menu_window
-from ..ui.message_window import MessageWindow
-from ..ui.window import draw_window
-from .base_scene import BaseScene
+from ...data.events import MAP_EVENTS
+from ...data.maps import MAP_CONFIG, WARP_POINTS, MapId
+from ...ui.hud_status_window import HudStatusWindow
+from ...ui.input import is_cancel, is_confirm, navigate_menu
+from ...ui.menu import draw_menu_window
+from ...ui.message_window import MessageWindow
+from ...ui.window import draw_window
+from ...ui.window_manager import WindowManager
+from ..base_scene import BaseScene
+from .mode.base_mode import BaseMode, FieldContext
+from .mode.explore_mode import ExploreMode
+from .mode.signals import PopSignal, PushSignal
 
 # --- 1. 定数・共通ヘルパー関数 (DRY原則) ---
 
@@ -66,49 +69,59 @@ class FieldScene(BaseScene):
         self.direction: Direction = Direction.DOWN
         self.current_map_id: MapId = MapId.WORLD
 
-        self.mode: Mode = Mode.EXPLORE
-        self.return_mode: Mode = Mode.EXPLORE
-        self.cursor = 0
-        self.sub_cursor = 0
-        self.shop_cursor = 0
+        # self.mode: Mode = Mode.EXPLORE
+        # self.return_mode: Mode = Mode.EXPLORE
+        # self.cursor = 0
+        # self.sub_cursor = 0
+        # self.shop_cursor = 0
 
         self.current_event = None
         self.pending_boss_id = None
 
-        self.msg_box = MessageWindow(
-            app=app,
-            x=10,
-            y=130,
-            width=172,
-            height=50,
-            speed=2,
-        )
+        # self.msg_box = MessageWindow(
+        #     app=app,
+        #     x=10,
+        #     y=130,
+        #     width=172,
+        #     height=50,
+        #     speed=2,
+        # )
+
+        self.window_manager = WindowManager()
+
+        self.context = FieldContext(scene=self)
+
+        self.mode_stack: list[BaseMode] = [ExploreMode(self.context)]
 
         # ★ Dispatcher テーブル（モードと更新/描画メソッドのバインディング）
-        self._update_handlers = {
-            Mode.EXPLORE: self._update_explore,
-            Mode.MAIN_MENU: self._update_main_menu,
-            Mode.SPELL_MENU: self._update_spell_menu,
-            Mode.ITEM_MENU: self._update_item_menu,
-            Mode.STATS_MENU: self._update_stats_menu,
-            Mode.INN_CONFIRM: self._update_inn_confirm,
-            Mode.SHOP_MAIN_MENU: self._update_shop_main_menu,
-            Mode.SHOP_BUY_MENU: self._update_shop_buy_menu,
-            Mode.SHOP_SELL_MENU: self._update_shop_sell_menu,
-            Mode.MESSAGE: self._update_message,
-        }
+        # self._update_handlers = {
+        #     Mode.EXPLORE: self._update_explore,
+        #     Mode.MAIN_MENU: self._update_main_menu,
+        #     Mode.SPELL_MENU: self._update_spell_menu,
+        #     Mode.ITEM_MENU: self._update_item_menu,
+        #     Mode.STATS_MENU: self._update_stats_menu,
+        #     Mode.INN_CONFIRM: self._update_inn_confirm,
+        #     Mode.SHOP_MAIN_MENU: self._update_shop_main_menu,
+        #     Mode.SHOP_BUY_MENU: self._update_shop_buy_menu,
+        #     Mode.SHOP_SELL_MENU: self._update_shop_sell_menu,
+        #     Mode.MESSAGE: self._update_message,
+        # }
 
-        self._draw_handlers = {
-            Mode.MAIN_MENU: self._draw_menu_overlay,
-            Mode.SPELL_MENU: self._draw_menu_overlay,
-            Mode.ITEM_MENU: self._draw_menu_overlay,
-            Mode.STATS_MENU: self._draw_menu_overlay,
-            Mode.INN_CONFIRM: self._draw_inn_confirm,
-            Mode.SHOP_MAIN_MENU: self._draw_shop_main_menu,
-            Mode.SHOP_BUY_MENU: self._draw_shop_buy_menu,
-            Mode.SHOP_SELL_MENU: self._draw_shop_sell_menu,
-            Mode.MESSAGE: self.msg_box.draw,
-        }
+        # self._draw_handlers = {
+        #     Mode.MAIN_MENU: self._draw_menu_overlay,
+        #     Mode.SPELL_MENU: self._draw_menu_overlay,
+        #     Mode.ITEM_MENU: self._draw_menu_overlay,
+        #     Mode.STATS_MENU: self._draw_menu_overlay,
+        #     Mode.INN_CONFIRM: self._draw_inn_confirm,
+        #     Mode.SHOP_MAIN_MENU: self._draw_shop_main_menu,
+        #     Mode.SHOP_BUY_MENU: self._draw_shop_buy_menu,
+        #     Mode.SHOP_SELL_MENU: self._draw_shop_sell_menu,
+        #     Mode.MESSAGE: self.msg_box.draw,
+        # }
+
+    @property
+    def current_mode(self) -> BaseMode:
+        return self.mode_stack[-1]
 
     # --- ヘルパーメソッド ---
 
@@ -125,8 +138,8 @@ class FieldScene(BaseScene):
 
     def get_tile_type(self, grid_x: int, grid_y: int) -> str:
         cfg = MAP_CONFIG[self.current_map_id]
-        tm_x = (cfg["u"] // 8) + (grid_x * 2)
-        tm_y = (cfg["v"] // 8) + (grid_y * 2)
+        tm_x = (cfg.u // 8) + (grid_x * 2)
+        tm_y = (cfg.v // 8) + (grid_y * 2)
         tile_info = pyxel.tilemaps[0].pget(tm_x, tm_y)
         return TILE_MAPPING.get(tile_info, "GRASS")
 
@@ -139,25 +152,40 @@ class FieldScene(BaseScene):
         tile_type = self.get_tile_type(grid_x, grid_y)
         return tile_type not in ["MOUNTAIN", "WALL"]
 
-    def show_message(self, messages: list[str], return_mode: Mode = Mode.EXPLORE):
-        """メッセージを表示して完了後に指定モードへ遷移する汎用メソッド"""
-        self.msg_box.push_messages(messages)
-        self.return_mode = return_mode
-        self.mode = Mode.MESSAGE
+    def trigger_battle(self):
+        from ..battle_scene import BattleScene
+
+        monster_id = random.choice(["entenstr", "rarutaes"])
+        monster = self.app.repo.create_monster(monster_id)
+        self.app.change_state(BattleScene(self.app, monster))
+
+    # def show_message(self, messages: list[str], return_mode: Mode = Mode.EXPLORE):
+    #     """メッセージを表示して完了後に指定モードへ遷移する汎用メソッド"""
+    #     self.msg_box.push_messages(messages)
+    #     self.return_mode = return_mode
+    #     self.mode = Mode.MESSAGE
 
     # --- メインループ (update / draw) ---
 
     def update(self):
-        handler = self._update_handlers.get(self.mode)
-        if handler:
-            handler()
+        signal = self.current_mode.update()
+
+        match signal:
+            case PushSignal(new_mode):
+                self.mode_stack.append(new_mode)
+            case PopSignal():
+                if len(self.mode_stack) > 1:
+                    self.mode_stack.pop()
+        # handler = self._update_handlers.get(self.mode)
+        # if handler:
+        #     handler()
 
     def draw(self):
         pyxel.cls(0)
 
         # 1. マップ & プレイヤー描画
         cfg = MAP_CONFIG[self.current_map_id]
-        pyxel.bltm(0, 16, 0, cfg["u"], cfg["v"], 192, 176)
+        pyxel.bltm(0, 16, 0, cfg.u, cfg.v, 192, 176)
         pyxel.blt(
             self.player_x * self.tile_size,
             self.player_y * self.tile_size + 16,
@@ -171,6 +199,10 @@ class FieldScene(BaseScene):
 
         # 2. 上部HUD
         self.hud.draw()
+        self.window_manager.draw()
+
+        self.current_mode.draw()
+
         # draw_window(0, 0, 192, 16)
         # p = self.app.player
         # pyxel.text(
@@ -178,9 +210,9 @@ class FieldScene(BaseScene):
         # )
 
         # 3. 各モード別UIの描画（Dispatcher）
-        handler = self._draw_handlers.get(self.mode)
-        if handler:
-            handler()
+        # handler = self._draw_handlers.get(self.mode)
+        # if handler:
+        #     handler()
 
     # --- モード別 Update ハンドラー群 ---
 
@@ -444,18 +476,13 @@ class FieldScene(BaseScene):
         if self.msg_box.update():
             if self.return_mode == Mode.START_BOSS_BATTLE:
                 monster = self.app.repo.create_monster(self.pending_boss_id)
-                from .battle_scene import BattleScene
+                from ..battle_scene import BattleScene
 
                 self.app.change_state(BattleScene(self.app, monster))
             else:
                 self.mode = self.return_mode
 
-    def trigger_battle(self):
-        from .battle_scene import BattleScene
 
-        monster_id = random.choice(["entenstr", "rarutaes"])
-        monster = self.app.repo.create_monster(monster_id)
-        self.app.change_state(BattleScene(self.app, monster))
 
     # --- モード別 Draw ハンドラー群 ---
 

@@ -73,7 +73,7 @@ class BattleScene(BaseScene):
 
                                 self.app.change_state(EndingScene(self.app))
                             else:
-                                from .field_scene import FieldScene
+                                from .field.field_scene import FieldScene
 
                                 self.app.change_state(FieldScene(self.app))
                         else:

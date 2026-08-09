@@ -7,7 +7,7 @@ class TitleScene(BaseScene):
     def update(self):
         # SPACEキーまたはZキーでゲーム開始
         if pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.KEY_Z):
-            from .field_scene import FieldScene
+            from .field.field_scene import FieldScene
 
             # プレイヤー初期化してフィールドへ
             # self.app.player = self.app.repo.create_initial_player("ゆうしゃ")
