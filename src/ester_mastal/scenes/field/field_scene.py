@@ -216,94 +216,94 @@ class FieldScene(BaseScene):
 
     # --- モード別 Update ハンドラー群 ---
 
-    def _update_explore(self):
-        dx, dy = 0, 0
-        if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.KEY_W):
-            dy, self.direction = -1, Direction.UP
-        elif pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.KEY_S):
-            dy, self.direction = 1, Direction.DOWN
-        elif pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.KEY_A):
-            dx, self.direction = -1, Direction.LEFT
-        elif pyxel.btnp(pyxel.KEY_RIGHT) or pyxel.btnp(pyxel.KEY_D):
-            dx, self.direction = 1, Direction.RIGHT
+    # def _update_explore(self):
+    #     dx, dy = 0, 0
+    #     if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.KEY_W):
+    #         dy, self.direction = -1, Direction.UP
+    #     elif pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.KEY_S):
+    #         dy, self.direction = 1, Direction.DOWN
+    #     elif pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.KEY_A):
+    #         dx, self.direction = -1, Direction.LEFT
+    #     elif pyxel.btnp(pyxel.KEY_RIGHT) or pyxel.btnp(pyxel.KEY_D):
+    #         dx, self.direction = 1, Direction.RIGHT
 
-        if dx != 0 or dy != 0:
-            next_x, next_y = self.player_x + dx, self.player_y + dy
-            if self.can_move_to(next_x, next_y):
-                self.player_x, self.player_y = next_x, next_y
+    #     if dx != 0 or dy != 0:
+    #         next_x, next_y = self.player_x + dx, self.player_y + dy
+    #         if self.can_move_to(next_x, next_y):
+    #             self.player_x, self.player_y = next_x, next_y
 
-                # ワープ判定
-                warp_key = (self.current_map_id, self.player_x, self.player_y)
-                if warp_key in WARP_POINTS:
-                    warp = WARP_POINTS[warp_key]
-                    self.current_map_id, self.player_x, self.player_y = (
-                        warp["target_map"],
-                        warp["target_x"],
-                        warp["target_y"],
-                    )
-                    if "message" in warp:
-                        self.show_message([warp["message"]])
-                    return
+    #             # ワープ判定
+    #             warp_key = (self.current_map_id, self.player_x, self.player_y)
+    #             if warp_key in WARP_POINTS:
+    #                 warp = WARP_POINTS[warp_key]
+    #                 self.current_map_id, self.player_x, self.player_y = (
+    #                     warp["target_map"],
+    #                     warp["target_x"],
+    #                     warp["target_y"],
+    #                 )
+    #                 if "message" in warp:
+    #                     self.show_message([warp["message"]])
+    #                 return
 
-                # エンカウント判定
-                cfg = MAP_CONFIG[self.current_map_id]
-                if (
-                    self.get_tile_type(self.player_x, self.player_y) == "GRASS"
-                    and random.random() < cfg["encount_rate"]
-                ):
-                    self.trigger_battle()
+    #             # エンカウント判定
+    #             cfg = MAP_CONFIG[self.current_map_id]
+    #             if (
+    #                 self.get_tile_type(self.player_x, self.player_y) == "GRASS"
+    #                 and random.random() < cfg["encount_rate"]
+    #             ):
+    #                 self.trigger_battle()
 
-        if is_confirm():
-            self.interact()
-        elif is_cancel():
-            self.mode = Mode.MAIN_MENU
-            self.cursor = 0
+    #     if is_confirm():
+    #         self.interact()
+    #     elif is_cancel():
+    #         self.mode = Mode.MAIN_MENU
+    #         self.cursor = 0
 
-    def interact(self):
-        target_pos = self.get_facing_pos()
-        event_key = (self.current_map_id, target_pos[0], target_pos[1])
-        event = MAP_EVENTS.get(event_key)
-        if not event:
-            return
+    # def interact(self):
+    #     target_pos = self.get_facing_pos()
+    #     event_key = (self.current_map_id, target_pos[0], target_pos[1])
+    #     event = MAP_EVENTS.get(event_key)
+    #     if not event:
+    #         return
 
-        self.current_event = event
+    #     self.current_event = event
 
-        match event["type"]:
-            case "NPC":
-                self.show_message(event["messages"])
-            case "CHEST":
-                if event["is_opened"]:
-                    self.show_message(["たからばこ は からっぽ だ。"])
-                else:
-                    event["is_opened"] = True
-                    if event["reward_type"] == "gold":
-                        self.app.player.gold += event["reward_value"]
-                        self.show_message(
-                            [
-                                "たからばこ を あけた！",
-                                f"{event['reward_value']} ゴールド を てにいれた！",
-                            ]
-                        )
-                    elif event["reward_type"] == "item":
-                        self.app.player.items.append(event["reward_value"])
-                        self.show_message(
-                            [
-                                "たからばこ を あけた！",
-                                f"{event['reward_value']} を てにいれた！",
-                            ]
-                        )
-            case "INN":
-                self.sub_cursor = 0
-                self.mode = Mode.INN_CONFIRM
-            case "SHOP":
-                self.sub_cursor = 0
-                greeting = event.get(
-                    "greeting", "いらっしゃいませ！\nなにに しますか？"
-                )
-                self.show_message([greeting], return_mode=Mode.SHOP_MAIN_MENU)
-            case "BOSS":
-                self.pending_boss_id = event["monster_id"]
-                self.show_message(event["messages"], return_mode=Mode.START_BOSS_BATTLE)
+    #     match event["type"]:
+    #         case "NPC":
+    #             self.show_message(event["messages"])
+    #         case "CHEST":
+    #             if event["is_opened"]:
+    #                 self.show_message(["たからばこ は からっぽ だ。"])
+    #             else:
+    #                 event["is_opened"] = True
+    #                 if event["reward_type"] == "gold":
+    #                     self.app.player.gold += event["reward_value"]
+    #                     self.show_message(
+    #                         [
+    #                             "たからばこ を あけた！",
+    #                             f"{event['reward_value']} ゴールド を てにいれた！",
+    #                         ]
+    #                     )
+    #                 elif event["reward_type"] == "item":
+    #                     self.app.player.items.append(event["reward_value"])
+    #                     self.show_message(
+    #                         [
+    #                             "たからばこ を あけた！",
+    #                             f"{event['reward_value']} を てにいれた！",
+    #                         ]
+    #                     )
+    #         case "INN":
+    #             self.sub_cursor = 0
+    #             self.mode = Mode.INN_CONFIRM
+    #         case "SHOP":
+    #             self.sub_cursor = 0
+    #             greeting = event.get(
+    #                 "greeting", "いらっしゃいませ！\nなにに しますか？"
+    #             )
+    #             self.show_message([greeting], return_mode=Mode.SHOP_MAIN_MENU)
+    #         case "BOSS":
+    #             self.pending_boss_id = event["monster_id"]
+    #             self.show_message(event["messages"], return_mode=Mode.START_BOSS_BATTLE)
 
     def _update_main_menu(self):
         self.cursor = navigate_menu(3, self.cursor)

@@ -78,4 +78,7 @@ def wait_for_menu[T: Enum](window_manager, select_window: EnumSelectWindow[T]):
     while select_window.result is None and window_manager.is_open:
         yield  # 1フレーム待機
 
+    if window_manager.current == select_window:
+        window_manager.pop()
+
     return select_window.result

@@ -9,6 +9,19 @@ from .signals import ModeSignal, PushSignal
 
 
 class ExploreMode(BaseMode):
+
+    def is_confirm(self) -> bool:
+        """決定キー判定 (Z / SPACE / RETURN)"""
+        return (
+            pyxel.btnp(pyxel.KEY_Z)
+            or pyxel.btnp(pyxel.KEY_SPACE)
+            or pyxel.btnp(pyxel.KEY_RETURN)
+        )
+
+    def is_cancel(self) -> bool:
+        """キャンセルキー判定 (X / ESCAPE)"""
+        return pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE)
+
     def update(self) -> ModeSignal:
         scene = self.context.scene
         wm = scene.window_manager
@@ -50,10 +63,12 @@ class ExploreMode(BaseMode):
                     scene.trigger_battle()
                     return ModeSignal()
 
-        # if is_confirm():
-        #     return self._interact()
-        # elif is_cancel():
-        #     return PushSignal(MainMenuMode(self.context))
+        if self.is_confirm():
+            # return self._interact()
+            pass
+        
+        elif self.is_cancel():
+            return PushSignal(MainMenuMode(self.context))
 
         return ModeSignal()
 
@@ -98,5 +113,4 @@ class ExploreMode(BaseMode):
     #     return ModeSignal()
 
     def draw(self) -> None:
-        # self.context.scene.window_manager.draw()
         pass
