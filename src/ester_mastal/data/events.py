@@ -25,22 +25,22 @@ MAP_EVENTS = {
         ],
     },
     # 宝箱 (x=8, y=4)
-    (MapId.DUNGEON, 8, 4): {
+    (MapId.DUNGEON_B1F, 8, 4): {
         "type": "CHEST",
         "reward_type": "gold",  # "gold" または "item"
         "reward_value": 50,
         "is_opened": False,
     },
     # ダンジョンの最奥 (x=5, y=2) に竜王を配置
-    (MapId.DUNGEON, 5, 2): {
-        "type": "BOSS",
-        "name": "りゅうおう",
-        "messages": [
-            "よくぞ ここまで たどりついた！",
-            "わしが あくの しはいしゃ りゅうおう だ！",
-            "わしの てかとなれば せかいの はんぶんを やろう！",
-            "…と でも いうとおもったか！ くらえ！",
-        ],
-        "monster_id": "deramil",
-    },
+    # (MapId.DUNGEON, 5, 2): {
+    #     "type": "BOSS",
+    #     "name": "りゅうおう",
+    #     "messages": [
+    #         "よくぞ ここまで たどりついた！",
+    #         "わしが あくの しはいしゃ りゅうおう だ！",
+    #         "わしの てかとなれば せかいの はんぶんを やろう！",
+    #         "…と でも いうとおもったか！ くらえ！",
+    #     ],
+    #     "monster_id": "deramil",
+    # },
 }

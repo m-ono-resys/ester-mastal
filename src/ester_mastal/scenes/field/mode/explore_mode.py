@@ -59,16 +59,17 @@ class ExploreMode(BaseMode):
                     warp = WARP_POINTS[warp_key]
                     scene.current_map_id = warp.map_id
                     scene.player_x, scene.player_y = warp.x, warp.y
-                    message = MessageWindow(
-                        app=scene.app,
-                        x=10,
-                        y=130,
-                        width=172,
-                        height=50,
-                        speed=2,
-                        messages=[warp.message],
-                    )
-                    scene.window_manager.push(message)
+                    if warp.message is not None:
+                        message = MessageWindow(
+                            app=scene.app,
+                            x=10,
+                            y=130,
+                            width=172,
+                            height=50,
+                            speed=2,
+                            messages=[warp.message],
+                        )
+                        scene.window_manager.push(message)
                     return ModeSignal()
 
                 # エンカウント判定
