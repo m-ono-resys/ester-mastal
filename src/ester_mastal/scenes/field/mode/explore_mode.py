@@ -5,11 +5,11 @@ import pyxel
 from ....data.maps import MAP_CONFIG, WARP_POINTS, FromPosition
 from ....ui.message_window import MessageWindow
 from .base_mode import BaseMode
+from .main_menu_mode import MainMenuMode
 from .signals import ModeSignal, PushSignal
 
 
 class ExploreMode(BaseMode):
-
     def is_confirm(self) -> bool:
         """決定キー判定 (Z / SPACE / RETURN)"""
         return (
@@ -30,7 +30,7 @@ class ExploreMode(BaseMode):
         if wm.is_open:
             wm.update()  # 最前面の MessageWindow の文字送りや決定キー処理を実行
             return ModeSignal()  # 移動処理は行わずに終了
-        
+
         dx, dy = 0, 0
 
         if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.KEY_W):
@@ -48,25 +48,38 @@ class ExploreMode(BaseMode):
                 scene.player_x, scene.player_y = next_x, next_y
 
                 # ワープ判定
-                warp_key = FromPosition(scene.current_map_id, scene.player_x, scene.player_y)
+                warp_key = FromPosition(
+                    scene.current_map_id, scene.player_x, scene.player_y
+                )
                 if warp_key in WARP_POINTS:
                     warp = WARP_POINTS[warp_key]
                     scene.current_map_id = warp.map_id
                     scene.player_x, scene.player_y = warp.x, warp.y
-                    message = MessageWindow(app=scene.app, x=10, y=130, width=172, height=50, speed=2, messages=[warp.message])
+                    message = MessageWindow(
+                        app=scene.app,
+                        x=10,
+                        y=130,
+                        width=172,
+                        height=50,
+                        speed=2,
+                        messages=[warp.message],
+                    )
                     scene.window_manager.push(message)
                     return ModeSignal()
 
                 # エンカウント判定
                 cfg = MAP_CONFIG[scene.current_map_id]
-                if scene.get_tile_type(scene.player_x, scene.player_y) == "GRASS" and random.random() < cfg.encount_rate:
+                if (
+                    scene.get_tile_type(scene.player_x, scene.player_y) == "GRASS"
+                    and random.random() < cfg.encount_rate
+                ):
                     scene.trigger_battle()
                     return ModeSignal()
 
         if self.is_confirm():
             # return self._interact()
             pass
-        
+
         elif self.is_cancel():
             return PushSignal(MainMenuMode(self.context))
 

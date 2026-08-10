@@ -18,10 +18,10 @@ class MessageWindow(BaseWindow):
         y: int,
         width: int,
         height: int,
-        messages: list[str] | None = None,  # ★ __init__ で初期メッセージを直接受け取れるように拡張
+        messages: list[str] | None = None,  # 初期メッセージを直接受け取れるように拡張
         speed: int = 2,
         max_chars_per_line: int = 18,
-        max_lines_per_page: int = 2,# ★ ウィンドウが閉じた時のコールバック機能
+        max_lines_per_page: int = 2,
     ):
         super().__init__(app, x, y, width, height)
         self.speed = speed

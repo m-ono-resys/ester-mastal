@@ -6,9 +6,10 @@ from enum import Enum, auto
 class ItemType(Enum):
     CONSUMABLE_HP = auto()  # 消耗品
     CONSUMABLE_MP = auto()
-    WEAPON = auto()      # 武器
-    ARMOR = auto()       # 防具
-    KEY = auto()         # 鍵
+    WEAPON = auto()  # 武器
+    ARMOR = auto()  # 防具
+    KEY = auto()  # 鍵
+
 
 @dataclass(frozen=True)
 class Item:
@@ -18,24 +19,26 @@ class Item:
     effect_value: int
     description: str = ""
 
+
 class ItemCode(Enum):
     # 消耗品
-    POTION = auto()
-    MAGIC_WATER = auto()
+    POTION = "きずぐすり"
+    MAGIC_WATER = "まほうのみず"
 
     # 武器
-    CLUB = auto()
-    COPPER_SWORD = auto()
-    KING_SWORD = auto()
+    CLUB = "こんぼう"
+    COPPER_SWORD = "どうのつるぎ"
+    KING_SWORD = "おうのつるぎ"
 
     # 防具
-    LEATHER_ARMOR = auto()
-    IRON_ARMOR = auto()
-    KING_ARMOR = auto()
+    LEATHER_ARMOR = "かわのよろい"
+    IRON_ARMOR = "てつのよろい"
+    KING_ARMOR = "おうのよろい"
 
     # 特殊
-    CELESTIAL_ORB = auto()
-    CELESTIAL_KEY = auto()
+    CELESTIAL_ORB = "てんのたま"
+    CELESTIAL_KEY = "てんのかぎ"
+
 
 class ItemRepository(ABC):
     @abstractmethod
