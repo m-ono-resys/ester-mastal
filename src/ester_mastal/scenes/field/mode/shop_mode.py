@@ -52,7 +52,7 @@ class ShopMode(BaseMode):
 
         # 各ウィンドウの参照保持
         self._shop_command: EnumSelectWindow[ShopCommand] | None = None
-        self._shopping_window: ShopItemSelectWindow[ItemCode] | None = None
+        self._shopping_window: ShopItemSelectWindow | None = None
         self._confirm_window: EnumSelectWindow[ChoiceCommand] | None = None
         self._confirm_msg: MessageWindow | None = None
         self._no_item_msg: MessageWindow | None = None

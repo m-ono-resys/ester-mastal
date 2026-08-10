@@ -8,6 +8,7 @@ from ....ui.message_window import MessageWindow
 from .base_mode import BaseMode
 from .inn_mode import InnMode
 from .main_menu_mode import MainMenuMode
+from .message_mode import MessageMode
 from .shop_mode import ShopMode
 from .signals import ModeSignal, PushSignal
 
@@ -100,8 +101,8 @@ class ExploreMode(BaseMode):
         scene.current_event = event
 
         match event["type"]:
-            #         case "NPC":
-            #             return PushSignal(MessageMode(self.context, event["messages"]))
+            case "NPC":
+                return PushSignal(MessageMode(self.context))
 
             #         case "CHEST":
             #             if event["is_opened"]:
@@ -126,7 +127,7 @@ class ExploreMode(BaseMode):
     #             scene.pending_boss_id = event["monster_id"]
     #             return PushSignal(MessageMode(self.context, event["messages"], start_boss_battle=True))
 
-    #     return ModeSignal()
+        return ModeSignal()
 
     def draw(self) -> None:
         pass

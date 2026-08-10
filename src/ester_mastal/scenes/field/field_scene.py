@@ -1,5 +1,6 @@
 import random
 from enum import Enum, auto
+from typing import Any
 
 import pyxel
 
@@ -63,7 +64,7 @@ class FieldScene(BaseScene):
         self.direction: Direction = Direction.DOWN
         self.current_map_id: MapId = MapId.TOWN
 
-        self.current_event = None
+        self.current_event: Any = None
         self.pending_boss_id = None
 
         self.window_manager = WindowManager()
