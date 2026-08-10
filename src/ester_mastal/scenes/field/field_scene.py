@@ -25,6 +25,7 @@ TILE_MAPPING = {
     (2, 6): "TABLE",
     (0, 8): "FLOOR",
     (4, 6): "BED",
+    (0, 10): "CAVE_WALL",
 }
 
 
@@ -102,7 +103,7 @@ class FieldScene(BaseScene):
             return False
 
         tile_type = self.get_tile_type(grid_x, grid_y)
-        return tile_type not in ["MOUNTAIN", "WALL"]
+        return tile_type not in ["MOUNTAIN", "WALL", "CAVE_WALL"]
 
     def trigger_battle(self):
         from ..battle_scene import BattleScene

@@ -53,6 +53,8 @@ WARP_POINTS: dict[FromPosition, ToPosition] = {
     FromPosition(MapId.TOWN, 0, 4): ToPosition(MapId.WORLD, 2, 7, "そと に でた。"),
     FromPosition(MapId.TOWN, 0, 5): ToPosition(MapId.WORLD, 2, 7, "そと に でた。"),
     FromPosition(MapId.TOWN, 0, 6): ToPosition(MapId.WORLD, 2, 7, "そと に でた。"),
+    FromPosition(MapId.WORLD, 1, 4): ToPosition(MapId.DUNGEON, 1, 1, "ギントのどうくつ に はいった…"),
+    FromPosition(MapId.DUNGEON, 1, 1): ToPosition(MapId.WORLD, 1, 5, "そと に でた。"),
     # # 3. フィールドの洞窟 (x=8, y=2) ➔ ダンジョンへ
     # (MapId.WORLD, 1, 4): {
     #     "target_map": MapId.DUNGEON,
