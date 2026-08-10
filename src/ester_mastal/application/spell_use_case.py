@@ -1,5 +1,5 @@
-from ester_mastal.models.player import Player
-from ester_mastal.models.spell import SpellCode, SpellRepository, SpellType
+from ..models.player import Player
+from ..models.spell import SpellCode, SpellRepository, SpellType
 
 
 class SpellUseCase:
