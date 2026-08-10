@@ -220,7 +220,7 @@ class ShopMode(BaseMode):
 
                 if self._confirm_window is not None:
                     # A. 決定された場合
-                    if self._confirm_window.result is not None:
+                    if self._confirm_window.result is not None and self._pending_item is not None:
                         choice = self._confirm_window.result
                         self._confirm_window.result = None
 

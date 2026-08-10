@@ -8,7 +8,7 @@ class ShopUseCase:
     def __init__(self, item_repository: ItemRepository):
         self._item_repository = item_repository
 
-    def buy_item(self, player: Player, item_code: ItemCode) -> str:
+    def buy_item(self, player: Player, item_code: ItemCode) -> list[str]:
         item = self._item_repository.find_by_code(item_code)
 
         if not item:
@@ -22,7 +22,7 @@ class ShopUseCase:
             player.inventory.append(item_code)
             return [f"{item.name} を かった！", "まいどあり！"]
 
-    def sell_item(self, player: Player, item_code: ItemCode) -> str:
+    def sell_item(self, player: Player, item_code: ItemCode) -> list[str]:
         item = self._item_repository.find_by_code(item_code)
 
         if not item:
