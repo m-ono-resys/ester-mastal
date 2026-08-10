@@ -11,11 +11,11 @@ class EnumSelectWindow[T: Enum](BaseWindow):
         y: int,
         width: int,
         choices: list[T],
-        line_height: int = 11,
+        line_height: int = 12,
         padding_x: int = 14,
         padding_y: int = 8,
     ):
-        height = (padding_y * 2) + (len(choices) * line_height) - (line_height - 8)
+        height = (padding_y * 2) + (len(choices) * line_height) - (line_height - 11)
         super().__init__(app, x, y, width, height)
 
         self.choices = choices
@@ -66,6 +66,7 @@ class EnumSelectWindow[T: Enum](BaseWindow):
                 ">",
                 10,
             )
+
 
 def wait_for_menu[T: Enum](window_manager, select_window: EnumSelectWindow[T]):
     """

@@ -80,7 +80,7 @@ class GameRepository:
             level=1,
             exp=10,
             gold=200,
-            inventory=[ItemCode.POTION],
+            inventory=[ItemCode.POTION, ItemCode.COPPER_SWORD],
         )
 
     def check_level_up(self, player: Player) -> list[str]:
