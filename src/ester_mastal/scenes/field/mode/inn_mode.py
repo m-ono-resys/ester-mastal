@@ -28,7 +28,7 @@ class InnMode(BaseMode):
         self._wm.push(self._greeting_msg)
 
         self._choice_menu = EnumSelectWindow(
-            context.scene.app, 10, 24, 60, list(InnCommand)
+            self.context.scene.app, 10, 24, 60, list(InnCommand)
         )
 
         # ★ 進行管理用フラグ

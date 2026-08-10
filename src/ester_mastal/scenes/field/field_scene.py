@@ -61,7 +61,7 @@ class FieldScene(BaseScene):
         self.player_x = 1
         self.player_y = 1
         self.direction: Direction = Direction.DOWN
-        self.current_map_id: MapId = MapId.WORLD
+        self.current_map_id: MapId = MapId.TOWN
 
         self.current_event = None
         self.pending_boss_id = None

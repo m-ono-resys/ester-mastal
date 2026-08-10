@@ -8,6 +8,7 @@ from ....ui.message_window import MessageWindow
 from .base_mode import BaseMode
 from .inn_mode import InnMode
 from .main_menu_mode import MainMenuMode
+from .shop_mode import ShopMode
 from .signals import ModeSignal, PushSignal
 
 
@@ -118,8 +119,8 @@ class ExploreMode(BaseMode):
             case "INN":
                 return PushSignal(InnMode(self.context))
 
-    #         case "SHOP":
-    #             return PushSignal(ShopMode(self.context, event))
+            case "SHOP":
+                return PushSignal(ShopMode(self.context, event))
 
     #         case "BOSS":
     #             scene.pending_boss_id = event["monster_id"]
