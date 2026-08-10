@@ -36,13 +36,23 @@ class ShopItemSelectWindow(BaseWindow):
         if not self.choices or self.result is not None:
             return
 
+        # ★ 修正: リストが空(0個)の場合でも、キャンセルキーで閉じることは可能にする
+        if not self.choices:
+            if self.is_cancel():
+                window_manager.pop()
+            return
+
+        # ★ 安全ガード: アイテムが売られてリストが減った場合、カーソル位置を自動補正する
+        self._selected_idx = max(0, min(self._selected_idx, len(self.choices) - 1))
+
         # 上下キー移動
         self._selected_idx = self.navigate_menu(len(self.choices), self._selected_idx)
 
         # 決定キー処理
         if self.is_confirm():
-            self.result = self.choices[self._selected_idx]
-            # window_manager.pop()  # 選択完了したら自身を閉じる
+            # ★ 安全ガード: 念のため範囲内であることを確認してから取得する
+            if 0 <= self._selected_idx < len(self.choices):
+                self.result = self.choices[self._selected_idx]
 
         # キャンセルキー処理
         elif self.is_cancel():
