@@ -13,7 +13,7 @@ class EnumSelectWindow[T: Enum](BaseWindow):
         choices: list[T],
         line_height: int = 12,
         padding_x: int = 14,
-        padding_y: int = 8,
+        padding_y: int = 6,
     ):
         height = (padding_y * 2) + (len(choices) * line_height) - (line_height - 11)
         super().__init__(app, x, y, width, height)
