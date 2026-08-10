@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from ..data.exp_table import EXP_TABLE, ExpRow
+from ..data.exp_table import EXP_TABLE
 from ..data.items import ItemCode
 from ..data.spells import SPELL_MASTER, SpellCode
 from .monster import Monster
