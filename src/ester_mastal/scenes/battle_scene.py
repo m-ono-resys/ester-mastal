@@ -2,9 +2,13 @@ from enum import Enum, auto
 
 import pyxel
 
+from ..application.item_use_case import ItemUseCase
 from ..audio import play_se
+from ..infrastructure.in_memory_item_repository import InMemoryItemRepository
 from ..infrastructure.in_memory_spell_repository import InMemorySpellRepository
 from ..models.battle import BattleEngine
+from ..models.item import ItemCode
+from ..models.spell import SpellCode
 from ..ui.battle_status_window import BattleStatusWindow
 from ..ui.enum_select_window import EnumSelectWindow
 from ..ui.message_window import MessageWindow
@@ -30,13 +34,14 @@ class BattleScene(BaseScene):
         self.engine = BattleEngine(self.app.player, monster, self.app.repo)
 
         self.spell_repository = InMemorySpellRepository()
+        self._item_usecase = ItemUseCase(InMemoryItemRepository())
 
         # UI
         self.window_manager = WindowManager()
         self.battle_status_window = BattleStatusWindow(app)
         self.cmd_window: EnumSelectWindow[BattleCommand] | None = None
-        self.item_window: EnumSelectWindow | None = None
-        self.spell_window: EnumSelectWindow | None = None
+        self.item_window: EnumSelectWindow[ItemCode] | None = None
+        self.spell_window: EnumSelectWindow[SpellCode] | None = None
 
         # 戦闘開始メッセージの表示
         self.show_message([f"{monster.name} が あらわれた！"])
@@ -103,7 +108,6 @@ class BattleScene(BaseScene):
                 case BattleCommand.SPELL:
                     _spells = self.app.player.spells
                     if not _spells:
-                        self.show_command_menu()
                         self.show_message(["つかえるじゅもんがない！"])
                     else:
                         self.spell_window = EnumSelectWindow(
@@ -111,9 +115,23 @@ class BattleScene(BaseScene):
                             x=95,
                             y=120,
                             width=87,
-                            choices=self.app.player.spells,
+                            choices=_spells,
                         )
                         self.window_manager.push(self.spell_window)
+
+                case BattleCommand.ITEM:
+                    _items = self.app.player.inventory
+                    if not _items:
+                        self.show_message(["アイテムをもっていない！"])
+                    else:
+                        self.item_window = EnumSelectWindow(
+                            self.app,
+                            x=95,
+                            y=120,
+                            width=87,
+                            choices=_items,
+                        )
+                        self.window_manager.push(self.item_window)
 
                 case BattleCommand.ESCAPE:
                     logs, success = self.engine.player_escape()
@@ -132,6 +150,18 @@ class BattleScene(BaseScene):
 
             if spell is not None:
                 logs = self.engine.player_cast_spell(spell)
+                if self.engine.monster.is_alive:
+                    m_logs = self.engine.monster_turn()
+                    play_se(2)  # ダメージSE
+                    logs.extend(m_logs)
+
+        elif self.item_window is not None and self.item_window.result is not None:
+            item_code = self.item_window.result
+            self.window_manager.pop()  # コマンドウィンドウを閉じる
+            self.item_window = None
+
+            if item_code is not None:
+                logs = self._item_usecase.use_item(self.app.player, item_code)
                 if self.engine.monster.is_alive:
                     m_logs = self.engine.monster_turn()
                     play_se(2)  # ダメージSE

@@ -1,9 +1,9 @@
 import json
 from pathlib import Path
 
-from ester_mastal.data.items import ItemCode
-from ester_mastal.data.spells import SPELL_MASTER, SpellCode
-
+from ..data.exp_table import EXP_TABLE, ExpRow
+from ..data.items import ItemCode
+from ..data.spells import SPELL_MASTER, SpellCode
 from .monster import Monster
 from .player import Player
 from .spell import Spell
@@ -25,7 +25,7 @@ class GameRepository:
             self.data_dir = Path(data_dir)
         self.monsters_data = self._load_json("monsters.json")
         self.spells_data = SPELL_MASTER
-        self.exp_table_data = self._load_json("exp_table.json")
+        self.exp_table_data = EXP_TABLE
         self.items_data = self._load_json("items.json")
 
     def _load_json(self, filename: str):
@@ -68,20 +68,19 @@ class GameRepository:
 
     def create_initial_player(self, name: str) -> Player:
         """初期（LV1）のプレイヤーを生成"""
-        lv1_data = self.exp_table_data[2]
+        lv1_data = self.exp_table_data[0]
         return Player(
             name=name,
-            max_hp=lv1_data["max_hp"],
-            hp=lv1_data["max_hp"],
-            max_mp=lv1_data["max_mp"],
-            mp=lv1_data["max_mp"],
-            base_attack=lv1_data["base_attack"] + 100,
-            base_defense=lv1_data["base_defense"],
+            max_hp=lv1_data.max_hp,
+            hp=lv1_data.max_hp,
+            max_mp=lv1_data.max_mp,
+            mp=lv1_data.max_mp,
+            base_attack=lv1_data.base_attack + 100,
+            base_defense=lv1_data.base_defense,
             level=1,
             exp=10,
             gold=200,
             inventory=[ItemCode.POTION, ItemCode.COPPER_SWORD],
-            spells=[SpellCode.IMARU],
         )
 
     def check_level_up(self, player: Player) -> list[str]:
@@ -89,24 +88,23 @@ class GameRepository:
         logs = []
         # 現在のレベルより上データを確認
         for entry in self.exp_table_data:
-            target_lv = entry["level"]
-            if target_lv > player.level and player.exp >= entry["required_exp"]:
+            target_lv = entry.level
+            if target_lv > player.level and player.exp >= entry.required_exp:
                 player.level = target_lv
-                player.max_hp = entry["max_hp"]
+                player.max_hp = entry.max_hp
                 player.hp = player.max_hp  # レベルアップ時全回復
-                player.max_mp = entry["max_mp"]
+                player.max_mp = entry.max_mp
                 player.mp = player.max_mp
-                player.base_attack = entry["base_attack"]
-                player.base_defense = entry["base_defense"]
+                player.base_attack = entry.base_attack
+                player.base_defense = entry.base_defense
                 logs.append(f"{player.name} は レベル {player.level} に あがった！")
 
                 # 習得呪文があるかチェック
-                # spell_id = entry.get("learn_spell")
-                # if spell_id:
-                #     spell = self.get_spell(spell_id)
-                #     player.spells.append(spell)
-                #     logs.append(
-                #         f"{player.name} は {spell.name} の じゅもんを おぼえた！"
-                #     )
+                spell_code = entry.learn_spell
+                if spell_code:
+                    player.spells.append(spell_code)
+                    logs.append(
+                        f"{player.name} は {spell_code.value} の じゅもんを おぼえた！"
+                    )
 
         return logs

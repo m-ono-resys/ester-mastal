@@ -87,7 +87,7 @@ class MainMenuMode(BaseMode):
             # A. アイテムが選択された場合
             if self._item_window.result is not None:
                 selected_item = self._item_window.result
-                log = self._item_usecase.use_item(
+                logs = self._item_usecase.use_item(
                     self.context.scene.app.player, selected_item
                 )
                 self._wm.pop()
@@ -99,7 +99,7 @@ class MainMenuMode(BaseMode):
                         width=172,
                         height=50,
                         speed=2,
-                        messages=[log],
+                        messages=logs,
                     )
                 )
                 self._item_window = None
@@ -111,7 +111,7 @@ class MainMenuMode(BaseMode):
         if self._spell_window is not None:
             if self._spell_window.result is not None:
                 selected_spell = self._spell_window.result
-                log = self._spell_usecase.use_spell(
+                logs = self._spell_usecase.use_spell(
                     self.context.scene.app.player, selected_spell
                 )
                 self._wm.pop()
@@ -123,7 +123,7 @@ class MainMenuMode(BaseMode):
                         width=172,
                         height=50,
                         speed=2,
-                        messages=[log],
+                        messages=logs,
                     )
                 )
                 self._spell_window = None
