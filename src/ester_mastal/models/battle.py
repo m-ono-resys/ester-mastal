@@ -1,7 +1,8 @@
 import random
 
 from .monster import Monster
-from .player import Player, Spell
+from .player import Player
+from .spell import Spell, SpellType
 
 
 class BattleEngine:
@@ -54,19 +55,23 @@ class BattleEngine:
 
         self.player.mp -= spell.mp_cost
 
-        # 回復魔法の場合
-        if spell.heal_amount > 0:
-            healed = self.player.heal(spell.heal_amount)
-            logs.append(f"{self.player.name} の HPが {healed} かいふくした！")
+        match spell.spell_type:
+            # 回復魔法の場合
+            case SpellType.HEAL:
+                healed = self.player.heal_hp(spell.effect_value)
+                logs.append(f"{self.player.name} の HPが {healed} かいふくした！")
 
-        # 攻撃魔法の場合（例：メラなど）
-        elif spell.damage_amount > 0:
-            damage = spell.damage_amount + random.randint(-2, 2)
-            actual_damage = self.monster.take_damage(damage)
-            logs.append(f"{self.monster.name} に {actual_damage} の ダメージ！")
-            if not self.monster.is_alive:
-                logs.extend(self._process_victory())
-                self.is_finished = True
+            # 攻撃魔法の場合
+            case SpellType.ATTACK:
+                damage = spell.effect_value + random.randint(-2, 2)
+                actual_damage = self.monster.take_damage(damage)
+                logs.append(f"{self.monster.name} に {actual_damage} の ダメージ！")
+                if not self.monster.is_alive:
+                    logs.extend(self._process_victory())
+                    self.is_finished = True
+
+            case _:
+                logs.append("こうかがなかった！")
 
         return logs
 
