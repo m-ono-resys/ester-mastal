@@ -2,9 +2,11 @@ import random
 
 import pyxel
 
+from ....data.events import MAP_EVENTS
 from ....data.maps import MAP_CONFIG, WARP_POINTS, FromPosition
 from ....ui.message_window import MessageWindow
 from .base_mode import BaseMode
+from .inn_mode import InnMode
 from .main_menu_mode import MainMenuMode
 from .signals import ModeSignal, PushSignal
 
@@ -77,44 +79,44 @@ class ExploreMode(BaseMode):
                     return ModeSignal()
 
         if self.is_confirm():
-            # return self._interact()
-            pass
+            return self._interact()
+            # pass
 
         elif self.is_cancel():
             return PushSignal(MainMenuMode(self.context))
 
         return ModeSignal()
 
-    # def _interact(self) -> ModeSignal:
-    #     scene = self.context.scene
-    #     target_pos = scene.get_facing_pos()
-    #     event_key = (scene.current_map_id, target_pos[0], target_pos[1])
-    #     event = MAP_EVENTS.get(event_key)
+    def _interact(self) -> ModeSignal:
+        scene = self.context.scene
+        target_pos = scene.get_facing_pos()
+        event_key = (scene.current_map_id, target_pos[0], target_pos[1])
+        event = MAP_EVENTS.get(event_key)
 
-    #     if not event:
-    #         return ModeSignal()
+        if not event:
+            return ModeSignal()
 
-    #     scene.current_event = event
+        scene.current_event = event
 
-    #     match event["type"]:
-    #         case "NPC":
-    #             return PushSignal(MessageMode(self.context, event["messages"]))
+        match event["type"]:
+            #         case "NPC":
+            #             return PushSignal(MessageMode(self.context, event["messages"]))
 
-    #         case "CHEST":
-    #             if event["is_opened"]:
-    #                 return PushSignal(MessageMode(self.context, ["たからばこ は からっぽ だ。"]))
-    #             else:
-    #                 event["is_opened"] = True
-    #                 p = self.context.app.player
-    #                 if event["reward_type"] == "gold":
-    #                     p.gold += event["reward_value"]
-    #                     return PushSignal(MessageMode(self.context, ["たからばこ を あけた！", f"{event['reward_value']} ゴールド を てにいれた！"]))
-    #                 elif event["reward_type"] == "item":
-    #                     p.items.append(event["reward_value"])
-    #                     return PushSignal(MessageMode(self.context, ["たからばこ を あけた！", f"{event['reward_value']} を てにいれた！"]))
+            #         case "CHEST":
+            #             if event["is_opened"]:
+            #                 return PushSignal(MessageMode(self.context, ["たからばこ は からっぽ だ。"]))
+            #             else:
+            #                 event["is_opened"] = True
+            #                 p = self.context.app.player
+            #                 if event["reward_type"] == "gold":
+            #                     p.gold += event["reward_value"]
+            #                     return PushSignal(MessageMode(self.context, ["たからばこ を あけた！", f"{event['reward_value']} ゴールド を てにいれた！"]))
+            #                 elif event["reward_type"] == "item":
+            #                     p.items.append(event["reward_value"])
+            #                     return PushSignal(MessageMode(self.context, ["たからばこ を あけた！", f"{event['reward_value']} を てにいれた！"]))
 
-    #         case "INN":
-    #             return PushSignal(InnMode(self.context, event))
+            case "INN":
+                return PushSignal(InnMode(self.context))
 
     #         case "SHOP":
     #             return PushSignal(ShopMode(self.context, event))
