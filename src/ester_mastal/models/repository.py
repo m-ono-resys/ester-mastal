@@ -68,7 +68,7 @@ class GameRepository:
 
     def create_initial_player(self, name: str) -> Player:
         """初期（LV1）のプレイヤーを生成"""
-        lv1_data = self.exp_table_data[4]
+        lv1_data = self.exp_table_data[2]
         return Player(
             name=name,
             max_hp=lv1_data["max_hp"],
@@ -81,6 +81,7 @@ class GameRepository:
             exp=10,
             gold=200,
             inventory=[ItemCode.POTION, ItemCode.COPPER_SWORD],
+            spells=[SpellCode.IMARU],
         )
 
     def check_level_up(self, player: Player) -> list[str]:

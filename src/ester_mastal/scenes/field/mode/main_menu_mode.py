@@ -1,7 +1,9 @@
 from enum import Enum
 
 from ....application.item_use_case import ItemUseCase
+from ....application.spell_use_case import SpellUseCase
 from ....infrastructure.in_memory_item_repository import InMemoryItemRepository
+from ....infrastructure.in_memory_spell_repository import InMemorySpellRepository
 from ....ui.enum_select_window import EnumSelectWindow
 from ....ui.message_window import MessageWindow
 from ....ui.status_window import StatusWindow
@@ -27,6 +29,9 @@ class MainMenuMode(BaseMode):
         self._item_window: EnumSelectWindow | None = None
         self._item_usecase = ItemUseCase(InMemoryItemRepository())
 
+        self._spell_window: EnumSelectWindow | None = None
+        self._spell_usecase = SpellUseCase(InMemorySpellRepository())
+
         self._status_window: StatusWindow | None = None
 
     def update(self):
@@ -46,7 +51,7 @@ class MainMenuMode(BaseMode):
                                 width=172,
                                 height=50,
                                 speed=2,
-                                messages=["アイテムをもっていません"],
+                                messages=["アイテムをもっていない！"],
                             )
                         )
                     else:
@@ -55,7 +60,24 @@ class MainMenuMode(BaseMode):
                         )
                         self._wm.push(self._item_window)
                 case MenuCommand.Spell:
-                    print("じゅもん")
+                    _spells = self.context.scene.app.player.spells
+                    if not _spells:
+                        self._wm.push(
+                            MessageWindow(
+                                app=self.context.scene.app,
+                                x=10,
+                                y=130,
+                                width=172,
+                                height=50,
+                                speed=2,
+                                messages=["つかえるじゅもんがない！"],
+                            )
+                        )
+                    else:
+                        self._spell_window = EnumSelectWindow(
+                            self.context.scene.app, 80, 24, 100, _spells
+                        )
+                        self._wm.push(self._spell_window)
                 case MenuCommand.Status:
                     self._status_window = StatusWindow(self.context.scene.app)
                     self._wm.push(self._status_window)
@@ -85,6 +107,28 @@ class MainMenuMode(BaseMode):
             # B. キャンセルキー等でアイテムウィンドウが閉じられた場合
             elif self._wm.current != self._item_window:
                 self._item_window = None
+
+        if self._spell_window is not None:
+            if self._spell_window.result is not None:
+                selected_spell = self._spell_window.result
+                log = self._spell_usecase.use_spell(
+                    self.context.scene.app.player, selected_spell
+                )
+                self._wm.pop()
+                self._wm.push(
+                    MessageWindow(
+                        app=self.context.scene.app,
+                        x=10,
+                        y=130,
+                        width=172,
+                        height=50,
+                        speed=2,
+                        messages=[log],
+                    )
+                )
+                self._spell_window = None
+            elif self._wm.current != self._spell_window:
+                self._spell_window = None
 
         if self._status_window is not None and self._wm.current != self._status_window:
             self._status_window = None
