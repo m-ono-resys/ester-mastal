@@ -41,41 +41,57 @@ class InnMode(BaseMode):
             self._wm.push(self._choice_menu)
             self._has_pushed_choice = True
 
-        if self._choice_menu.result is not None:
-            choise = self._choice_menu.result
-            self._choice_menu.result = None
-            self._has_made_choice = True  # 選択完了フラグをオン
+        if self._has_pushed_choice and not self._has_made_choice:
+            if self._choice_menu.result is not None:
+                choise = self._choice_menu.result
+                self._choice_menu.result = None
+                self._has_made_choice = True  # 選択完了フラグをオン
 
-            match choise:
-                case InnCommand.Yes:
-                    p = self.context.scene.app.player
-                    p.hp, p.mp = p.max_hp, p.max_mp
-                    self._wm.clear()
-                    self._wm.push(
-                        MessageWindow(
-                            self.context.scene.app,
-                            x=10,
-                            y=130,
-                            width=172,
-                            height=50,
-                            speed=2,
-                            messages=["よく ねむれたかい？", "いってらっしゃい！"],
+                match choise:
+                    case InnCommand.Yes:
+                        p = self.context.scene.app.player
+                        p.hp, p.mp = p.max_hp, p.max_mp
+                        self._wm.clear()
+                        self._wm.push(
+                            MessageWindow(
+                                self.context.scene.app,
+                                x=10,
+                                y=130,
+                                width=172,
+                                height=50,
+                                speed=2,
+                                messages=["よく ねむれたかい？", "いってらっしゃい！"],
+                            )
                         )
-                    )
 
-                case InnCommand.No:
-                    self._wm.clear()
-                    self._wm.push(
-                        MessageWindow(
-                            self.context.scene.app,
-                            x=10,
-                            y=130,
-                            width=172,
-                            height=50,
-                            speed=2,
-                            messages=["むりしないでね"],
+                    case _:
+                        self._wm.clear()
+                        self._wm.push(
+                            MessageWindow(
+                                self.context.scene.app,
+                                x=10,
+                                y=130,
+                                width=172,
+                                height=50,
+                                speed=2,
+                                messages=["むりしないでね"],
+                            )
                         )
+
+            elif self._wm.current != self._choice_menu:
+                self._has_made_choice = True
+                self._wm.clear()
+                self._wm.push(
+                    MessageWindow(
+                        self.context.scene.app,
+                        x=10,
+                        y=130,
+                        width=172,
+                        height=50,
+                        speed=2,
+                        messages=["むりしないでね"],
                     )
+                )
 
         # ★ ステップ3: 選択後のメッセージも読み終わってウィンドウが全て閉じたら探索に戻る
         if self._has_made_choice and not self._wm.is_open:
