@@ -11,17 +11,49 @@ MAP_EVENTS = {
     (MapId.CASTLE_1F, 2, 2): {
         "type": "NPC",
         "name": "イフロ",
-        "messages": [
-            "イフロ「まずは ２かいの 王さまから話をきいてくれ。」",
+        "dialogues": [
+            {
+                "flag": "GOT_ORB",
+                "messages": ["イフロ「あとはたのんだぞ！」"],
+            },
+            {
+                "flag": "TALKED_TO_KING",
+                "set_flag": "GOT_ORB",
+                "give_item": ItemCode.CELESTIAL_ORB,
+                "messages": [
+                    "イフロ「王さまにきいて ここにきたんだろ。",
+                    "ま王のしろのまえには とても高いやまがあるだろ。",
+                    "だからぼくがもっている 天の玉をつかうといい。」",
+                    "天の玉を てにいれた！",
+                ],
+            },
+            {
+                "flag": None,
+                "messages": [
+                    "イフロ「まずは ２かいの 王さまから話をきいてくれ。」",
+                ],
+            },
         ],
     },
     (MapId.CASTLE_2F, 6, 3): {
         "type": "NPC",
         "name": "まさたか王",
-        "messages": [
-            "まさたか王「おねがいします どうか ま王をたおしてくれ。",
-            "そのまえに、１かいにいる イフロに話したらいい",
-            "きっと やくに たつだろう。」",
+        "dialogues": [
+            {
+                "flag": "TALKED_TO_KING",
+                "messages": [
+                    "まさたか王「トイロよ たのんだぞ。」",
+                ],
+            },
+            {
+                "flag": None,
+                "set_flag": "TALKED_TO_KING",
+                "messages": [
+                    "まさたか王「おねがいします どうか ま王をたおしてくれ。",
+                    "そのまえに、１かいにいる イフロに話したらいい",
+                    "きっと やくに たつだろう。」",
+                ],
+            },
         ],
     },
     # 宿屋 (x=1, y=3)

@@ -124,9 +124,9 @@ class ExploreMode(BaseMode):
             case "SHOP":
                 return PushSignal(ShopMode(self.context, event))
 
-    #         case "BOSS":
-    #             scene.pending_boss_id = event["monster_id"]
-    #             return PushSignal(MessageMode(self.context, event["messages"], start_boss_battle=True))
+        #         case "BOSS":
+        #             scene.pending_boss_id = event["monster_id"]
+        #             return PushSignal(MessageMode(self.context, event["messages"], start_boss_battle=True))
 
         return ModeSignal()
 
