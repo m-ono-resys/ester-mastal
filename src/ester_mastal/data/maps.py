@@ -3,10 +3,12 @@ from enum import Enum, auto
 
 
 class MapId(Enum):
-    WORLD = auto()  # フィールド
-    TOWN = auto()  # 街
-    DUNGEON_B1F = auto()  # ダンジョン
-    DUNGEON_B2F = auto()
+    WORLD = auto()  # 世界（トレートロット）
+    TOWN = auto()  # まち（トーンバット）
+    CASTLE_1F = auto()  # おしろ（メーマント）1F
+    CASTLE_2F = auto()  # おしろ（メーマント）2F
+    DUNGEON_B1F = auto()  # ダンジョン（ギントのどうくつ） B1F
+    DUNGEON_B2F = auto()  # ダンジョン（ギントのどうくつ） B2F
 
 
 @dataclass(frozen=True)
@@ -35,6 +37,8 @@ class ToPosition:
 MAP_CONFIG: dict[MapId, MapDefinistion] = {
     MapId.WORLD: MapDefinistion(0, 0, 0),
     MapId.TOWN: MapDefinistion(192, 0, 0.0),
+    MapId.CASTLE_1F: MapDefinistion(768, 0, 0),
+    MapId.CASTLE_2F: MapDefinistion(960, 0, 0),
     MapId.DUNGEON_B1F: MapDefinistion(384, 0, 0),
     MapId.DUNGEON_B2F: MapDefinistion(576, 0, 0),
     # MapId.TOWN: {
@@ -51,31 +55,48 @@ MAP_CONFIG: dict[MapId, MapDefinistion] = {
 
 # ★ ワープ地点の定義: (現在のMapId, x, y) -> 遷移先情報
 WARP_POINTS: dict[FromPosition, ToPosition] = {
-    FromPosition(MapId.WORLD, 2, 6): ToPosition(MapId.TOWN, 1, 5, "トーンバットのまち"),
-    FromPosition(MapId.TOWN, 0, 4): ToPosition(MapId.WORLD, 2, 7, "そと に でた。"),
-    FromPosition(MapId.TOWN, 0, 5): ToPosition(MapId.WORLD, 2, 7, "そと に でた。"),
-    FromPosition(MapId.TOWN, 0, 6): ToPosition(MapId.WORLD, 2, 7, "そと に でた。"),
-
-    FromPosition(MapId.WORLD, 1, 4): ToPosition(MapId.DUNGEON_B1F, 5, 9, "ギントのどうくつ に はいった…"),
-    FromPosition(MapId.DUNGEON_B1F, 5, 9): ToPosition(MapId.WORLD, 1, 5, "そと に でた。"),
-
+    # トーンバットのまち
+    FromPosition(MapId.WORLD, 4, 8): ToPosition(MapId.TOWN, 1, 5, "トーンバットのまち"),
+    FromPosition(MapId.TOWN, 0, 4): ToPosition(MapId.WORLD, 4, 9, "そと に でた。"),
+    FromPosition(MapId.TOWN, 0, 5): ToPosition(MapId.WORLD, 4, 9, "そと に でた。"),
+    FromPosition(MapId.TOWN, 0, 6): ToPosition(MapId.WORLD, 4, 9, "そと に でた。"),
+    # ギントのどうくつ
+    FromPosition(MapId.WORLD, 2, 2): ToPosition(
+        MapId.DUNGEON_B1F, 5, 9, "ギントのどうくつ に はいった…"
+    ),
+    FromPosition(MapId.DUNGEON_B1F, 5, 9): ToPosition(
+        MapId.WORLD, 1, 5, "そと に でた。"
+    ),
+    # ぎんとのどうくつ階段
     FromPosition(MapId.DUNGEON_B1F, 6, 5): ToPosition(MapId.DUNGEON_B2F, 6, 5, None),
     FromPosition(MapId.DUNGEON_B2F, 6, 5): ToPosition(MapId.DUNGEON_B1F, 6, 5, None),
-
     FromPosition(MapId.DUNGEON_B2F, 2, 5): ToPosition(MapId.DUNGEON_B1F, 2, 5, None),
     FromPosition(MapId.DUNGEON_B1F, 2, 5): ToPosition(MapId.DUNGEON_B2F, 2, 5, None),
-
     FromPosition(MapId.DUNGEON_B1F, 1, 1): ToPosition(MapId.DUNGEON_B2F, 1, 1, None),
     FromPosition(MapId.DUNGEON_B2F, 1, 1): ToPosition(MapId.DUNGEON_B1F, 1, 1, None),
-
     FromPosition(MapId.DUNGEON_B2F, 10, 1): ToPosition(MapId.DUNGEON_B1F, 10, 1, None),
     FromPosition(MapId.DUNGEON_B1F, 10, 1): ToPosition(MapId.DUNGEON_B2F, 10, 1, None),
-
     FromPosition(MapId.DUNGEON_B1F, 10, 9): ToPosition(MapId.DUNGEON_B2F, 10, 9, None),
     FromPosition(MapId.DUNGEON_B2F, 10, 9): ToPosition(MapId.DUNGEON_B1F, 10, 9, None),
-
-    # FromPosition(MapId.DUNGEON, 5, 9): ToPosition(MapId.WORLD, 1, 5, "そと に でた。"),
-    # FromPosition(MapId.DUNGEON, 5, 9): ToPosition(MapId.WORLD, 1, 5, "そと に でた。"),
+    # メーマントのしろ
+    FromPosition(MapId.WORLD, 6, 4): ToPosition(
+        MapId.CASTLE_1F, 6, 9, "メーマントのしろ"
+    ),
+    FromPosition(MapId.CASTLE_1F, 4, 10): ToPosition(
+        MapId.WORLD, 6, 5, "そと に でた。"
+    ),
+    FromPosition(MapId.CASTLE_1F, 5, 10): ToPosition(
+        MapId.WORLD, 6, 5, "そと に でた。"
+    ),
+    FromPosition(MapId.CASTLE_1F, 6, 10): ToPosition(
+        MapId.WORLD, 6, 5, "そと に でた。"
+    ),
+    FromPosition(MapId.CASTLE_1F, 7, 10): ToPosition(
+        MapId.WORLD, 6, 5, "そと に でた。"
+    ),
+    # メーマントのしろ階段
+    FromPosition(MapId.CASTLE_1F, 6, 4): ToPosition(MapId.CASTLE_2F, 6, 7, None),
+    FromPosition(MapId.CASTLE_2F, 6, 7): ToPosition(MapId.CASTLE_1F, 6, 4, None),
     # FromPosition(MapId.DUNGEON, 5, 9): ToPosition(MapId.WORLD, 1, 5, "そと に でた。"),
     # # 3. フィールドの洞窟 (x=8, y=2) ➔ ダンジョンへ
     # (MapId.WORLD, 1, 4): {
