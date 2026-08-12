@@ -9,6 +9,9 @@ class MapId(Enum):
     CASTLE_2F = auto()  # おしろ（メーマント）2F
     DUNGEON_B1F = auto()  # ダンジョン（ギントのどうくつ） B1F
     DUNGEON_B2F = auto()  # ダンジョン（ギントのどうくつ） B2F
+    DEMON_CASTLE_1F = auto()  # まおうのしろ 1F
+    DEMON_CASTLE_2F = auto()  # まおうのしろ 2F
+    DEMON_CASTLE_3F = auto()  # まおうのしろ 3F
 
 
 @dataclass(frozen=True)
@@ -41,6 +44,9 @@ MAP_CONFIG: dict[MapId, MapDefinistion] = {
     MapId.CASTLE_2F: MapDefinistion(960, 0, 0),
     MapId.DUNGEON_B1F: MapDefinistion(384, 0, 0),
     MapId.DUNGEON_B2F: MapDefinistion(576, 0, 0),
+    MapId.DEMON_CASTLE_1F: MapDefinistion(0, 192, 0),
+    MapId.DEMON_CASTLE_2F: MapDefinistion(192, 192, 0),
+    MapId.DEMON_CASTLE_3F: MapDefinistion(384, 192, 0),
     # MapId.TOWN: {
     #     "u": 192,  # 例: Tilemap 0 上で横に 192px (24タイル) ズレた場所
     #     "v": 0,
@@ -97,6 +103,35 @@ WARP_POINTS: dict[FromPosition, ToPosition] = {
     # メーマントのしろ階段
     FromPosition(MapId.CASTLE_1F, 6, 4): ToPosition(MapId.CASTLE_2F, 6, 7, None),
     FromPosition(MapId.CASTLE_2F, 6, 7): ToPosition(MapId.CASTLE_1F, 6, 4, None),
+    # まおうのしろ
+    FromPosition(MapId.WORLD, 10, 1): ToPosition(
+        MapId.DEMON_CASTLE_1F, 5, 9, "まおうのしろ"
+    ),
+    FromPosition(MapId.DEMON_CASTLE_1F, 5, 10): ToPosition(
+        MapId.WORLD, 10, 2, "そと に でた。"
+    ),
+    FromPosition(MapId.DEMON_CASTLE_1F, 6, 10): ToPosition(
+        MapId.WORLD, 10, 2, "そと に でた。"
+    ),
+    # まおうのしろ階段
+    FromPosition(MapId.DEMON_CASTLE_1F, 5, 4): ToPosition(
+        MapId.DEMON_CASTLE_2F, 5, 6, None
+    ),
+    FromPosition(MapId.DEMON_CASTLE_1F, 6, 6): ToPosition(
+        MapId.DEMON_CASTLE_2F, 6, 8, None
+    ),
+    FromPosition(MapId.DEMON_CASTLE_2F, 5, 6): ToPosition(
+        MapId.DEMON_CASTLE_1F, 5, 4, None
+    ),
+    FromPosition(MapId.DEMON_CASTLE_2F, 6, 8): ToPosition(
+        MapId.DEMON_CASTLE_1F, 6, 6, None
+    ),
+    FromPosition(MapId.DEMON_CASTLE_2F, 6, 1): ToPosition(
+        MapId.DEMON_CASTLE_3F, 6, 8, None
+    ),
+    FromPosition(MapId.DEMON_CASTLE_3F, 6, 8): ToPosition(
+        MapId.DEMON_CASTLE_2F, 6, 1, None
+    ),
     # FromPosition(MapId.DUNGEON, 5, 9): ToPosition(MapId.WORLD, 1, 5, "そと に でた。"),
     # # 3. フィールドの洞窟 (x=8, y=2) ➔ ダンジョンへ
     # (MapId.WORLD, 1, 4): {
