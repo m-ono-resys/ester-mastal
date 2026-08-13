@@ -4,10 +4,12 @@ import pyxel
 
 from ..application.item_use_case import ItemUseCase
 from ..audio import play_se
+from ..data.events import EventFlag
 from ..infrastructure.in_memory_item_repository import InMemoryItemRepository
 from ..infrastructure.in_memory_spell_repository import InMemorySpellRepository
 from ..models.battle import BattleEngine
 from ..models.item import ItemCode
+from ..models.monster import MonsterCode
 from ..models.spell import SpellCode
 from ..ui.battle_status_window import BattleStatusWindow
 from ..ui.enum_select_window import EnumSelectWindow
@@ -73,14 +75,18 @@ class BattleScene(BaseScene):
             if self.engine.is_finished:
                 # 戦闘終了 ➔ 勝敗に応じたシーン遷移
                 if self.app.player.is_alive:
-                    if self.engine.monster.is_boss:
-                        from .ending_scene import EndingScene
 
-                        self.app.change_state(EndingScene(self.app))
-                    else:
-                        from .field.field_scene import FieldScene
+                    match self.engine.monster.name:
+                        case MonsterCode.SANTROTO.value:
+                            self.app.flags.add(EventFlag.DEFEATED_SANTROTO)
+                        case MonsterCode.DERAMILE.value:
+                            from .ending_scene import EndingScene
 
-                        self.app.change_state(FieldScene(self.app))
+                            self.app.change_state(EndingScene(self.app))
+                        case _:
+                            from .field.field_scene import FieldScene
+
+                            self.app.change_state(FieldScene(self.app))
                 else:
                     from .game_over_scene import GameOverScene
 
