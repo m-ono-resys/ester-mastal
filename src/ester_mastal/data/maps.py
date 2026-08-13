@@ -47,16 +47,6 @@ MAP_CONFIG: dict[MapId, MapDefinistion] = {
     MapId.DEMON_CASTLE_1F: MapDefinistion(0, 192, 0),
     MapId.DEMON_CASTLE_2F: MapDefinistion(192, 192, 0),
     MapId.DEMON_CASTLE_3F: MapDefinistion(384, 192, 0),
-    # MapId.TOWN: {
-    #     "u": 192,  # 例: Tilemap 0 上で横に 192px (24タイル) ズレた場所
-    #     "v": 0,
-    #     "encount_rate": 0.0,
-    # },
-    # MapId.DUNGEON: {
-    #     "u": 384,  # 例: Tilemap 0 上で横に 384px (48タイル) ズレた場所
-    #     "v": 0,
-    #     "encount_rate": 0.0,  # エンカウント率　25%
-    # },
 }
 
 # ★ ワープ地点の定義: (現在のMapId, x, y) -> 遷移先情報
@@ -132,26 +122,4 @@ WARP_POINTS: dict[FromPosition, ToPosition] = {
     FromPosition(MapId.DEMON_CASTLE_3F, 6, 8): ToPosition(
         MapId.DEMON_CASTLE_2F, 6, 1, None
     ),
-    # FromPosition(MapId.DUNGEON, 5, 9): ToPosition(MapId.WORLD, 1, 5, "そと に でた。"),
-    # # 3. フィールドの洞窟 (x=8, y=2) ➔ ダンジョンへ
-    # (MapId.WORLD, 1, 4): {
-    #     "target_map": MapId.DUNGEON,
-    #     "target_x": 1,
-    #     "target_y": 1,
-    #     "message": "ギントのどうくつ に はいった…",
-    # },
-    # # 4. ダンジョンの出口 (x=1, y=0) ➔ フィールドへ
-    # (MapId.DUNGEON, 1, 0): {
-    #     "target_map": MapId.WORLD,
-    #     "target_x": 1,
-    #     "target_y": 5,
-    #     "message": "ギントのどうくつ から でた。",
-    # },
 }
-
-# マップごとのエンカウント率設定
-# ENCOUNT_RATES = {
-#     MapId.WORLD: 0.15,   # 15%
-#     MapId.TOWN: 0.0,     # 街の中は敵が出ない (0%)
-#     MapId.DUNGEON: 0.25  # ダンジョンは高め (25%)
-# }
