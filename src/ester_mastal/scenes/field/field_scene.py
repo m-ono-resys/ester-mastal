@@ -109,7 +109,7 @@ class FieldScene(BaseScene):
     def trigger_battle(self):
         from ..battle_scene import BattleScene
 
-        monster_id = random.choice(["entenstr", "rarutaes"])
+        monster_id = random.choice(["entenstr", "rarutaes", "mentatol"])
         monster = self.app.repo.create_monster(monster_id)
         self.app.change_state(BattleScene(self.app, monster))
 

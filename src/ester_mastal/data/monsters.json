@@ -35,7 +35,29 @@
     "attack": 24,
     "defense": 14,
     "exp": 18,
-    "gold": 25
+    "gold": 25,
+    "sprite": {
+      "u": 64,
+      "v": 64,
+      "w": 32,
+      "h": 32,
+      "colkey": 0
+    }
+  },
+  "santoroto": {
+    "name": "サントーロート",
+    "hp": 50,
+    "attack": 30,
+    "defense": 20,
+    "exp": 36,
+    "gold": 100,
+    "sprite": {
+      "u": 48,
+      "v": 96,
+      "w": 32,
+      "h": 48,
+      "colkey": 0
+    }
   },
   "deramil": {
     "name": "まおう デラミール",
