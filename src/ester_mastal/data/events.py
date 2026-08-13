@@ -25,6 +25,9 @@ chest_strat = ModeLauncherStrategy(ChestMessageMode)
 class EventFlag(StrEnum):
     TALKED_TO_KING = "TALKED_TO_KING"
     GOT_ORB = "GOT_ORB"
+    OPENED_CHEST_CASTLE_1 = "CHEST_C_10_9"
+    OPENED_CHEST_CASTLE_2 = "CHEST_C_9_1"
+    OPENED_CHEST_CASTLE_3 = "CHEST_C_10_1"
     OPENED_CHEST_DUNGEON_1 = "CHEST_D_8_4"
 
 
@@ -99,12 +102,22 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
             ],
         ),
     ),
-    # # 宝箱 (x=8, y=4)
+    FromPosition(MapId.CASTLE_1F, 10, 9): (
+        chest_strat,
+        ChestModeData(flag_key=EventFlag.OPENED_CHEST_CASTLE_1, reward_gold=30),
+    ),
+    FromPosition(MapId.CASTLE_1F, 9, 1): (
+        chest_strat,
+        ChestModeData(flag_key=EventFlag.OPENED_CHEST_CASTLE_2, reward_item=ItemCode.POTION),
+    ),
+    FromPosition(MapId.CASTLE_1F, 10, 1): (
+        chest_strat,
+        ChestModeData(flag_key=EventFlag.OPENED_CHEST_CASTLE_3, reward_item=ItemCode.LEATHER_ARMOR),
+    ),
     FromPosition(MapId.DUNGEON_B1F, 8, 4): (
         chest_strat,
-        ChestModeData(flag_key=EventFlag.OPENED_CHEST_DUNGEON_1, reward_gold=100)
-    )
-
+        ChestModeData(flag_key=EventFlag.OPENED_CHEST_DUNGEON_1, reward_gold=100),
+    ),
     # {
     #     "type": "CHEST",
     #     "reward_type": "gold",  # "gold" または "item"
