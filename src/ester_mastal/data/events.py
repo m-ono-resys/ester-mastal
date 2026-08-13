@@ -29,15 +29,17 @@ class EventFlag(StrEnum):
     OPENED_CHEST_CASTLE_2 = "CHEST_C_9_1"
     OPENED_CHEST_CASTLE_3 = "CHEST_C_10_1"
     OPENED_CHEST_DUNGEON_1 = "CHEST_D_8_4"
+    OPENED_CHEST_DUNGEON_2 = "CHEST_D_B2_9_5"
+    OPENED_CHEST_DUNGEON_3 = "CHEST_D_B2_10_5"
+
+
 
 
 MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
-    # 村人NPC (x=5, y=5)
     FromPosition(MapId.TOWN, 5, 5): (
         message_strat,
         MessageModeData(name="むらびと", messages=["きたに おしろが あるよ"]),
     ),
-    # 宿屋 (x=1, y=3)
     FromPosition(MapId.TOWN, 8, 8): (
         inn_strat,
         InnModeData(
@@ -108,24 +110,28 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
     ),
     FromPosition(MapId.CASTLE_1F, 9, 1): (
         chest_strat,
-        ChestModeData(flag_key=EventFlag.OPENED_CHEST_CASTLE_2, reward_item=ItemCode.POTION),
+        ChestModeData(
+            flag_key=EventFlag.OPENED_CHEST_CASTLE_2, reward_item=ItemCode.POTION
+        ),
     ),
     FromPosition(MapId.CASTLE_1F, 10, 1): (
         chest_strat,
-        ChestModeData(flag_key=EventFlag.OPENED_CHEST_CASTLE_3, reward_item=ItemCode.LEATHER_ARMOR),
+        ChestModeData(
+            flag_key=EventFlag.OPENED_CHEST_CASTLE_3, reward_item=ItemCode.LEATHER_ARMOR
+        ),
     ),
     FromPosition(MapId.DUNGEON_B1F, 8, 4): (
         chest_strat,
         ChestModeData(flag_key=EventFlag.OPENED_CHEST_DUNGEON_1, reward_gold=100),
     ),
-    # {
-    #     "type": "CHEST",
-    #     "reward_type": "gold",  # "gold" または "item"
-    #     "reward_value": 50,
-    #     "is_opened": False,
-    #     "closed_sprite": (16, 32),  # ★ 閉じた宝箱の (u, v) 座標
-    #     "opened_sprite": (32, 32),  # ★ 開いた宝箱の (u, v) 座標
-    # },
+    FromPosition(MapId.DUNGEON_B2F, 9, 5): (
+        chest_strat,
+        ChestModeData(flag_key=EventFlag.OPENED_CHEST_DUNGEON_2, reward_item=ItemCode.KING_ARMOR),
+    ),
+    FromPosition(MapId.DUNGEON_B2F, 10, 5): (
+        chest_strat,
+        ChestModeData(flag_key=EventFlag.OPENED_CHEST_DUNGEON_3, reward_item=ItemCode.KING_SWORD),
+    ),
     # ダンジョンの最奥 (x=5, y=2) に竜王を配置
     # (MapId.DUNGEON, 5, 2): {
     #     "type": "BOSS",
