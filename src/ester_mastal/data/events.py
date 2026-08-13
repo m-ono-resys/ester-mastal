@@ -2,6 +2,7 @@ from enum import StrEnum
 
 from ..models.item import ItemCode
 from ..scenes.field.mode.base_mode import BaseModeData
+from ..scenes.field.mode.chest_message_mode import ChestMessageMode, ChestModeData
 from ..scenes.field.mode.extend_message_mode import (
     Dialogue,
     ExtendMessageMode,
@@ -18,6 +19,7 @@ message_strat = ModeLauncherStrategy(MessageMode)
 ext_message_strat = ModeLauncherStrategy(ExtendMessageMode)
 inn_strat = ModeLauncherStrategy(InnMode)
 shop_strat = ModeLauncherStrategy(ShopMode)
+chest_strat = ModeLauncherStrategy(ChestMessageMode)
 
 
 class EventFlag(StrEnum):
@@ -98,7 +100,12 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
         ),
     ),
     # # 宝箱 (x=8, y=4)
-    # FromPosition(MapId.DUNGEON_B1F, 8, 4): {
+    FromPosition(MapId.DUNGEON_B1F, 8, 4): (
+        chest_strat,
+        ChestModeData(flag_key=EventFlag.OPENED_CHEST_DUNGEON_1, reward_gold=100)
+    )
+
+    # {
     #     "type": "CHEST",
     #     "reward_type": "gold",  # "gold" または "item"
     #     "reward_value": 50,

@@ -11,10 +11,9 @@ if TYPE_CHECKING:
     from ....models.item import ItemCode
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ChestModeData(BaseModeData):
     """宝箱専用のデータ構造（デフォルトメッセージは自動生成されるため指定不要）"""
-
     flag_key: EventFlag
     reward_gold: int = 0
     reward_item: ItemCode | None = None

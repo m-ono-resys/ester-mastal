@@ -6,6 +6,7 @@ import pyxel
 
 from ...data.events import MAP_EVENTS
 from ...data.maps import MAP_CONFIG, FromPosition, MapId
+from ...scenes.field.mode.chest_message_mode import ChestModeData
 from ...ui.hud_status_window import HudStatusWindow
 from ...ui.window_manager import WindowManager
 from ..base_scene import BaseScene
@@ -125,22 +126,19 @@ class FieldScene(BaseScene):
 
     def _draw_map_objects(self):
         """現在のマップにある宝箱などのスプライトを描画"""
-        # for key, event in MAP_EVENTS.items():
-        #     map_id, x, y = key.map_id, key.x, key.y
+        flags = self.app.flags
+        for key, (_, data) in MAP_EVENTS.items():
+            if key.map_id == self.current_map_id and isinstance(data, ChestModeData):
+                px = key.x * self.tile_size
+                py = key.y * self.tile_size + 16
 
-        #     # 現在のマップの宝箱（CHEST）を描画
-        #     if map_id == self.current_map_id and event.get("type") == "CHEST":
-        #         px = x * self.tile_size
-        #         py = y * self.tile_size + 16  # 上部HUD分(16px)オフセット
+                # ★ 中央管理フラグ (app.flags) に flag_key が入っているかでスプライト決定！
+                if data.flag_key in flags:
+                    u, v = data.opened_sprite  # 開いた宝箱
+                else:
+                    u, v = data.closed_sprite  # 閉じた宝箱
 
-        #         # 開いているか閉じているかで描画するスプライト(u, v)を切り替え！
-        #         if event.get("is_opened", False):
-        #             u, v = event.get("opened_sprite", (32, 32))  # 開いた宝箱
-        #         else:
-        #             u, v = event.get("closed_sprite", (16, 32))  # 閉じた宝箱
-
-        #         # スプライト描画 (Image Bank 0, 16x16, 透過色8など)
-        #         pyxel.blt(px, py, 0, u, v, 16, 16, 0)
+                pyxel.blt(px, py, 0, u, v, 16, 16, 0)
 
     def draw(self):
         pyxel.cls(0)
