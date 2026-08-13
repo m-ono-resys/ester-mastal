@@ -27,41 +27,43 @@ class ExploreMode(BaseMode):
         return pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE)
 
     def update(self) -> ModeSignal:
-        scene = self.context.scene
-        wm = scene.window_manager
+        # scene = self.context.scene
+        # wm = scene.window_manager
 
         # ★ ウィンドウが開いている（会話中・メッセージ表示中など）場合
-        if wm.is_open:
-            wm.update()  # 最前面の MessageWindow の文字送りや決定キー処理を実行
+        if self._wm.is_open:
+            self._wm.update()  # 最前面の MessageWindow の文字送りや決定キー処理を実行
             return ModeSignal()  # 移動処理は行わずに終了
 
         dx, dy = 0, 0
 
         if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.KEY_W):
-            dy, scene.direction = -1, scene.direction.UP
+            dy, self._scene.direction = -1, self._scene.direction.UP
         elif pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.KEY_S):
-            dy, scene.direction = 1, scene.direction.DOWN
+            dy, self._scene.direction = 1, self._scene.direction.DOWN
         elif pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.KEY_A):
-            dx, scene.direction = -1, scene.direction.LEFT
+            dx, self._scene.direction = -1, self._scene.direction.LEFT
         elif pyxel.btnp(pyxel.KEY_RIGHT) or pyxel.btnp(pyxel.KEY_D):
-            dx, scene.direction = 1, scene.direction.RIGHT
+            dx, self._scene.direction = 1, self._scene.direction.RIGHT
 
         if dx != 0 or dy != 0:
-            next_x, next_y = scene.player_x + dx, scene.player_y + dy
-            if scene.can_move_to(next_x, next_y):
-                scene.player_x, scene.player_y = next_x, next_y
+            next_x, next_y = self._scene.player_x + dx, self._scene.player_y + dy
+            if self._scene.can_move_to(next_x, next_y):
+                self._scene.player_x, self._scene.player_y = next_x, next_y
 
                 # ワープ判定
                 warp_key = FromPosition(
-                    scene.current_map_id, scene.player_x, scene.player_y
+                    self._scene.current_map_id,
+                    self._scene.player_x,
+                    self._scene.player_y,
                 )
                 if warp_key in WARP_POINTS:
                     warp = WARP_POINTS[warp_key]
-                    scene.current_map_id = warp.map_id
-                    scene.player_x, scene.player_y = warp.x, warp.y
+                    self._scene.current_map_id = warp.map_id
+                    self._scene.player_x, self._scene.player_y = warp.x, warp.y
                     if warp.message is not None:
                         message = MessageWindow(
-                            app=scene.app,
+                            app=self._app,
                             x=10,
                             y=130,
                             width=172,
@@ -69,16 +71,19 @@ class ExploreMode(BaseMode):
                             speed=2,
                             messages=[warp.message],
                         )
-                        scene.window_manager.push(message)
+                        self._wm.push(message)
                     return ModeSignal()
 
                 # エンカウント判定
-                cfg = MAP_CONFIG[scene.current_map_id]
+                cfg = MAP_CONFIG[self._scene.current_map_id]
                 if (
-                    scene.get_tile_type(scene.player_x, scene.player_y) == "GRASS"
+                    self._scene.get_tile_type(
+                        self._scene.player_x, self._scene.player_y
+                    )
+                    == "GRASS"
                     and random.random() < cfg.encount_rate
                 ):
-                    scene.trigger_battle()
+                    self._scene.trigger_battle()
                     return ModeSignal()
 
         if self.is_confirm():
@@ -86,43 +91,66 @@ class ExploreMode(BaseMode):
             # pass
 
         elif self.is_cancel():
-            return PushSignal(MainMenuMode(self.context))
+            return PushSignal(MainMenuMode(self._context))
 
         return ModeSignal()
 
     def _interact(self) -> ModeSignal:
-        scene = self.context.scene
-        target_pos = scene.get_facing_pos()
-        event_key = (scene.current_map_id, target_pos[0], target_pos[1])
-        event = MAP_EVENTS.get(event_key)
+        # scene = self.context.scene
+        target_pos = self._scene.get_facing_pos()
+        event_key = FromPosition(
+            self._scene.current_map_id, target_pos[0], target_pos[1]
+        )
+        event_entry = MAP_EVENTS.get(event_key)
 
-        if not event:
+        if not event_entry:
             return ModeSignal()
 
-        scene.current_event = event
+        strategy, event_data = event_entry
+        self._scene.current_event = event_data
 
-        match event["type"]:
-            case "NPC":
-                return PushSignal(MessageMode(self.context))
+        return strategy.execute(self._context)
 
-            #         case "CHEST":
-            #             if event["is_opened"]:
-            #                 return PushSignal(MessageMode(self.context, ["たからばこ は からっぽ だ。"]))
-            #             else:
-            #                 event["is_opened"] = True
-            #                 p = self.context.app.player
-            #                 if event["reward_type"] == "gold":
-            #                     p.gold += event["reward_value"]
-            #                     return PushSignal(MessageMode(self.context, ["たからばこ を あけた！", f"{event['reward_value']} ゴールド を てにいれた！"]))
-            #                 elif event["reward_type"] == "item":
-            #                     p.items.append(event["reward_value"])
-            #                     return PushSignal(MessageMode(self.context, ["たからばこ を あけた！", f"{event['reward_value']} を てにいれた！"]))
+        # match type:
+        #     case "NPC":
+        #         return PushSignal(MessageMode(self.context))
 
-            case "INN":
-                return PushSignal(InnMode(self.context))
+        #     case "CHEST":
+        #         if event["is_opened"]:
+        #             return PushSignal(
+        #                 MessageMode(self.context, ["たからばこ は からっぽ だ。"])
+        #             )
+        #         else:
+        #             event["is_opened"] = True
+        #             p = self.context.app.player
+        #             if event["reward_type"] == "gold":
+        #                 p.gold += event["reward_value"]
+        #                 return PushSignal(
+        #                     MessageMode(
+        #                         self.context,
+        #                         [
+        #                             "たからばこ を あけた！",
+        #                             f"{event['reward_value']} ゴールド を てにいれた！",
+        #                         ],
+        #                     )
+        #                 )
+        #             elif event["reward_type"] == "item":
+        #                 p.items.append(event["reward_value"])
+        #                 return PushSignal(
+        #                     MessageMode(
+        #                         self.context,
+        #                         [
+        #                             "たからばこ を あけた！",
+        #                             f"{event['reward_value']} を てにいれた！",
+        #                         ],
+        #                     )
+        #                 )
 
-            case "SHOP":
-                return PushSignal(ShopMode(self.context, event))
+        #     case "INN":
+        #         return PushSignal(InnMode(self.context))
+
+        #     case "SHOP":
+        #         return PushSignal(ShopMode(self.context, event))
 
         #         case "BOSS":
         #             scene.pending_boss_id = event["monster_id"]

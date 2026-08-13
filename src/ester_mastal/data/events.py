@@ -1,81 +1,114 @@
-from ..models.item import ItemCode
-from .maps import MapId
+from enum import StrEnum
 
-MAP_EVENTS = {
+from ..models.item import ItemCode
+from ..scenes.field.mode.base_mode import BaseModeData
+from ..scenes.field.mode.inn_mode import InnMode, InnModeData
+from ..scenes.field.mode.message_mode import MessageMode, MessageModeData
+from ..scenes.field.mode.shop_mode import ShopMode, ShopModeData
+from ..scenes.field.strategies.event_strategies import ModeLauncherStrategy
+from ..scenes.field.strategies.event_strategy import EventStrategy
+from .maps import FromPosition, MapId
+
+message_strat = ModeLauncherStrategy(MessageMode)
+inn_strat = ModeLauncherStrategy(InnMode)
+shop_strat = ModeLauncherStrategy(ShopMode)
+
+
+class EventFlag(StrEnum):
+    TALKED_TO_KING = "TALKED_TO_KING"
+    GOT_ORB = "GOT_ORB"
+    OPENED_CHEST_DUNGEON_1 = "CHEST_D_8_4"
+
+
+MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
     # 村人NPC (x=5, y=5)
-    (MapId.TOWN, 5, 5): {
-        "type": "NPC",
-        "name": "むらびと",
-        "messages": ["きたに おしろが あるよ"],
-    },
-    (MapId.CASTLE_1F, 2, 2): {
-        "type": "NPC",
-        "name": "イフロ",
-        "dialogues": [
-            {
-                "flag": "GOT_ORB",
-                "messages": ["イフロ「あとはたのんだぞ！」"],
-            },
-            {
-                "flag": "TALKED_TO_KING",
-                "set_flag": "GOT_ORB",
-                "give_item": ItemCode.CELESTIAL_ORB,
-                "messages": [
-                    "イフロ「王さまにきいて ここにきたんだろ。",
-                    "ま王のしろのまえには とても高いやまがあるだろ。",
-                    "だからぼくがもっている 天の玉をつかうといい。」",
-                    "天の玉を てにいれた！",
-                ],
-            },
-            {
-                "flag": None,
-                "messages": [
-                    "イフロ「まずは ２かいの 王さまから話をきいてくれ。」",
-                ],
-            },
-        ],
-    },
-    (MapId.CASTLE_2F, 6, 3): {
-        "type": "NPC",
-        "name": "まさたか王",
-        "dialogues": [
-            {
-                "flag": "TALKED_TO_KING",
-                "messages": [
-                    "まさたか王「といろ よ たのんだぞ。」",
-                ],
-            },
-            {
-                "flag": None,
-                "set_flag": "TALKED_TO_KING",
-                "messages": [
-                    "まさたか王「おねがいします どうか ま王をたおしてくれ。",
-                    "そのまえに、１かいにいる イフロに話したらいい",
-                    "きっと やくに たつだろう。」",
-                ],
-            },
-        ],
-    },
+    FromPosition(MapId.TOWN, 5, 5): (
+        message_strat,
+        MessageModeData(name="むらびと", messages=["きたに おしろが あるよ"]),
+    ),
     # 宿屋 (x=1, y=3)
-    (MapId.TOWN, 8, 8): {"type": "INN", "name": "やどや", "price": 10},
-    # 武器屋 (x=4, y=2)
-    (MapId.TOWN, 4, 2): {
-        "type": "SHOP",
-        "name": "どうぐや",
-        "greeting": "いらっしゃいませ！\nここは どうぐや です。\nなにに しますか？",
-        "items": [
-            ItemCode.POTION,
-            ItemCode.COPPER_SWORD,
-            ItemCode.LEATHER_ARMOR,
-        ],
-    },
-    # 宝箱 (x=8, y=4)
-    (MapId.DUNGEON_B1F, 8, 4): {
-        "type": "CHEST",
-        "reward_type": "gold",  # "gold" または "item"
-        "reward_value": 50,
-        "is_opened": False,
-    },
+    FromPosition(MapId.TOWN, 8, 8): (
+        inn_strat,
+        InnModeData(
+            name="おかあさん",
+            greeting_messages=["おかえりなさい\n やすんでいくかい？"],
+            done_messages=["よく ねむれたかい？", "いってらっしゃい！"],
+            cancel_messages=["むりしないでね"],
+        ),
+    ),
+    FromPosition(MapId.TOWN, 4, 2): (
+        shop_strat,
+        ShopModeData(
+            name="どうぐや",
+            items=[
+                ItemCode.POTION,
+                ItemCode.COPPER_SWORD,
+                ItemCode.LEATHER_ARMOR,
+            ],
+            greeting_messages=[
+                "いらっしゃいませ！\nここは どうぐや です。\nなにに しますか？"
+            ],
+            cancel_messages=["また おこしください！"],
+        ),
+    ),
+    # FromPosition(MapId.CASTLE_1F, 2, 2): {
+    #     "type": "NPC",
+    #     "name": "イフロ",
+    #     "dialogues": [
+    #         {
+    #             "flag": "GOT_ORB",
+    #             "messages": ["イフロ「あとはたのんだぞ！」"],
+    #         },
+    #         {
+    #             "flag": "TALKED_TO_KING",
+    #             "set_flag": "GOT_ORB",
+    #             "give_item": ItemCode.CELESTIAL_ORB,
+    #             "messages": [
+    #                 "イフロ「王さまにきいて ここにきたんだろ。",
+    #                 "ま王のしろのまえには とても高いやまがあるだろ。",
+    #                 "だからぼくがもっている 天の玉をつかうといい。」",
+    #                 "天の玉を てにいれた！",
+    #             ],
+    #         },
+    #         {
+    #             "flag": None,
+    #             "messages": [
+    #                 "イフロ「まずは ２かいの 王さまから話をきいてくれ。」",
+    #             ],
+    #         },
+    #     ],
+    # },
+    # FromPosition(MapId.CASTLE_2F, 6, 3): {
+    #     "type": "NPC",
+    #     "name": "まさたか王",
+    #     "dialogues": [
+    #         {
+    #             "flag": "TALKED_TO_KING",
+    #             "messages": [
+    #                 "まさたか王「といろ よ たのんだぞ。」",
+    #             ],
+    #         },
+    #         {
+    #             "flag": None,
+    #             "set_flag": "TALKED_TO_KING",
+    #             "messages": [
+    #                 "まさたか王「おねがいします どうか ま王をたおしてくれ。",
+    #                 "そのまえに、１かいにいる イフロに話したらいい",
+    #                 "きっと やくに たつだろう。」",
+    #             ],
+    #         },
+    #     ],
+    # },
+    # # 武器屋 (x=4, y=2)
+    # # 宝箱 (x=8, y=4)
+    # FromPosition(MapId.DUNGEON_B1F, 8, 4): {
+    #     "type": "CHEST",
+    #     "reward_type": "gold",  # "gold" または "item"
+    #     "reward_value": 50,
+    #     "is_opened": False,
+    #     "closed_sprite": (16, 32),  # ★ 閉じた宝箱の (u, v) 座標
+    #     "opened_sprite": (32, 32),  # ★ 開いた宝箱の (u, v) 座標
+    # },
     # ダンジョンの最奥 (x=5, y=2) に竜王を配置
     # (MapId.DUNGEON, 5, 2): {
     #     "type": "BOSS",

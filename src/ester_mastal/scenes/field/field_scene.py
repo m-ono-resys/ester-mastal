@@ -5,7 +5,7 @@ from typing import Any
 import pyxel
 
 from ...data.events import MAP_EVENTS
-from ...data.maps import MAP_CONFIG, MapId
+from ...data.maps import MAP_CONFIG, FromPosition, MapId
 from ...ui.hud_status_window import HudStatusWindow
 from ...ui.window_manager import WindowManager
 from ..base_scene import BaseScene
@@ -99,7 +99,7 @@ class FieldScene(BaseScene):
     def can_move_to(self, grid_x: int, grid_y: int) -> bool:
         if grid_x < 0 or grid_x >= 12 or grid_y < 0 or grid_y >= 11:
             return False
-        if (self.current_map_id, grid_x, grid_y) in MAP_EVENTS:
+        if FromPosition(self.current_map_id, grid_x, grid_y) in MAP_EVENTS:
             return False
 
         tile_type = self.get_tile_type(grid_x, grid_y)
@@ -123,12 +123,34 @@ class FieldScene(BaseScene):
                 if len(self.mode_stack) > 1:
                     self.mode_stack.pop()
 
+    def _draw_map_objects(self):
+        """現在のマップにある宝箱などのスプライトを描画"""
+        # for key, event in MAP_EVENTS.items():
+        #     map_id, x, y = key.map_id, key.x, key.y
+
+        #     # 現在のマップの宝箱（CHEST）を描画
+        #     if map_id == self.current_map_id and event.get("type") == "CHEST":
+        #         px = x * self.tile_size
+        #         py = y * self.tile_size + 16  # 上部HUD分(16px)オフセット
+
+        #         # 開いているか閉じているかで描画するスプライト(u, v)を切り替え！
+        #         if event.get("is_opened", False):
+        #             u, v = event.get("opened_sprite", (32, 32))  # 開いた宝箱
+        #         else:
+        #             u, v = event.get("closed_sprite", (16, 32))  # 閉じた宝箱
+
+        #         # スプライト描画 (Image Bank 0, 16x16, 透過色8など)
+        #         pyxel.blt(px, py, 0, u, v, 16, 16, 0)
+
     def draw(self):
         pyxel.cls(0)
 
         # 1. マップ & プレイヤー描画
         cfg = MAP_CONFIG[self.current_map_id]
         pyxel.bltm(0, 16, 0, cfg.u, cfg.v, 192, 176)
+
+        self._draw_map_objects()
+
         pyxel.blt(
             self.player_x * self.tile_size,
             self.player_y * self.tile_size + 16,

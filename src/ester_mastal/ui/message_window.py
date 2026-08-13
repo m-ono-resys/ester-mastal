@@ -18,6 +18,7 @@ class MessageWindow(BaseWindow):
         y: int,
         width: int,
         height: int,
+        name: str | None = None,
         messages: list[str] | None = None,  # 初期メッセージを直接受け取れるように拡張
         speed: int = 2,
         max_chars_per_line: int = 16,
@@ -35,9 +36,23 @@ class MessageWindow(BaseWindow):
         self.is_waiting_input = False
         self.is_completed = True
 
+        self.name: str | None = name
+
         # 初期メッセージが指定されている場合は即座にキューに追加
         if messages:
             self.push_messages(messages)
+
+    def _format_messages(self, messages: list[str]) -> list[str]:
+        if not messages:
+            return []
+
+        lines = messages[:]
+
+        if self.name:
+            lines[0] = f"{self.name} 「{lines[0]}"
+            lines[-1] = f"{lines[-1]}」"
+
+        return lines
 
     def _split_into_pages(self, text: str) -> list[str]:
         """長文を1行18文字・1ページ2行に自動分割する関数"""
@@ -58,6 +73,7 @@ class MessageWindow(BaseWindow):
 
     def push_messages(self, messages: list[str]):
         """メッセージを追加（自動的に長文はページ分割される）"""
+        messages = self._format_messages(messages)
         for msg in messages:
             pages = self._split_into_pages(msg)
             self.queue.extend(pages)

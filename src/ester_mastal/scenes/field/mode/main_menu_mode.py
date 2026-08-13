@@ -20,7 +20,6 @@ class MenuCommand(Enum):
 class MainMenuMode(BaseMode):
     def __init__(self, context: FieldContext):
         super().__init__(context)
-        self._wm = context.scene.window_manager
         self._main_menu = EnumSelectWindow(
             context.scene.app, 10, 24, 60, list(MenuCommand)
         )
@@ -41,11 +40,11 @@ class MainMenuMode(BaseMode):
 
             match cmd:
                 case MenuCommand.Item:
-                    _items = self.context.scene.app.player.inventory
+                    _items = self._app.player.inventory
                     if not _items:
                         self._wm.push(
                             MessageWindow(
-                                app=self.context.scene.app,
+                                app=self._app,
                                 x=10,
                                 y=130,
                                 width=172,
@@ -56,15 +55,15 @@ class MainMenuMode(BaseMode):
                         )
                     else:
                         self._item_window = EnumSelectWindow(
-                            self.context.scene.app, 80, 24, 100, _items
+                            self._app, 80, 24, 100, _items
                         )
                         self._wm.push(self._item_window)
                 case MenuCommand.Spell:
-                    _spells = self.context.scene.app.player.spells
+                    _spells = self._app.player.spells
                     if not _spells:
                         self._wm.push(
                             MessageWindow(
-                                app=self.context.scene.app,
+                                app=self._app,
                                 x=10,
                                 y=130,
                                 width=172,
@@ -75,11 +74,11 @@ class MainMenuMode(BaseMode):
                         )
                     else:
                         self._spell_window = EnumSelectWindow(
-                            self.context.scene.app, 80, 24, 100, _spells
+                            self._app, 80, 24, 100, _spells
                         )
                         self._wm.push(self._spell_window)
                 case MenuCommand.Status:
-                    self._status_window = StatusWindow(self.context.scene.app)
+                    self._status_window = StatusWindow(self._app)
                     self._wm.push(self._status_window)
 
         # 2. アイテム選択ウィンドウが開いている時の判定
@@ -87,13 +86,11 @@ class MainMenuMode(BaseMode):
             # A. アイテムが選択された場合
             if self._item_window.result is not None:
                 selected_item = self._item_window.result
-                logs = self._item_usecase.use_item(
-                    self.context.scene.app.player, selected_item
-                )
+                logs = self._item_usecase.use_item(self._app.player, selected_item)
                 self._wm.pop()
                 self._wm.push(
                     MessageWindow(
-                        app=self.context.scene.app,
+                        app=self._app,
                         x=10,
                         y=130,
                         width=172,
@@ -111,13 +108,11 @@ class MainMenuMode(BaseMode):
         if self._spell_window is not None:
             if self._spell_window.result is not None:
                 selected_spell = self._spell_window.result
-                logs = self._spell_usecase.use_spell(
-                    self.context.scene.app.player, selected_spell
-                )
+                logs = self._spell_usecase.use_spell(self._app.player, selected_spell)
                 self._wm.pop()
                 self._wm.push(
                     MessageWindow(
-                        app=self.context.scene.app,
+                        app=self._app,
                         x=10,
                         y=130,
                         width=172,

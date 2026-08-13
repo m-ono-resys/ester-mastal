@@ -1,4 +1,8 @@
+from __future__ import annotations
+
+from dataclasses import dataclass, field
 from enum import Enum, auto
+from typing import TYPE_CHECKING
 
 from ....application.shop_use_case import ShopUseCase
 from ....infrastructure.in_memory_item_repository import InMemoryItemRepository
@@ -6,8 +10,18 @@ from ....models.item import ItemCode
 from ....ui.enum_select_window import EnumSelectWindow
 from ....ui.message_window import MessageWindow
 from ....ui.shop_item_select_window import ShopItemSelectWindow
-from .base_mode import BaseMode, FieldContext
+from .base_mode import BaseMode, BaseModeData
 from .signals import ModeSignal, PopSignal
+
+if TYPE_CHECKING:
+    from .base_mode import FieldContext
+
+
+@dataclass
+class ShopModeData(BaseModeData):
+    items: list[ItemCode] = field(default_factory=list)
+    greeting_messages: list[str] = field(default_factory=list)
+    cancel_messages: list[str] = field(default_factory=list)
 
 
 class ShopCommand(Enum):
@@ -30,23 +44,24 @@ class _ShopSubState(Enum):
 
 
 class ShopMode(BaseMode):
-    def __init__(self, context: FieldContext, event):
+    def __init__(self, context: FieldContext):
         super().__init__(context)
-        self._wm = context.scene.window_manager
-        self._event = event
+        self._event_data: ShopModeData = self._scene.current_event
 
         self._item_repository = InMemoryItemRepository()
         self._shop_use_case = ShopUseCase(self._item_repository)
 
         # 1. 挨拶メッセージ表示
         self._greeting_msg = MessageWindow(
-            self.context.scene.app,
+            self._app,
             x=10,
             y=130,
             width=172,
             height=50,
             speed=2,
-            messages=["いらっしゃいませ！\nなにに しますか？"],
+            # messages=["いらっしゃいませ！\nなにに しますか？"],
+            name=self._event_data.name,
+            messages=self._event_data.greeting_messages,
         )
         self._wm.push(self._greeting_msg)
 
@@ -68,7 +83,7 @@ class ShopMode(BaseMode):
             case _ShopSubState.GREETING:
                 if not self._wm.is_open or self._wm.current != self._greeting_msg:
                     self._shop_command = EnumSelectWindow(
-                        self.context.scene.app, 10, 24, 60, list(ShopCommand)
+                        self._app, 10, 24, 60, list(ShopCommand)
                     )
                     self._wm.push(self._shop_command)
                     self._sub_state = _ShopSubState.MAIN_MENU
@@ -84,10 +99,10 @@ class ShopMode(BaseMode):
                         match cmd:
                             case ShopCommand.BUY:
                                 self._sell_mode = False
-                                _shop_items = self._event["items"]
+                                _shop_items = self._event_data.items
 
                                 self._shopping_window = ShopItemSelectWindow(
-                                    self.context.scene.app,
+                                    self._app,
                                     75,
                                     24,
                                     110,
@@ -98,11 +113,11 @@ class ShopMode(BaseMode):
                                 self._sub_state = _ShopSubState.BUY_LIST
 
                             case ShopCommand.SELL:
-                                _shop_items = self.context.scene.app.player.inventory
+                                _shop_items = self._app.player.inventory
 
                                 if not _shop_items:
                                     self._no_item_msg = MessageWindow(
-                                        self.context.scene.app,
+                                        self._app,
                                         x=10,
                                         y=130,
                                         width=172,
@@ -115,7 +130,7 @@ class ShopMode(BaseMode):
                                 else:
                                     self._sell_mode = True
                                     self._shopping_window = ShopItemSelectWindow(
-                                        self.context.scene.app,
+                                        self._app,
                                         75,
                                         24,
                                         110,
@@ -138,13 +153,14 @@ class ShopMode(BaseMode):
                             or self._wm.current != self._shop_command
                         ) and not is_no_item_msg_active:
                             self._farewell_msg = MessageWindow(
-                                self.context.scene.app,
+                                self._app,
                                 10,
                                 130,
                                 172,
                                 50,
                                 speed=2,
-                                messages=["また おこしください！"],
+                                # messages=["また おこしください！"],
+                                messages=self._event_data.cancel_messages,
                             )
                             self._wm.push(self._farewell_msg)
                             self._sub_state = _ShopSubState.EXITING
@@ -157,7 +173,7 @@ class ShopMode(BaseMode):
                         self._shopping_window.result = None
 
                         self._confirm_msg = MessageWindow(
-                            app=self.context.scene.app,
+                            app=self._app,
                             x=10,
                             y=130,
                             width=172,
@@ -174,7 +190,7 @@ class ShopMode(BaseMode):
 
             # ★ 4. うる商品リスト選択中
             case _ShopSubState.SELL_LIST:
-                p = self.context.scene.app.player
+                p = self._app.player
 
                 # 手持ちが売り切れていて売却画面も閉じた場合、売却メッセージ終了後に安全に MAIN_MENU へ戻る
                 if not p.inventory and self._shopping_window is None:
@@ -188,7 +204,7 @@ class ShopMode(BaseMode):
                         self._shopping_window.result = None
 
                         self._confirm_msg = MessageWindow(
-                            app=self.context.scene.app,
+                            app=self._app,
                             x=10,
                             y=130,
                             width=172,
@@ -214,19 +230,22 @@ class ShopMode(BaseMode):
                     )
                 ):
                     self._confirm_window = EnumSelectWindow(
-                        self.context.scene.app, 10, 80, 60, list(ChoiceCommand)
+                        self._app, 10, 80, 60, list(ChoiceCommand)
                     )
                     self._wm.push(self._confirm_window)
 
                 if self._confirm_window is not None:
                     # A. 決定された場合
-                    if self._confirm_window.result is not None and self._pending_item is not None:
+                    if (
+                        self._confirm_window.result is not None
+                        and self._pending_item is not None
+                    ):
                         choice = self._confirm_window.result
                         self._confirm_window.result = None
 
                         match choice:
                             case ChoiceCommand.Yes:
-                                p = self.context.scene.app.player
+                                p = self._app.player
                                 if not self._sell_mode:
                                     logs = self._shop_use_case.buy_item(
                                         p, self._pending_item
@@ -258,7 +277,7 @@ class ShopMode(BaseMode):
 
                                 self._wm.push(
                                     MessageWindow(
-                                        app=self.context.scene.app,
+                                        app=self._app,
                                         x=10,
                                         y=130,
                                         width=172,

@@ -1,6 +1,7 @@
 import pyxel
 
 from ester_mastal.audio import init_audio
+from ester_mastal.data.events import EventFlag
 from ester_mastal.models.repository import GameRepository
 from ester_mastal.scenes.base_scene import BaseScene
 from ester_mastal.scenes.title_scene import TitleScene
@@ -19,7 +20,7 @@ class App:
         # リポジトリとグローバル状態の保持
         self.repo = GameRepository()
         self.player = self.repo.create_initial_player("といろ")
-        self.flags: set[str] = set()
+        self.flags: set[EventFlag] = set()
 
         # 初期状態はタイトル画面
         self.current_scene: BaseScene = TitleScene(self)

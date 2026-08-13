@@ -1,9 +1,23 @@
+from __future__ import annotations
+
+from dataclasses import dataclass, field
 from enum import Enum
+from typing import TYPE_CHECKING
 
 from ....ui.enum_select_window import EnumSelectWindow
 from ....ui.message_window import MessageWindow
-from .base_mode import BaseMode, FieldContext
+from .base_mode import BaseMode, BaseModeData
 from .signals import ModeSignal, PopSignal
+
+if TYPE_CHECKING:
+    from .base_mode import FieldContext
+
+
+@dataclass
+class InnModeData(BaseModeData):
+    greeting_messages: list[str] = field(default_factory=list)
+    done_messages: list[str] = field(default_factory=list)
+    cancel_messages: list[str] = field(default_factory=list)
 
 
 class InnCommand(Enum):
@@ -14,22 +28,23 @@ class InnCommand(Enum):
 class InnMode(BaseMode):
     def __init__(self, context: FieldContext):
         super().__init__(context)
-        self._wm = context.scene.window_manager
+        self._event_data: InnModeData = self._scene.current_event
+        self._player = self._app.player
 
         self._greeting_msg = MessageWindow(
-            self.context.scene.app,
+            self._app,
             x=10,
             y=130,
             width=172,
             height=50,
             speed=2,
-            messages=["おかあさん「おかえりなさい\n やすんでいくかい？」"],
+            # messages=["おかあさん「おかえりなさい\n やすんでいくかい？」"],
+            name=self._event_data.name,
+            messages=self._event_data.greeting_messages,
         )
         self._wm.push(self._greeting_msg)
 
-        self._choice_menu = EnumSelectWindow(
-            self.context.scene.app, 10, 24, 60, list(InnCommand)
-        )
+        self._choice_menu = EnumSelectWindow(self._app, 10, 24, 60, list(InnCommand))
 
         # ★ 進行管理用フラグ
         self._has_pushed_choice = False  # 選択メニューを出したか
@@ -49,18 +64,19 @@ class InnMode(BaseMode):
 
                 match choise:
                     case InnCommand.Yes:
-                        p = self.context.scene.app.player
+                        p = self._app.player
                         p.hp, p.mp = p.max_hp, p.max_mp
                         self._wm.clear()
                         self._wm.push(
                             MessageWindow(
-                                self.context.scene.app,
+                                app=self._app,
                                 x=10,
                                 y=130,
                                 width=172,
                                 height=50,
                                 speed=2,
-                                messages=["よく ねむれたかい？", "いってらっしゃい！"],
+                                # messages=["よく ねむれたかい？", "いってらっしゃい！"],
+                                messages=self._event_data.done_messages,
                             )
                         )
 
@@ -68,13 +84,14 @@ class InnMode(BaseMode):
                         self._wm.clear()
                         self._wm.push(
                             MessageWindow(
-                                self.context.scene.app,
+                                app=self._app,
                                 x=10,
                                 y=130,
                                 width=172,
                                 height=50,
                                 speed=2,
-                                messages=["むりしないでね"],
+                                # messages=["むりしないでね"],
+                                messages=self._event_data.cancel_messages,
                             )
                         )
 
@@ -83,13 +100,13 @@ class InnMode(BaseMode):
                 self._wm.clear()
                 self._wm.push(
                     MessageWindow(
-                        self.context.scene.app,
+                        app=self._app,
                         x=10,
                         y=130,
                         width=172,
                         height=50,
                         speed=2,
-                        messages=["むりしないでね"],
+                        messages=self._event_data.cancel_messages,
                     )
                 )
 
