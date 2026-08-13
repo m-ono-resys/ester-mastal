@@ -6,10 +6,7 @@ from ....data.events import MAP_EVENTS
 from ....data.maps import MAP_CONFIG, WARP_POINTS, FromPosition
 from ....ui.message_window import MessageWindow
 from .base_mode import BaseMode
-from .inn_mode import InnMode
 from .main_menu_mode import MainMenuMode
-from .message_mode import MessageMode
-from .shop_mode import ShopMode
 from .signals import ModeSignal, PushSignal
 
 
@@ -83,7 +80,7 @@ class ExploreMode(BaseMode):
                     == "GRASS"
                     and random.random() < cfg.encount_rate
                 ):
-                    self._scene.trigger_battle()
+                    self._scene.trigger_random_battle()
                     return ModeSignal()
 
         if self.is_confirm():
@@ -156,7 +153,7 @@ class ExploreMode(BaseMode):
         #             scene.pending_boss_id = event["monster_id"]
         #             return PushSignal(MessageMode(self.context, event["messages"], start_boss_battle=True))
 
-        return ModeSignal()
+        # return ModeSignal()
 
     def draw(self) -> None:
         pass

@@ -6,6 +6,8 @@ import pyxel
 
 from ...data.events import MAP_EVENTS
 from ...data.maps import MAP_CONFIG, FromPosition, MapId
+from ...infrastructure.in_memory_monster_repository import InMemoryMonsterRepository
+from ...models.monster import MonsterCode
 from ...scenes.field.mode.chest_message_mode import ChestModeData
 from ...ui.hud_status_window import HudStatusWindow
 from ...ui.window_manager import WindowManager
@@ -106,11 +108,17 @@ class FieldScene(BaseScene):
         tile_type = self.get_tile_type(grid_x, grid_y)
         return tile_type not in ["MOUNTAIN", "WALL", "CAVE_WALL"]
 
-    def trigger_battle(self):
+    def trigger_random_battle(self):
+        monster_code = random.choice(
+            [MonsterCode.ENTENSTR, MonsterCode.RARUTAES, MonsterCode.MENTATOL]
+        )
+        self.trigger_battle_with_monster(monster_code)
+
+    def trigger_battle_with_monster(self, monster_code: MonsterCode):
+        """指定したモンスターIDで戦闘シーンを開始する"""
         from ..battle_scene import BattleScene
 
-        monster_id = random.choice(["entenstr", "rarutaes", "mentatol"])
-        monster = self.app.repo.create_monster(monster_id)
+        monster = InMemoryMonsterRepository().find_by_code(monster_code)
         self.app.change_state(BattleScene(self.app, monster))
 
     def update(self):

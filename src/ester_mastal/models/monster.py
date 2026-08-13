@@ -1,5 +1,14 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from enum import StrEnum
 
+
+class MonsterCode(StrEnum):
+    ENTENSTR = "エンテンストル"
+    RARUTAES = "ラルターエス"
+    MENTATOL = "メンタートル"
+    SANTROTO = "サントーロート"
+    DERAMILE = "まおう デラミール"
 
 @dataclass
 class Monster:
@@ -25,3 +34,12 @@ class Monster:
         damage = max(1, amount)
         self.hp = max(0, self.hp - damage)
         return damage
+
+class MonsterRepository(ABC):
+    @abstractmethod
+    def find_by_code(self, code: MonsterCode) -> Monster | None:
+        """モンスターコードから Monster を取得する（存在しない場合は None）"""
+
+    @abstractmethod
+    def get_all(self) -> list[Monster]:
+        """全モンスターを取得する"""
