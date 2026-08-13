@@ -47,10 +47,14 @@ class EnumSelectWindow[T: Enum](BaseWindow):
     def update_window(self):
         pass
 
+    def _get_item_label(self, choice: T) -> str:
+        """★ アイテムテキストを取得するフックメソッド（子クラスでオーバーライド用）"""
+        return str(choice.value)
+
     def draw_content(self):
         # ラベルの描画
         for i, choice in enumerate(self.choices):
-            label = str(choice.value)
+            label = self._get_item_label(choice)  # ★ 呼び出し
             self.draw_text(
                 self.padding_x,
                 self.padding_y + i * self.line_height,

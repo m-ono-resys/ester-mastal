@@ -5,6 +5,7 @@ from ....application.spell_use_case import SpellUseCase
 from ....infrastructure.in_memory_item_repository import InMemoryItemRepository
 from ....infrastructure.in_memory_spell_repository import InMemorySpellRepository
 from ....ui.enum_select_window import EnumSelectWindow
+from ....ui.equip_item_select_window import EquipItemSelectWindow
 from ....ui.message_window import MessageWindow
 from ....ui.status_window import StatusWindow
 from .base_mode import BaseMode, FieldContext
@@ -54,8 +55,20 @@ class MainMenuMode(BaseMode):
                             )
                         )
                     else:
-                        self._item_window = EnumSelectWindow(
-                            self._app, 80, 24, 100, _items
+                        player = self._app.player
+                        equipped_set = {
+                            item.name
+                            for item in [player.equipped_weapon, player.equipped_armor]
+                            if item is not None
+                        }
+
+                        self._item_window = EquipItemSelectWindow(
+                            self._app,
+                            80,
+                            24,
+                            100,
+                            choices=_items,
+                            equipped_items=equipped_set,
                         )
                         self._wm.push(self._item_window)
                 case MenuCommand.Spell:
