@@ -144,7 +144,10 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
         boss_strat,
         BossMessageModeData(
             name=MonsterCode.SANTROTO.value,
-            messages=["うしろのたからがほしかったら、おれにかってみろ！"],
+            messages=[
+                "よくここまできた。わたしのうしろには、たからばこがある。",
+                "それを手に入れたいのなら、わたしとたたかえ。",
+            ],
             monster_code=MonsterCode.SANTROTO,
             sprite_u=0,
             sprite_v=16,
@@ -154,16 +157,20 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
             defeated_flag=EventFlag.DEFEATED_SANTROTO,
         ),
     ),
-    # ダンジョンの最奥 (x=5, y=2) に竜王を配置
-    # (MapId.DUNGEON, 5, 2): {
-    #     "type": "BOSS",
-    #     "name": "りゅうおう",
-    #     "messages": [
-    #         "よくぞ ここまで たどりついた！",
-    #         "わしが あくの しはいしゃ りゅうおう だ！",
-    #         "わしの てかとなれば せかいの はんぶんを やろう！",
-    #         "…と でも いうとおもったか！ くらえ！",
-    #     ],
-    #     "monster_id": "deramil",
-    # },
+    FromPosition(MapId.DEMON_CASTLE_3F, 6, 1): (
+        boss_strat,
+        BossMessageModeData(
+            name=MonsterCode.DERAMILE.value,
+            messages=[
+                "よくぞここまできた。もうむかしのしっぱいはぜったいにしない かかってこい！",
+            ],
+            monster_code=MonsterCode.DERAMILE,
+            sprite_u=16,
+            sprite_v=16,
+            sprite_w=16,
+            sprite_h=16,
+            colkey=0,
+            defeated_flag=EventFlag.DEFEATED_DERAMILE,
+        ),
+    ),
 }
