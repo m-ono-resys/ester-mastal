@@ -10,6 +10,7 @@ from ..scenes.field.mode.extend_message_mode import (
     ExtendMessageMode,
     ExtendMessageModeData,
 )
+from ..scenes.field.mode.gate_message_mode import GateMessageModeData
 from ..scenes.field.mode.inn_mode import InnMode, InnModeData
 from ..scenes.field.mode.message_mode import MessageMode, MessageModeData
 from ..scenes.field.mode.shop_mode import ShopMode, ShopModeData
@@ -37,10 +38,35 @@ class EventFlag(StrEnum):
     DEFEATED_SANTROTO = "DEFEATED_SANTROTO"
     OPENED_MOUNTAIN = "OPENED_MOUNTAIN"
     DEFEATED_DERAMILE = "DEFEATED_DERAMILE"
-    TRIGGER_VICTORY_MSG = "TRIGGER_VICTORY_MSG"
 
 
 MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
+    FromPosition(MapId.WORLD, 10, 2): (
+        ext_message_strat,
+        GateMessageModeData(
+            name=None,
+            dialogues=[
+                Dialogue(
+                    set_flag=EventFlag.OPENED_MOUNTAIN,
+                    flag=EventFlag.GOT_ORB,
+                    messages=[
+                        f"{ItemCode.CELESTIAL_ORB.value} が ひかりかがやく！",
+                        "やま が くずれさった！",
+                    ],
+                ),
+                Dialogue(
+                    flag=None,
+                    messages=[
+                        "なにかの くぼみ が ある...",
+                        "ふしぎな ちから で つうこう できない！",
+                    ],
+                ),
+            ],
+            sprite_u=48,
+            sprite_v=32,
+            colkey=8,
+        ),
+    ),
     FromPosition(MapId.TOWN, 5, 5): (
         message_strat,
         MessageModeData(name="むらびと", messages=["きたに おしろが あるよ"]),

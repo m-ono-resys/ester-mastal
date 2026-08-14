@@ -40,9 +40,9 @@ class MessageMode(BaseMode):
             )
             self._wm.push(self._msg)
 
-        # フラグの追加（共通化）
-        if self._set_flag:
-            self._flags.add(self._set_flag)
+        # # フラグの追加（共通化）
+        # if self._set_flag:
+        #     self._flags.add(self._set_flag)
 
     def _setup_dialogue(self):
         """単発メッセージ用の初期化処理"""
@@ -53,6 +53,9 @@ class MessageMode(BaseMode):
 
     def update(self):
         if not self._wm.is_open:
+            # フラグの追加（共通化）
+            if self._set_flag:
+                self._flags.add(self._set_flag)
             return PopSignal()
         return ModeSignal()
 

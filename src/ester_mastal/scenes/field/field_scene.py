@@ -4,11 +4,13 @@ from typing import Any
 
 import pyxel
 
+from .mode.gate_message_mode import GateMessageModeData
+
 from ...data.events import MAP_EVENTS
 from ...data.maps import MAP_CONFIG, FromPosition, MapId
 from ...infrastructure.in_memory_monster_repository import InMemoryMonsterRepository
 from ...models.monster import MonsterCode
-from ...scenes.field.mode.chest_message_mode import ChestModeData
+from .mode.chest_message_mode import ChestModeData
 from ...ui.hud_status_window import HudStatusWindow
 from ...ui.window_manager import WindowManager
 from ..base_scene import BaseScene
@@ -108,15 +110,24 @@ class FieldScene(BaseScene):
         if event_key in MAP_EVENTS:
             _, data = MAP_EVENTS[event_key]
 
+            flags = self.app.flags
+
+            # ★ GateMessageModeData で、いずれかの set_flag が ON なら通過許可！
+            if isinstance(data, GateMessageModeData):
+                is_opened = any(
+                    d.set_flag in flags for d in data.dialogues if d.set_flag
+                )
+                if not is_opened:
+                    return False  # 未開放なら通行不可
+
             # ★ ボスをすでに倒している（defeated_flag が ON）なら通行可能！
-            if (
-                isinstance(data, BossMessageModeData)
-                and data.defeated_flag
-                and data.defeated_flag in self.app.flags
-            ):
-                pass  # 通過を許可
+            elif isinstance(data, BossMessageModeData):
+                is_defeated = bool(data.defeated_flag and data.defeated_flag in flags)
+                if not is_defeated:
+                    return False  # まだ倒していないボスやイベントマスは移動不可
+
             else:
-                return False  # まだ倒していないボスやイベントマスは移動不可
+                return False  # その他のイベント（宝箱やNPCなど）は通過不可
 
         tile_type = self.get_tile_type(grid_x, grid_y)
         return tile_type not in ["MOUNTAIN", "WALL", "CAVE_WALL"]
@@ -163,6 +174,25 @@ class FieldScene(BaseScene):
                         u, v = data.closed_sprite  # 閉じた宝箱
 
                     pyxel.blt(px, py, 0, u, v, 16, 16, 0)
+
+                elif isinstance(data, GateMessageModeData):
+                    is_opened = any(
+                        d.set_flag in flags for d in data.dialogues if d.set_flag
+                    )
+
+                    if is_opened:
+                        continue
+
+                    pyxel.blt(
+                        px,
+                        py,
+                        0,
+                        data.sprite_u,
+                        data.sprite_v,
+                        data.sprite_w,
+                        data.sprite_h,
+                        data.colkey,
+                    )
 
                 # 2. ★ ボス・特殊NPCの描画
                 elif isinstance(data, BossMessageModeData):
