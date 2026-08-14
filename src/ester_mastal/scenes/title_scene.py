@@ -1,6 +1,7 @@
 import pyxel
 
 from .base_scene import BaseScene
+from .field.mode.message_mode import MessageMode, MessageModeData
 
 
 class TitleScene(BaseScene):
@@ -9,11 +10,22 @@ class TitleScene(BaseScene):
         if pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.KEY_Z):
             from .field.field_scene import FieldScene
 
-            self.app.change_state(FieldScene(self.app))
+            field_scene = FieldScene(self.app)
+            field_scene.current_event = MessageModeData(
+                name="おかあさん",
+                messages=[
+                    "むかし、大まおうが、おうちにはいってきて、ゆうしゃを見つける どうぐ を おうちの中のどこかにいれたんだ。",
+                    "だから ごめんだけど、おうちには入っちゃダメ。",
+                    "それで、おしろの王さまが ま王をやっつけてくれといっていたから、",
+                    "まずは、きたにあるおしろにいけばいいよ。",
+                ],
+            )
+            field_scene.mode_stack.append(MessageMode(field_scene.context))
+
+            self.app.change_state(field_scene)
 
     def draw(self):
         pyxel.cls(0)  # 黒でクリア
-        # pyxel.text(50, 40, "エスターマスタル", 10, self.app.font)
         pyxel.blt(0, 24, 0, 0, 160, 192, 128, 0)
 
         # 点滅表示（フレーム数で制御）

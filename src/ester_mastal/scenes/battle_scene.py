@@ -4,8 +4,7 @@ import pyxel
 
 from ..application.item_use_case import ItemUseCase
 from ..audio import play_se
-from ..data.events import MAP_EVENTS, EventFlag
-from ..data.maps import FromPosition
+from ..data.events import EventFlag
 from ..infrastructure.in_memory_item_repository import InMemoryItemRepository
 from ..infrastructure.in_memory_spell_repository import InMemorySpellRepository
 from ..models.battle import BattleEngine
