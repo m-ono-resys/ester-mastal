@@ -45,7 +45,7 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
         message_strat,
         MessageModeData(name="むらびと", messages=["きたに おしろが あるよ"]),
     ),
-    FromPosition(MapId.TOWN, 8, 8): (
+    FromPosition(MapId.TOWN, 8, 3): (
         inn_strat,
         InnModeData(
             name="おかあさん",

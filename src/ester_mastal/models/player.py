@@ -25,8 +25,8 @@ class Player:
     equipped_armor: Item | None = None
 
     # ★ シーンを跨いで保持する位置データ（初期値を指定）
-    x: int = 1
-    y: int = 1
+    x: int = 8
+    y: int = 4
     map_id: MapId = MapId.TOWN
 
     # ★ 実際の攻撃力（素の攻撃力 ＋ 武器の攻撃力）
