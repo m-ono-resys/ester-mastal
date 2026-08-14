@@ -13,6 +13,7 @@ from ...ui.hud_status_window import HudStatusWindow
 from ...ui.window_manager import WindowManager
 from ..base_scene import BaseScene
 from .mode.base_mode import BaseMode, FieldContext
+from .mode.boss_message_mode import BossMessageModeData
 from .mode.explore_mode import ExploreMode
 from .mode.signals import PopSignal, PushSignal
 
@@ -102,8 +103,20 @@ class FieldScene(BaseScene):
     def can_move_to(self, grid_x: int, grid_y: int) -> bool:
         if grid_x < 0 or grid_x >= 12 or grid_y < 0 or grid_y >= 11:
             return False
-        if FromPosition(self.current_map_id, grid_x, grid_y) in MAP_EVENTS:
-            return False
+
+        event_key = FromPosition(self.current_map_id, grid_x, grid_y)
+        if event_key in MAP_EVENTS:
+            _, data = MAP_EVENTS[event_key]
+
+            # ★ ボスをすでに倒している（defeated_flag が ON）なら通行可能！
+            if (
+                isinstance(data, BossMessageModeData)
+                and data.defeated_flag
+                and data.defeated_flag in self.app.flags
+            ):
+                pass  # 通過を許可
+            else:
+                return False  # まだ倒していないボスやイベントマスは移動不可
 
         tile_type = self.get_tile_type(grid_x, grid_y)
         return tile_type not in ["MOUNTAIN", "WALL", "CAVE_WALL"]
@@ -135,18 +148,38 @@ class FieldScene(BaseScene):
     def _draw_map_objects(self):
         """現在のマップにある宝箱などのスプライトを描画"""
         flags = self.app.flags
+
         for key, (_, data) in MAP_EVENTS.items():
-            if key.map_id == self.current_map_id and isinstance(data, ChestModeData):
+            if key.map_id == self.current_map_id:
                 px = key.x * self.tile_size
                 py = key.y * self.tile_size + 16
 
-                # ★ 中央管理フラグ (app.flags) に flag_key が入っているかでスプライト決定！
-                if data.flag_key in flags:
-                    u, v = data.opened_sprite  # 開いた宝箱
-                else:
-                    u, v = data.closed_sprite  # 閉じた宝箱
+                # 1. 宝箱の描画
+                if isinstance(data, ChestModeData):
+                    # ★ 中央管理フラグ (app.flags) に flag_key が入っているかでスプライト決定！
+                    if data.flag_key in flags:
+                        u, v = data.opened_sprite  # 開いた宝箱
+                    else:
+                        u, v = data.closed_sprite  # 閉じた宝箱
 
-                pyxel.blt(px, py, 0, u, v, 16, 16, 0)
+                    pyxel.blt(px, py, 0, u, v, 16, 16, 0)
+
+                # 2. ★ ボス・特殊NPCの描画
+                elif isinstance(data, BossMessageModeData):
+                    # 倒したフラグが ON なら描画をスキップ（マップから消える！）
+                    if data.defeated_flag and data.defeated_flag in flags:
+                        continue
+
+                    pyxel.blt(
+                        px,
+                        py,
+                        0,
+                        data.sprite_u,
+                        data.sprite_v,
+                        data.sprite_w,
+                        data.sprite_h,
+                        data.colkey,
+                    )
 
     def draw(self):
         pyxel.cls(0)

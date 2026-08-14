@@ -75,10 +75,12 @@ class BattleScene(BaseScene):
             if self.engine.is_finished:
                 # 戦闘終了 ➔ 勝敗に応じたシーン遷移
                 if self.app.player.is_alive:
-
                     match self.engine.monster.name:
                         case MonsterCode.SANTROTO.value:
                             self.app.flags.add(EventFlag.DEFEATED_SANTROTO)
+                            from .field.field_scene import FieldScene
+
+                            self.app.change_state(FieldScene(self.app))
                         case MonsterCode.DERAMILE.value:
                             from .ending_scene import EndingScene
 

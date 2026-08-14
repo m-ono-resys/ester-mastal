@@ -1,7 +1,9 @@
 from enum import StrEnum
 
 from ..models.item import ItemCode
+from ..models.monster import MonsterCode
 from ..scenes.field.mode.base_mode import BaseModeData
+from ..scenes.field.mode.boss_message_mode import BossMessageMode, BossMessageModeData
 from ..scenes.field.mode.chest_message_mode import ChestMessageMode, ChestModeData
 from ..scenes.field.mode.extend_message_mode import (
     Dialogue,
@@ -20,6 +22,7 @@ ext_message_strat = ModeLauncherStrategy(ExtendMessageMode)
 inn_strat = ModeLauncherStrategy(InnMode)
 shop_strat = ModeLauncherStrategy(ShopMode)
 chest_strat = ModeLauncherStrategy(ChestMessageMode)
+boss_strat = ModeLauncherStrategy(BossMessageMode)
 
 
 class EventFlag(StrEnum):
@@ -135,6 +138,20 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
         chest_strat,
         ChestModeData(
             flag_key=EventFlag.OPENED_CHEST_DUNGEON_3, reward_item=ItemCode.KING_SWORD
+        ),
+    ),
+    FromPosition(MapId.DUNGEON_B2F, 8, 7): (
+        boss_strat,
+        BossMessageModeData(
+            name=MonsterCode.SANTROTO.value,
+            messages=["うしろのたからがほしかったら、おれにかってみろ！"],
+            monster_code=MonsterCode.SANTROTO,
+            sprite_u=0,
+            sprite_v=16,
+            sprite_w=16,
+            sprite_h=16,
+            colkey=14,
+            defeated_flag=EventFlag.DEFEATED_SANTROTO,
         ),
     ),
     # ダンジョンの最奥 (x=5, y=2) に竜王を配置

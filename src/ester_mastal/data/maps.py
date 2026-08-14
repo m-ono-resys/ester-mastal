@@ -38,7 +38,7 @@ class ToPosition:
 
 # ★ 各マップの Tilemap 0 上の位置 (u, v) と エンカウント率の定義
 MAP_CONFIG: dict[MapId, MapDefinistion] = {
-    MapId.WORLD: MapDefinistion(0, 0, 0.2),
+    MapId.WORLD: MapDefinistion(0, 0, 0.0),
     MapId.TOWN: MapDefinistion(192, 0, 0.0),
     MapId.CASTLE_1F: MapDefinistion(768, 0, 0),
     MapId.CASTLE_2F: MapDefinistion(960, 0, 0),
