@@ -37,6 +37,7 @@ class EventFlag(StrEnum):
     DEFEATED_SANTROTO = "DEFEATED_SANTROTO"
     OPENED_MOUNTAIN = "OPENED_MOUNTAIN"
     DEFEATED_DERAMILE = "DEFEATED_DERAMILE"
+    TRIGGER_VICTORY_MSG = "TRIGGER_VICTORY_MSG"
 
 
 MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
@@ -171,6 +172,11 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
             sprite_h=16,
             colkey=0,
             defeated_flag=EventFlag.DEFEATED_DERAMILE,
+            # victory_messages=[
+            #     "まおう デラミール は ついに たおれた！",
+            #     "せかい に へいわ が もどった！",
+            #     "ありがとう たびの ゆうしゃ よ！",
+            # ],
         ),
     ),
 }

@@ -36,7 +36,6 @@ class BossMessageMode(MessageMode):
     def update(self) -> ModeSignal:
         # メッセージウィンドウが閉じられた時の処理
         if not self._wm.is_open:
-            # ★ モンスターコードが保存されていれば戦闘開始シグナルを返す！
             if self.monster_code is not None:
                 self._scene.trigger_battle_with_monster(self.monster_code)
                 return ModeSignal()

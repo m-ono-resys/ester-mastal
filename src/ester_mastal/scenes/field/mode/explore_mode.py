@@ -24,8 +24,6 @@ class ExploreMode(BaseMode):
         return pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE)
 
     def update(self) -> ModeSignal:
-        # scene = self.context.scene
-        # wm = scene.window_manager
 
         # ★ ウィンドウが開いている（会話中・メッセージ表示中など）場合
         if self._wm.is_open:
@@ -96,7 +94,6 @@ class ExploreMode(BaseMode):
         return ModeSignal()
 
     def _interact(self) -> ModeSignal:
-        # scene = self.context.scene
         target_pos = self._scene.get_facing_pos()
         event_key = FromPosition(
             self._scene.current_map_id, target_pos[0], target_pos[1]
@@ -110,53 +107,6 @@ class ExploreMode(BaseMode):
         self._scene.current_event = event_data
 
         return strategy.execute(self._context)
-
-        # match type:
-        #     case "NPC":
-        #         return PushSignal(MessageMode(self.context))
-
-        #     case "CHEST":
-        #         if event["is_opened"]:
-        #             return PushSignal(
-        #                 MessageMode(self.context, ["たからばこ は からっぽ だ。"])
-        #             )
-        #         else:
-        #             event["is_opened"] = True
-        #             p = self.context.app.player
-        #             if event["reward_type"] == "gold":
-        #                 p.gold += event["reward_value"]
-        #                 return PushSignal(
-        #                     MessageMode(
-        #                         self.context,
-        #                         [
-        #                             "たからばこ を あけた！",
-        #                             f"{event['reward_value']} ゴールド を てにいれた！",
-        #                         ],
-        #                     )
-        #                 )
-        #             elif event["reward_type"] == "item":
-        #                 p.items.append(event["reward_value"])
-        #                 return PushSignal(
-        #                     MessageMode(
-        #                         self.context,
-        #                         [
-        #                             "たからばこ を あけた！",
-        #                             f"{event['reward_value']} を てにいれた！",
-        #                         ],
-        #                     )
-        #                 )
-
-        #     case "INN":
-        #         return PushSignal(InnMode(self.context))
-
-        #     case "SHOP":
-        #         return PushSignal(ShopMode(self.context, event))
-
-        #         case "BOSS":
-        #             scene.pending_boss_id = event["monster_id"]
-        #             return PushSignal(MessageMode(self.context, event["messages"], start_boss_battle=True))
-
-        # return ModeSignal()
 
     def draw(self) -> None:
         pass

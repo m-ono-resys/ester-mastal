@@ -4,7 +4,8 @@ import pyxel
 
 from ..application.item_use_case import ItemUseCase
 from ..audio import play_se
-from ..data.events import EventFlag
+from ..data.events import MAP_EVENTS, EventFlag
+from ..data.maps import FromPosition
 from ..infrastructure.in_memory_item_repository import InMemoryItemRepository
 from ..infrastructure.in_memory_spell_repository import InMemorySpellRepository
 from ..models.battle import BattleEngine
@@ -75,20 +76,42 @@ class BattleScene(BaseScene):
             if self.engine.is_finished:
                 # 戦闘終了 ➔ 勝敗に応じたシーン遷移
                 if self.app.player.is_alive:
-                    match self.engine.monster.name:
-                        case MonsterCode.SANTROTO.value:
-                            self.app.flags.add(EventFlag.DEFEATED_SANTROTO)
-                            from .field.field_scene import FieldScene
+                    from .field.field_scene import FieldScene
+                    from .field.mode.message_mode import MessageMode, MessageModeData
 
-                            self.app.change_state(FieldScene(self.app))
-                        case MonsterCode.DERAMILE.value:
-                            from .ending_scene import EndingScene
+                    field_scene = FieldScene(self.app)
 
-                            self.app.change_state(EndingScene(self.app))
-                        case _:
-                            from .field.field_scene import FieldScene
+                    # ボスごとの撃破フラグと捨て台詞メッセージの定義テーブル
+                    boss_defeat_data = {
+                        MonsterCode.SANTROTO.value: (
+                            EventFlag.DEFEATED_SANTROTO,
+                            ["このわたしがたおされるとは・・・"],
+                        ),
+                        MonsterCode.DERAMILE.value: (
+                            EventFlag.DEFEATED_DERAMILE,
+                            [
+                                "このかんむりがあるかぎり、やみはほろびない",
+                                "またふっかつして こんどこそぜったいにたおしてやる。",
+                            ],
+                        ),
+                    }
 
-                            self.app.change_state(FieldScene(self.app))
+                    monster_name = self.engine.monster.name
+
+                    # ボスモンスターの場合はフラグ加算と捨て台詞メッセージを設定
+                    if monster_name in boss_defeat_data:
+                        flag, messages = boss_defeat_data[monster_name]
+                        self.app.flags.add(flag)
+
+                        field_scene.current_event = MessageModeData(
+                            name=monster_name,
+                            messages=messages,
+                        )
+                        field_scene.mode_stack.append(MessageMode(field_scene.context))
+
+                    # 勝利時は一括で FieldScene へ切り替え
+                    self.app.change_state(field_scene)
+
                 else:
                     from .game_over_scene import GameOverScene
 
