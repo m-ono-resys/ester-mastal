@@ -64,10 +64,10 @@ class FieldScene(BaseScene):
         self.hud = HudStatusWindow(app, 0, 0, 192, 16)
 
         self.tile_size = 16
-        self.player_x = 1
-        self.player_y = 1
+        self.player_x = self.app.player.x
+        self.player_y = self.app.player.y
+        self.current_map_id: MapId = self.app.player.map_id
         self.direction: Direction = Direction.DOWN
-        self.current_map_id: MapId = MapId.TOWN
 
         self.current_event: Any = None
         self.pending_boss_id = None

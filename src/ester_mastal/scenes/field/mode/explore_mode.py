@@ -47,6 +47,7 @@ class ExploreMode(BaseMode):
             next_x, next_y = self._scene.player_x + dx, self._scene.player_y + dy
             if self._scene.can_move_to(next_x, next_y):
                 self._scene.player_x, self._scene.player_y = next_x, next_y
+                self._app.player.x, self._app.player.y = next_x, next_y
 
                 # ワープ判定
                 warp_key = FromPosition(
@@ -58,6 +59,8 @@ class ExploreMode(BaseMode):
                     warp = WARP_POINTS[warp_key]
                     self._scene.current_map_id = warp.map_id
                     self._scene.player_x, self._scene.player_y = warp.x, warp.y
+                    self._app.player.map_id = warp.map_id
+                    self._app.player.x, self._app.player.y = warp.x, warp.y
                     if warp.message is not None:
                         message = MessageWindow(
                             app=self._app,

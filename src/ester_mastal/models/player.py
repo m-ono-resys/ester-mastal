@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+from ..data.maps import MapId
 from .item import Item, ItemCode, ItemType
 from .spell import SpellCode
 
@@ -23,6 +24,11 @@ class Player:
     equipped_weapon: Item | None = None
     equipped_armor: Item | None = None
 
+    # ★ シーンを跨いで保持する位置データ（初期値を指定）
+    x: int = 1
+    y: int = 1
+    map_id: MapId = MapId.TOWN
+
     # ★ 実際の攻撃力（素の攻撃力 ＋ 武器の攻撃力）
     @property
     def attack(self) -> int:
@@ -34,7 +40,7 @@ class Player:
     @property
     def defense(self) -> int:
         if self.equipped_armor and self.equipped_armor.item_type == ItemType.ARMOR:
-                    return self.base_defense + self.equipped_armor.effect_value
+            return self.base_defense + self.equipped_armor.effect_value
         return self.base_defense
 
     def equip_weapon(self, weapon: Item) -> bool:
