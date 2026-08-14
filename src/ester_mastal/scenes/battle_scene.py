@@ -185,7 +185,7 @@ class BattleScene(BaseScene):
                     play_se(2)  # ダメージSE
                     logs.extend(m_logs)
 
-            self.show_message(logs)
+                self.show_message(logs)
 
         elif self.item_window is not None and self.item_window.result is not None:
             item_code = self.item_window.result
@@ -199,7 +199,7 @@ class BattleScene(BaseScene):
                     play_se(2)  # ダメージSE
                     logs.extend(m_logs)
 
-            self.show_message(logs)
+                self.show_message(logs)
 
     def draw(self):
         pyxel.cls(0)  # 背景黒
