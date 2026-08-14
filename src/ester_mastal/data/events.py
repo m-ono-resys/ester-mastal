@@ -37,6 +37,7 @@ class EventFlag(StrEnum):
     OPENED_CHEST_DUNGEON_3 = "CHEST_D_B2_10_5"
     DEFEATED_SANTROTO = "DEFEATED_SANTROTO"
     OPENED_MOUNTAIN = "OPENED_MOUNTAIN"
+    SWITCH_DEMON_CASTLE_1 = "SWITCH_DEMON_CASTLE_1"
     DEFEATED_DERAMILE = "DEFEATED_DERAMILE"
 
 
@@ -182,6 +183,32 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
             sprite_h=16,
             colkey=14,
             defeated_flag=EventFlag.DEFEATED_SANTROTO,
+        ),
+    ),
+    FromPosition(MapId.DEMON_CASTLE_3F, 2, 3): (
+        ext_message_strat,
+        GateMessageModeData(
+            dialogues=[
+                Dialogue(
+                    messages=["とびらがしまっている。", "かぎでは あかないみたいだ"],
+                )
+            ],
+            sprite_u=80,
+            sprite_v=32,
+            colkey=0,
+        ),
+    ),
+    FromPosition(MapId.DEMON_CASTLE_3F, 3, 3): (
+        ext_message_strat,
+        GateMessageModeData(
+            dialogues=[
+                Dialogue(
+                    messages=["とびらがしまっている。", "かぎでは あかないみたいだ"],
+                )
+            ],
+            sprite_u=80,
+            sprite_v=32,
+            colkey=0,
         ),
     ),
     FromPosition(MapId.DEMON_CASTLE_3F, 6, 1): (
