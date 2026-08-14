@@ -39,6 +39,7 @@ class App:
     def draw(self):
         """現在のステートのdrawを呼ぶだけ"""
         self.current_scene.draw()
+        pyxel.text(18, 180, "Zはきめる / Xはやめる・メニュー", 7, self.font)
 
 
 if __name__ == "__main__":

@@ -30,4 +30,4 @@ class TitleScene(BaseScene):
 
         # 点滅表示（フレーム数で制御）
         if (pyxel.frame_count // 15) % 2 == 0:
-            pyxel.text(36, 128, "けっていボタンではじめる", 7, self.app.font)
+            pyxel.text(36, 128, "きめるボタンではじめる", 7, self.app.font)
