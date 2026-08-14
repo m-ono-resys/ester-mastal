@@ -32,8 +32,8 @@ class EventFlag(StrEnum):
     OPENED_CHEST_DUNGEON_2 = "CHEST_D_B2_9_5"
     OPENED_CHEST_DUNGEON_3 = "CHEST_D_B2_10_5"
     DEFEATED_SANTROTO = "DEFEATED_SANTROTO"
-
-
+    OPENED_MOUNTAIN = "OPENED_MOUNTAIN"
+    DEFEATED_DERAMILE = "DEFEATED_DERAMILE"
 
 
 MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
@@ -127,11 +127,15 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
     ),
     FromPosition(MapId.DUNGEON_B2F, 9, 5): (
         chest_strat,
-        ChestModeData(flag_key=EventFlag.OPENED_CHEST_DUNGEON_2, reward_item=ItemCode.KING_ARMOR),
+        ChestModeData(
+            flag_key=EventFlag.OPENED_CHEST_DUNGEON_2, reward_item=ItemCode.KING_ARMOR
+        ),
     ),
     FromPosition(MapId.DUNGEON_B2F, 10, 5): (
         chest_strat,
-        ChestModeData(flag_key=EventFlag.OPENED_CHEST_DUNGEON_3, reward_item=ItemCode.KING_SWORD),
+        ChestModeData(
+            flag_key=EventFlag.OPENED_CHEST_DUNGEON_3, reward_item=ItemCode.KING_SWORD
+        ),
     ),
     # ダンジョンの最奥 (x=5, y=2) に竜王を配置
     # (MapId.DUNGEON, 5, 2): {
