@@ -78,8 +78,8 @@ class GameRepository:
             base_attack=lv1_data.base_attack,
             base_defense=lv1_data.base_defense,
             level=1,
-            exp=10,
-            gold=200,
+            exp=0,
+            gold=10,
             inventory=[ItemCode.POTION],
         )
 

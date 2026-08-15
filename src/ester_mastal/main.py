@@ -10,7 +10,7 @@ from ester_mastal.scenes.title_scene import TitleScene
 class App:
     def __init__(self):
         # 画面サイズ: 192x192ピクセル（レトロ感のある低解像度）
-        pyxel.init(192, 192, title="DQ1-Like RPG", fps=30)
+        pyxel.init(192, 192, title="エスターマスタル", fps=30)
         init_audio()
 
         pyxel.load("./assets/game.pyxres")
