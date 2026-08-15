@@ -4,7 +4,7 @@ from typing import Any
 
 import pyxel
 
-from .mode.gate_message_mode import GateMessageModeData
+from .mode.gate_message_mode import GateMessageModeData, SwitchModeData
 
 from ...data.events import MAP_EVENTS
 from ...data.maps import MAP_CONFIG, FromPosition, MapId
@@ -192,6 +192,15 @@ class FieldScene(BaseScene):
                         data.sprite_w,
                         data.sprite_h,
                         data.colkey,
+                    )
+
+                elif isinstance(data, SwitchModeData):
+                    if data.flag_key in flags:
+                        u, v = data.on_sprite  # ONのスプライト
+                    else:
+                        u, v = data.off_sprite  # OFFのスプライト
+                    pyxel.blt(
+                        px, py, 0, u, v, data.sprite_w, data.sprite_h, data.colkey
                     )
 
                 # 2. ★ ボス・特殊NPCの描画

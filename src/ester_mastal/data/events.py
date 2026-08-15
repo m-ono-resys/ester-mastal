@@ -10,7 +10,7 @@ from ..scenes.field.mode.extend_message_mode import (
     ExtendMessageMode,
     ExtendMessageModeData,
 )
-from ..scenes.field.mode.gate_message_mode import GateMessageModeData
+from ..scenes.field.mode.gate_message_mode import GateMessageModeData, SwitchModeData
 from ..scenes.field.mode.inn_mode import InnMode, InnModeData
 from ..scenes.field.mode.message_mode import MessageMode, MessageModeData
 from ..scenes.field.mode.shop_mode import ShopMode, ShopModeData
@@ -38,6 +38,9 @@ class EventFlag(StrEnum):
     DEFEATED_SANTROTO = "DEFEATED_SANTROTO"
     OPENED_MOUNTAIN = "OPENED_MOUNTAIN"
     SWITCH_DEMON_CASTLE_1 = "SWITCH_DEMON_CASTLE_1"
+    SWITCH_DEMON_CASTLE_2 = "SWITCH_DEMON_CASTLE_2"
+    SWITCH_DEMON_CASTLE_3 = "SWITCH_DEMON_CASTLE_3"
+    SWITCH_DEMON_CASTLE_4 = "SWITCH_DEMON_CASTLE_4"
     DEFEATED_DERAMILE = "DEFEATED_DERAMILE"
 
 
@@ -185,13 +188,39 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
             defeated_flag=EventFlag.DEFEATED_SANTROTO,
         ),
     ),
+    FromPosition(MapId.DEMON_CASTLE_2F, 2, 2): (
+        ext_message_strat,
+        SwitchModeData(
+            name="スイッチ",
+            flag_key=EventFlag.SWITCH_DEMON_CASTLE_1,
+            dialogues=[
+                Dialogue(
+                    flag=EventFlag.SWITCH_DEMON_CASTLE_1,
+                    messages=["スイッチ は すでに おされている。"],
+                ),
+                Dialogue(
+                    flag=None,
+                    set_flag=EventFlag.SWITCH_DEMON_CASTLE_1,  # ★ スイッチONフラグを中央にセット！
+                    messages=[
+                        "スイッチ を おした！",
+                        "どこかで とびら が ひらく おと が した！",
+                    ],
+                ),
+            ],
+        )
+    ),
     FromPosition(MapId.DEMON_CASTLE_3F, 2, 3): (
         ext_message_strat,
         GateMessageModeData(
             dialogues=[
                 Dialogue(
+                    set_flag=EventFlag.SWITCH_DEMON_CASTLE_1,
+                    flag=EventFlag.SWITCH_DEMON_CASTLE_1,
+                    messages=["とびら は ひらいている。"],
+                ),
+                Dialogue(
                     messages=["とびらがしまっている。", "かぎでは あかないみたいだ"],
-                )
+                ),
             ],
             sprite_u=80,
             sprite_v=32,
@@ -203,8 +232,49 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
         GateMessageModeData(
             dialogues=[
                 Dialogue(
+                    set_flag=EventFlag.SWITCH_DEMON_CASTLE_2,
+                    flag=EventFlag.SWITCH_DEMON_CASTLE_2,
+                    messages=["とびら は ひらいている。"],
+                ),
+                Dialogue(
                     messages=["とびらがしまっている。", "かぎでは あかないみたいだ"],
-                )
+                ),
+            ],
+            sprite_u=80,
+            sprite_v=32,
+            colkey=0,
+        ),
+    ),
+    FromPosition(MapId.DEMON_CASTLE_3F, 8, 3): (
+        ext_message_strat,
+        GateMessageModeData(
+            dialogues=[
+                Dialogue(
+                    set_flag=EventFlag.SWITCH_DEMON_CASTLE_3,
+                    flag=EventFlag.SWITCH_DEMON_CASTLE_3,
+                    messages=["とびら は ひらいている。"],
+                ),
+                Dialogue(
+                    messages=["とびらがしまっている。", "かぎでは あかないみたいだ"],
+                ),
+            ],
+            sprite_u=80,
+            sprite_v=32,
+            colkey=0,
+        ),
+    ),
+    FromPosition(MapId.DEMON_CASTLE_3F, 9, 3): (
+        ext_message_strat,
+        GateMessageModeData(
+            dialogues=[
+                Dialogue(
+                    set_flag=EventFlag.SWITCH_DEMON_CASTLE_4,
+                    flag=EventFlag.SWITCH_DEMON_CASTLE_4,
+                    messages=["とびら は ひらいている。"],
+                ),
+                Dialogue(
+                    messages=["とびらがしまっている。", "かぎでは あかないみたいだ"],
+                ),
             ],
             sprite_u=80,
             sprite_v=32,
