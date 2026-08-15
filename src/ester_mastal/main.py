@@ -21,7 +21,6 @@ class App:
         self.repo = GameRepository()
         self.player = self.repo.create_initial_player("といろ")
         self.flags: set[EventFlag] = set()
-        self.flags.add(EventFlag.GOT_ORB)
 
         # 初期状態はタイトル画面
         self.current_scene: BaseScene = TitleScene(self)

@@ -38,15 +38,15 @@ class ToPosition:
 
 # ★ 各マップの Tilemap 0 上の位置 (u, v) と エンカウント率の定義
 MAP_CONFIG: dict[MapId, MapDefinistion] = {
-    MapId.WORLD: MapDefinistion(0, 0, 0.0),
+    MapId.WORLD: MapDefinistion(0, 0, 0.15),
     MapId.TOWN: MapDefinistion(192, 0, 0.0),
     MapId.CASTLE_1F: MapDefinistion(768, 0, 0),
     MapId.CASTLE_2F: MapDefinistion(960, 0, 0),
-    MapId.DUNGEON_B1F: MapDefinistion(384, 0, 0),
-    MapId.DUNGEON_B2F: MapDefinistion(576, 0, 0),
-    MapId.DEMON_CASTLE_1F: MapDefinistion(0, 192, 0),
-    MapId.DEMON_CASTLE_2F: MapDefinistion(192, 192, 0),
-    MapId.DEMON_CASTLE_3F: MapDefinistion(384, 192, 0),
+    MapId.DUNGEON_B1F: MapDefinistion(384, 0, 0.25),
+    MapId.DUNGEON_B2F: MapDefinistion(576, 0, 0.25),
+    MapId.DEMON_CASTLE_1F: MapDefinistion(0, 192, 0.25),
+    MapId.DEMON_CASTLE_2F: MapDefinistion(192, 192, 0.25),
+    MapId.DEMON_CASTLE_3F: MapDefinistion(384, 192, 0.25),
 }
 
 # ★ ワープ地点の定義: (現在のMapId, x, y) -> 遷移先情報
