@@ -5,6 +5,7 @@ import pyxel
 from ..application.item_use_case import ItemUseCase
 from ..audio import play_se
 from ..data.events import EventFlag
+from ..data.maps import MapId
 from ..infrastructure.in_memory_item_repository import InMemoryItemRepository
 from ..infrastructure.in_memory_spell_repository import InMemorySpellRepository
 from ..models.battle import BattleEngine
@@ -112,9 +113,25 @@ class BattleScene(BaseScene):
                     self.app.change_state(field_scene)
 
                 else:
-                    from .game_over_scene import GameOverScene
+                    p = self.app.player
+                    p.hp = p.max_hp         # HP全回復
+                    p.mp = p.max_mp         # MP全回復
+                    p.gold //= 2            # 所持金半分（ドラクエ伝統！）
 
-                    self.app.change_state(GameOverScene(self.app))
+                    # 初期位置（王様の城の座標など）に移動
+                    p.x = 8
+                    p.y = 4
+                    p.map_id = MapId.TOWN
+
+                    # 全滅復活フラグをONにする
+                    self.app.flags.add(EventFlag.PLAYER_DIED)
+
+                    # フィールドシーン（王様の城）へ復帰！
+                    from .field.field_scene import FieldScene
+                    self.app.change_state(FieldScene(self.app))
+                    # from .game_over_scene import GameOverScene
+
+                    # self.app.change_state(GameOverScene(self.app))
             else:
                 # 戦闘継続 ➔ コマンドメニューを表示
                 self.show_command_menu()

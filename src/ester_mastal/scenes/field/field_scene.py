@@ -4,19 +4,18 @@ from typing import Any
 
 import pyxel
 
-from .mode.gate_message_mode import GateMessageModeData, SwitchModeData
-
 from ...data.events import MAP_EVENTS
 from ...data.maps import MAP_CONFIG, FromPosition, MapId
 from ...infrastructure.in_memory_monster_repository import InMemoryMonsterRepository
 from ...models.monster import MonsterCode
-from .mode.chest_message_mode import ChestModeData
 from ...ui.hud_status_window import HudStatusWindow
 from ...ui.window_manager import WindowManager
 from ..base_scene import BaseScene
 from .mode.base_mode import BaseMode, FieldContext
 from .mode.boss_message_mode import BossMessageModeData
+from .mode.chest_message_mode import ChestModeData
 from .mode.explore_mode import ExploreMode
+from .mode.gate_message_mode import GateMessageModeData, SwitchModeData
 from .mode.signals import PopSignal, PushSignal
 
 TILE_MAPPING = {

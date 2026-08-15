@@ -42,6 +42,7 @@ class EventFlag(StrEnum):
     SWITCH_DEMON_CASTLE_3 = "SWITCH_DEMON_CASTLE_3"
     SWITCH_DEMON_CASTLE_4 = "SWITCH_DEMON_CASTLE_4"
     DEFEATED_DERAMILE = "DEFEATED_DERAMILE"
+    PLAYER_DIED = "PLAYER_DIED"
 
 
 MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {

@@ -75,12 +75,12 @@ class GameRepository:
             hp=lv1_data.max_hp,
             max_mp=lv1_data.max_mp,
             mp=lv1_data.max_mp,
-            base_attack=lv1_data.base_attack + 100,
+            base_attack=lv1_data.base_attack,
             base_defense=lv1_data.base_defense,
             level=1,
             exp=10,
             gold=200,
-            inventory=[ItemCode.POTION, ItemCode.COPPER_SWORD],
+            inventory=[ItemCode.POTION],
         )
 
     def check_level_up(self, player: Player) -> list[str]:

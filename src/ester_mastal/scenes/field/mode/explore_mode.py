@@ -2,15 +2,39 @@ import random
 
 import pyxel
 
-from ....data.events import MAP_EVENTS
+from ....data.events import MAP_EVENTS, EventFlag
 from ....data.maps import MAP_CONFIG, WARP_POINTS, FromPosition
 from ....ui.message_window import MessageWindow
-from .base_mode import BaseMode
+from .base_mode import BaseMode, FieldContext
 from .main_menu_mode import MainMenuMode
 from .signals import ModeSignal, PushSignal
 
 
 class ExploreMode(BaseMode):
+    def __init__(self, context: FieldContext):
+        super().__init__(context)
+
+        flags = self._app.flags
+
+        # ★ 全滅復活フラグが立っている場合、復活メッセージを自動表示！
+        if EventFlag.PLAYER_DIED in flags:
+            flags.remove(EventFlag.PLAYER_DIED)  # 1回だけ表示するためにフラグ解除
+
+            self._wm.push(
+                MessageWindow(
+                    self._app,
+                    10,
+                    130,
+                    172,
+                    50,
+                    speed=2,
+                    messages=[
+                        "おかあさん「だいじょうぶかい？",
+                        "いってらっしゃい。」",
+                    ],
+                )
+            )
+
     def is_confirm(self) -> bool:
         """決定キー判定 (Z / SPACE / RETURN)"""
         return (
