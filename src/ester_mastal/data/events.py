@@ -209,6 +209,69 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
             ],
         )
     ),
+        FromPosition(MapId.DEMON_CASTLE_2F, 2, 8): (
+        ext_message_strat,
+        SwitchModeData(
+            name="スイッチ",
+            flag_key=EventFlag.SWITCH_DEMON_CASTLE_2,
+            dialogues=[
+                Dialogue(
+                    flag=EventFlag.SWITCH_DEMON_CASTLE_2,
+                    messages=["スイッチ は すでに おされている。"],
+                ),
+                Dialogue(
+                    flag=None,
+                    set_flag=EventFlag.SWITCH_DEMON_CASTLE_2,  # ★ スイッチONフラグを中央にセット！
+                    messages=[
+                        "スイッチ を おした！",
+                        "どこかで とびら が ひらく おと が した！",
+                    ],
+                ),
+            ],
+        )
+    ),
+        FromPosition(MapId.DEMON_CASTLE_2F, 9, 2): (
+        ext_message_strat,
+        SwitchModeData(
+            name="スイッチ",
+            flag_key=EventFlag.SWITCH_DEMON_CASTLE_3,
+            dialogues=[
+                Dialogue(
+                    flag=EventFlag.SWITCH_DEMON_CASTLE_3,
+                    messages=["スイッチ は すでに おされている。"],
+                ),
+                Dialogue(
+                    flag=None,
+                    set_flag=EventFlag.SWITCH_DEMON_CASTLE_3,  # ★ スイッチONフラグを中央にセット！
+                    messages=[
+                        "スイッチ を おした！",
+                        "どこかで とびら が ひらく おと が した！",
+                    ],
+                ),
+            ],
+        )
+    ),
+        FromPosition(MapId.DEMON_CASTLE_2F, 9, 8): (
+        ext_message_strat,
+        SwitchModeData(
+            name="スイッチ",
+            flag_key=EventFlag.SWITCH_DEMON_CASTLE_4,
+            dialogues=[
+                Dialogue(
+                    flag=EventFlag.SWITCH_DEMON_CASTLE_4,
+                    messages=["スイッチ は すでに おされている。"],
+                ),
+                Dialogue(
+                    flag=None,
+                    set_flag=EventFlag.SWITCH_DEMON_CASTLE_4,  # ★ スイッチONフラグを中央にセット！
+                    messages=[
+                        "スイッチ を おした！",
+                        "どこかで とびら が ひらく おと が した！",
+                    ],
+                ),
+            ],
+        )
+    ),
     FromPosition(MapId.DEMON_CASTLE_3F, 2, 3): (
         ext_message_strat,
         GateMessageModeData(
