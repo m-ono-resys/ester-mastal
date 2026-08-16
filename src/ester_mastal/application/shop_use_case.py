@@ -31,6 +31,9 @@ class ShopUseCase:
         if not item_code in player.inventory:
             return ["そのアイテムはもっていないよ！"]
 
+        if item.price == 0:
+            return ["そのアイテムはうれないよ！"]
+
         else:
             idx = player.inventory.index(item_code)
             item_name = item.name
