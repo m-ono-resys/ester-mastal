@@ -50,9 +50,6 @@ class BattleScene(BaseScene):
         # 戦闘開始メッセージの表示
         self.show_message([f"{monster.name} が あらわれた！"])
 
-        # self.msg_window = MessageWindow(app, y=115, height=60)
-        # self.msg_window.push_messages([f"{monster.name} が あらわれた！"])
-
     def show_message(self, messages: list[str]):
         """メッセージウィンドウを WindowManager に追加"""
         self.window_manager.push(
