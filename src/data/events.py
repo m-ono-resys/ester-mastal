@@ -93,6 +93,7 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
             name="どうぐや",
             items=[
                 ItemCode.POTION,
+                ItemCode.MAGIC_WATER,
                 ItemCode.CLUB,
                 ItemCode.COPPER_SWORD,
                 ItemCode.LEATHER_ARMOR,
