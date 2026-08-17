@@ -47,11 +47,6 @@ class MainMenuMode(BaseMode):
                         self._wm.push(
                             MessageWindow(
                                 app=self._app,
-                                x=10,
-                                y=130,
-                                width=172,
-                                height=50,
-                                speed=2,
                                 messages=["アイテムをもっていない！"],
                             )
                         )
@@ -78,11 +73,6 @@ class MainMenuMode(BaseMode):
                         self._wm.push(
                             MessageWindow(
                                 app=self._app,
-                                x=10,
-                                y=130,
-                                width=172,
-                                height=50,
-                                speed=2,
                                 messages=["つかえるじゅもんがない！"],
                             )
                         )
@@ -105,11 +95,6 @@ class MainMenuMode(BaseMode):
                 self._wm.push(
                     MessageWindow(
                         app=self._app,
-                        x=10,
-                        y=130,
-                        width=172,
-                        height=50,
-                        speed=2,
                         messages=logs,
                     )
                 )
@@ -127,11 +112,6 @@ class MainMenuMode(BaseMode):
                 self._wm.push(
                     MessageWindow(
                         app=self._app,
-                        x=10,
-                        y=130,
-                        width=172,
-                        height=50,
-                        speed=2,
                         messages=logs,
                     )
                 )
