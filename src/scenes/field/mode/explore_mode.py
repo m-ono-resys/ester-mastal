@@ -37,18 +37,6 @@ class ExploreMode(BaseMode):
                 )
             )
 
-    # def is_confirm(self) -> bool:
-    #     """決定キー判定 (Z / SPACE / RETURN)"""
-    #     return (
-    #         pyxel.btnp(pyxel.KEY_Z)
-    #         or pyxel.btnp(pyxel.KEY_SPACE)
-    #         or pyxel.btnp(pyxel.KEY_RETURN)
-    #     )
-
-    # def is_cancel(self) -> bool:
-    #     """キャンセルキー判定 (X / ESCAPE)"""
-    #     return pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE)
-
     def update(self) -> ModeSignal:
 
         # ★ ウィンドウが開いている（会話中・メッセージ表示中など）場合
@@ -58,13 +46,29 @@ class ExploreMode(BaseMode):
 
         dx, dy = 0, 0
 
-        if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.KEY_W):
+        if (
+            pyxel.btnp(pyxel.KEY_UP)
+            or pyxel.btnp(pyxel.KEY_W)
+            or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP)
+        ):
             dy, self._scene.direction = -1, self._scene.direction.UP
-        elif pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.KEY_S):
+        elif (
+            pyxel.btnp(pyxel.KEY_DOWN)
+            or pyxel.btnp(pyxel.KEY_S)
+            or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN)
+        ):
             dy, self._scene.direction = 1, self._scene.direction.DOWN
-        elif pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.KEY_A):
+        elif (
+            pyxel.btnp(pyxel.KEY_LEFT)
+            or pyxel.btnp(pyxel.KEY_A)
+            or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT)
+        ):
             dx, self._scene.direction = -1, self._scene.direction.LEFT
-        elif pyxel.btnp(pyxel.KEY_RIGHT) or pyxel.btnp(pyxel.KEY_D):
+        elif (
+            pyxel.btnp(pyxel.KEY_RIGHT)
+            or pyxel.btnp(pyxel.KEY_D)
+            or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT)
+        ):
             dx, self._scene.direction = 1, self._scene.direction.RIGHT
 
         if dx != 0 or dy != 0:

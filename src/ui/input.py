@@ -24,8 +24,8 @@ def navigate_menu(length: int, current_idx: int) -> int:
     """上下キーによるメニュー選択カーソル移動"""
     if length <= 0:
         return 0
-    if pyxel.btnp(pyxel.KEY_UP):
+    if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP):
         return (current_idx - 1) % length
-    elif pyxel.btnp(pyxel.KEY_DOWN):
+    elif pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
         return (current_idx + 1) % length
     return current_idx
