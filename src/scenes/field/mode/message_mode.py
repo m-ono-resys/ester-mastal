@@ -32,11 +32,6 @@ class MessageMode(BaseMode):
         if self._messages:
             self._msg = MessageWindow(
                 self._app,
-                x=10,
-                y=130,
-                width=172,
-                height=50,
-                speed=2,
                 messages=self._messages,
                 name=self._event_name,
             )

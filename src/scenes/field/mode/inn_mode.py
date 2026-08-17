@@ -34,12 +34,6 @@ class InnMode(BaseMode):
 
         self._greeting_msg = MessageWindow(
             self._app,
-            x=10,
-            y=130,
-            width=172,
-            height=50,
-            speed=2,
-            # messages=["おかあさん「おかえりなさい\n やすんでいくかい？」"],
             name=self._event_data.name,
             messages=self._event_data.greeting_messages,
         )
@@ -71,12 +65,6 @@ class InnMode(BaseMode):
                         self._wm.push(
                             MessageWindow(
                                 app=self._app,
-                                x=10,
-                                y=130,
-                                width=172,
-                                height=50,
-                                speed=2,
-                                # messages=["よく ねむれたかい？", "いってらっしゃい！"],
                                 messages=self._event_data.done_messages,
                             )
                         )
@@ -86,12 +74,6 @@ class InnMode(BaseMode):
                         self._wm.push(
                             MessageWindow(
                                 app=self._app,
-                                x=10,
-                                y=130,
-                                width=172,
-                                height=50,
-                                speed=2,
-                                # messages=["むりしないでね"],
                                 messages=self._event_data.cancel_messages,
                             )
                         )
@@ -102,11 +84,6 @@ class InnMode(BaseMode):
                 self._wm.push(
                     MessageWindow(
                         app=self._app,
-                        x=10,
-                        y=130,
-                        width=172,
-                        height=50,
-                        speed=2,
                         messages=self._event_data.cancel_messages,
                     )
                 )

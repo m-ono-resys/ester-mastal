@@ -15,10 +15,10 @@ class MessageWindow(BaseWindow):
     def __init__(
         self,
         app,
-        x: int,
-        y: int,
-        width: int,
-        height: int,
+        x: int = 10,
+        y: int = 124,
+        width: int = 172,
+        height: int = 50,
         name: str | None = None,
         messages: list[str] | None = None,  # 初期メッセージを直接受け取れるように拡張
         speed: int = 2,

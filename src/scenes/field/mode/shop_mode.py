@@ -55,12 +55,6 @@ class ShopMode(BaseMode):
         # 1. 挨拶メッセージ表示
         self._greeting_msg = MessageWindow(
             self._app,
-            x=10,
-            y=130,
-            width=172,
-            height=50,
-            speed=2,
-            # messages=["いらっしゃいませ！\nなにに しますか？"],
             name=self._event_data.name,
             messages=self._event_data.greeting_messages,
         )
@@ -119,11 +113,6 @@ class ShopMode(BaseMode):
                                 if not _shop_items:
                                     self._no_item_msg = MessageWindow(
                                         self._app,
-                                        x=10,
-                                        y=130,
-                                        width=172,
-                                        height=50,
-                                        speed=2,
                                         messages=["うれるものが ないようだ！"],
                                     )
                                     self._wm.push(self._no_item_msg)
@@ -155,12 +144,6 @@ class ShopMode(BaseMode):
                         ) and not is_no_item_msg_active:
                             self._farewell_msg = MessageWindow(
                                 self._app,
-                                10,
-                                130,
-                                172,
-                                50,
-                                speed=2,
-                                # messages=["また おこしください！"],
                                 messages=self._event_data.cancel_messages,
                             )
                             self._wm.push(self._farewell_msg)
@@ -175,11 +158,6 @@ class ShopMode(BaseMode):
 
                         self._confirm_msg = MessageWindow(
                             app=self._app,
-                            x=10,
-                            y=130,
-                            width=172,
-                            height=50,
-                            speed=2,
                             messages=[f"{self._pending_item.value} を かいますか？"],
                         )
                         self._wm.push(self._confirm_msg)
@@ -206,11 +184,6 @@ class ShopMode(BaseMode):
 
                         self._confirm_msg = MessageWindow(
                             app=self._app,
-                            x=10,
-                            y=130,
-                            width=172,
-                            height=50,
-                            speed=2,
                             messages=[f"{self._pending_item.value} を うりますか？"],
                         )
                         self._wm.push(self._confirm_msg)
@@ -279,11 +252,6 @@ class ShopMode(BaseMode):
                                 self._wm.push(
                                     MessageWindow(
                                         app=self._app,
-                                        x=10,
-                                        y=130,
-                                        width=172,
-                                        height=50,
-                                        speed=2,
                                         messages=logs,
                                     )
                                 )
