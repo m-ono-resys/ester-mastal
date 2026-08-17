@@ -39,44 +39,50 @@ class ToPosition:
     message: str | None
 
 
+low_encount = 0.0
+high_encount = 0.0
+
 # ★ 各マップの Tilemap 0 上の位置 (u, v) と エンカウント率の定義
 MAP_CONFIG: dict[MapId, MapDefinistion] = {
     MapId.WORLD: MapDefinistion(
-        0, 0, 0.15, [MonsterCode.ENTENSTR, MonsterCode.RARUTAES]
+        0, 0, low_encount, [MonsterCode.ENTENSTR, MonsterCode.RARUTAES]
     ),
     MapId.TOWN: MapDefinistion(192, 0, 0.0),
     MapId.CASTLE_1F: MapDefinistion(768, 0, 0),
     MapId.CASTLE_2F: MapDefinistion(960, 0, 0),
     MapId.DUNGEON_B1F: MapDefinistion(
-        384, 0, 0.25, [MonsterCode.ENTENSTR, MonsterCode.RARUTAES]
+        384, 0, high_encount, [MonsterCode.ENTENSTR, MonsterCode.RARUTAES]
     ),
     MapId.DUNGEON_B2F: MapDefinistion(
-        576, 0, 0.25, [MonsterCode.ENTENSTR, MonsterCode.RARUTAES, MonsterCode.MENTATOL]
+        576,
+        0,
+        high_encount,
+        [MonsterCode.ENTENSTR, MonsterCode.RARUTAES, MonsterCode.MENTATOL],
     ),
     MapId.DEMON_CASTLE_1F: MapDefinistion(
-        0, 192, 0.25, [MonsterCode.RARUTAES, MonsterCode.MENTATOL]
+        0, 192, high_encount, [MonsterCode.RARUTAES, MonsterCode.MENTATOL]
     ),
     MapId.DEMON_CASTLE_2F: MapDefinistion(
-        192, 192, 0.25, [MonsterCode.RARUTAES, MonsterCode.MENTATOL]
+        192, 192, high_encount, [MonsterCode.RARUTAES, MonsterCode.MENTATOL]
     ),
     MapId.DEMON_CASTLE_3F: MapDefinistion(
-        384, 192, 0.25, [MonsterCode.RARUTAES, MonsterCode.MENTATOL]
+        384, 192, high_encount, [MonsterCode.RARUTAES, MonsterCode.MENTATOL]
     ),
 }
 
 # ★ ワープ地点の定義: (現在のMapId, x, y) -> 遷移先情報
 WARP_POINTS: dict[FromPosition, ToPosition] = {
     # トーンバットのまち
-    FromPosition(MapId.WORLD, 4, 8): ToPosition(MapId.TOWN, 1, 5, "トーンバットのまち"),
-    FromPosition(MapId.TOWN, 0, 4): ToPosition(MapId.WORLD, 4, 9, "そと に でた。"),
-    FromPosition(MapId.TOWN, 0, 5): ToPosition(MapId.WORLD, 4, 9, "そと に でた。"),
-    FromPosition(MapId.TOWN, 0, 6): ToPosition(MapId.WORLD, 4, 9, "そと に でた。"),
+    FromPosition(MapId.WORLD, 4, 7): ToPosition(MapId.TOWN, 1, 5, "トーンバットのまち"),
+    FromPosition(MapId.TOWN, 0, 4): ToPosition(MapId.WORLD, 4, 8, "そと に でた。"),
+    FromPosition(MapId.TOWN, 0, 5): ToPosition(MapId.WORLD, 4, 8, "そと に でた。"),
+    FromPosition(MapId.TOWN, 0, 6): ToPosition(MapId.WORLD, 4, 8, "そと に でた。"),
     # ギントのどうくつ
     FromPosition(MapId.WORLD, 2, 2): ToPosition(
-        MapId.DUNGEON_B1F, 5, 9, "ギントのどうくつ に はいった…"
+        MapId.DUNGEON_B1F, 5, 8, "ギントのどうくつ に はいった…"
     ),
-    FromPosition(MapId.DUNGEON_B1F, 5, 9): ToPosition(
-        MapId.WORLD, 1, 5, "そと に でた。"
+    FromPosition(MapId.DUNGEON_B1F, 5, 8): ToPosition(
+        MapId.WORLD, 2, 3, "そと に でた。"
     ),
     # ぎんとのどうくつ階段
     FromPosition(MapId.DUNGEON_B1F, 6, 5): ToPosition(MapId.DUNGEON_B2F, 6, 5, None),
@@ -87,27 +93,27 @@ WARP_POINTS: dict[FromPosition, ToPosition] = {
     FromPosition(MapId.DUNGEON_B2F, 1, 1): ToPosition(MapId.DUNGEON_B1F, 1, 1, None),
     FromPosition(MapId.DUNGEON_B2F, 10, 1): ToPosition(MapId.DUNGEON_B1F, 10, 1, None),
     FromPosition(MapId.DUNGEON_B1F, 10, 1): ToPosition(MapId.DUNGEON_B2F, 10, 1, None),
-    FromPosition(MapId.DUNGEON_B1F, 10, 9): ToPosition(MapId.DUNGEON_B2F, 10, 9, None),
-    FromPosition(MapId.DUNGEON_B2F, 10, 9): ToPosition(MapId.DUNGEON_B1F, 10, 9, None),
+    FromPosition(MapId.DUNGEON_B1F, 10, 8): ToPosition(MapId.DUNGEON_B2F, 10, 8, None),
+    FromPosition(MapId.DUNGEON_B2F, 10, 8): ToPosition(MapId.DUNGEON_B1F, 10, 8, None),
     # メーマントのしろ
     FromPosition(MapId.WORLD, 6, 4): ToPosition(
-        MapId.CASTLE_1F, 6, 9, "メーマントのしろ"
+        MapId.CASTLE_1F, 6, 8, "メーマントのしろ"
     ),
-    FromPosition(MapId.CASTLE_1F, 4, 10): ToPosition(
+    FromPosition(MapId.CASTLE_1F, 4, 9): ToPosition(
         MapId.WORLD, 6, 5, "そと に でた。"
     ),
-    FromPosition(MapId.CASTLE_1F, 5, 10): ToPosition(
+    FromPosition(MapId.CASTLE_1F, 5, 9): ToPosition(
         MapId.WORLD, 6, 5, "そと に でた。"
     ),
-    FromPosition(MapId.CASTLE_1F, 6, 10): ToPosition(
+    FromPosition(MapId.CASTLE_1F, 6, 9): ToPosition(
         MapId.WORLD, 6, 5, "そと に でた。"
     ),
-    FromPosition(MapId.CASTLE_1F, 7, 10): ToPosition(
+    FromPosition(MapId.CASTLE_1F, 7, 9): ToPosition(
         MapId.WORLD, 6, 5, "そと に でた。"
     ),
     # メーマントのしろ階段
-    FromPosition(MapId.CASTLE_1F, 6, 4): ToPosition(MapId.CASTLE_2F, 6, 7, None),
-    FromPosition(MapId.CASTLE_2F, 6, 7): ToPosition(MapId.CASTLE_1F, 6, 4, None),
+    FromPosition(MapId.CASTLE_1F, 6, 4): ToPosition(MapId.CASTLE_2F, 6, 6, None),
+    FromPosition(MapId.CASTLE_2F, 6, 6): ToPosition(MapId.CASTLE_1F, 6, 4, None),
     # まおうのしろ
     FromPosition(MapId.WORLD, 10, 1): ToPosition(
         MapId.DEMON_CASTLE_1F, 5, 9, "まおうのしろ"
@@ -123,18 +129,18 @@ WARP_POINTS: dict[FromPosition, ToPosition] = {
         MapId.DEMON_CASTLE_2F, 5, 6, None
     ),
     FromPosition(MapId.DEMON_CASTLE_1F, 6, 6): ToPosition(
-        MapId.DEMON_CASTLE_2F, 6, 8, None
+        MapId.DEMON_CASTLE_2F, 6, 7, None
     ),
     FromPosition(MapId.DEMON_CASTLE_2F, 5, 6): ToPosition(
         MapId.DEMON_CASTLE_1F, 5, 4, None
     ),
-    FromPosition(MapId.DEMON_CASTLE_2F, 6, 8): ToPosition(
+    FromPosition(MapId.DEMON_CASTLE_2F, 6, 7): ToPosition(
         MapId.DEMON_CASTLE_1F, 6, 6, None
     ),
     FromPosition(MapId.DEMON_CASTLE_2F, 6, 1): ToPosition(
-        MapId.DEMON_CASTLE_3F, 6, 8, None
+        MapId.DEMON_CASTLE_3F, 6, 7, None
     ),
-    FromPosition(MapId.DEMON_CASTLE_3F, 6, 8): ToPosition(
+    FromPosition(MapId.DEMON_CASTLE_3F, 6, 7): ToPosition(
         MapId.DEMON_CASTLE_2F, 6, 1, None
     ),
 }

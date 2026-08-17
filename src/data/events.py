@@ -144,7 +144,7 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
             ],
         ),
     ),
-    FromPosition(MapId.CASTLE_1F, 10, 9): (
+    FromPosition(MapId.CASTLE_1F, 10, 8): (
         chest_strat,
         ChestModeData(flag_key=EventFlag.OPENED_CHEST_CASTLE_1, reward_gold=30),
     ),
@@ -164,13 +164,13 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
         chest_strat,
         ChestModeData(flag_key=EventFlag.OPENED_CHEST_DUNGEON_1, reward_gold=50),
     ),
-    FromPosition(MapId.DUNGEON_B2F, 8, 3): (
+    FromPosition(MapId.DUNGEON_B2F, 8, 2): (
         chest_strat,
         ChestModeData(
             flag_key=EventFlag.OPENED_CHEST_DUNGEON_2, reward_item=ItemCode.POTION
         ),
     ),
-    FromPosition(MapId.DUNGEON_B2F, 9, 5): (
+    FromPosition(MapId.DUNGEON_B2F, 10, 4): (
         chest_strat,
         ChestModeData(
             flag_key=EventFlag.OPENED_CHEST_DUNGEON_3, reward_item=ItemCode.KING_ARMOR
@@ -182,7 +182,7 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
             flag_key=EventFlag.OPENED_CHEST_DUNGEON_4, reward_item=ItemCode.KING_SWORD
         ),
     ),
-    FromPosition(MapId.DUNGEON_B2F, 8, 7): (
+    FromPosition(MapId.DUNGEON_B2F, 8, 6): (
         boss_strat,
         BossMessageModeData(
             name=MonsterCode.SANTROTO.value,
@@ -220,7 +220,7 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
             ],
         ),
     ),
-    FromPosition(MapId.DEMON_CASTLE_2F, 2, 8): (
+    FromPosition(MapId.DEMON_CASTLE_2F, 2, 7): (
         ext_message_strat,
         SwitchModeData(
             name="スイッチ",
@@ -262,7 +262,7 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
             ],
         ),
     ),
-    FromPosition(MapId.DEMON_CASTLE_2F, 9, 8): (
+    FromPosition(MapId.DEMON_CASTLE_2F, 9, 7): (
         ext_message_strat,
         SwitchModeData(
             name="スイッチ",
