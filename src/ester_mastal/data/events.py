@@ -32,9 +32,10 @@ class EventFlag(StrEnum):
     OPENED_CHEST_CASTLE_1 = "CHEST_C_10_9"
     OPENED_CHEST_CASTLE_2 = "CHEST_C_9_1"
     OPENED_CHEST_CASTLE_3 = "CHEST_C_10_1"
-    OPENED_CHEST_DUNGEON_1 = "CHEST_D_8_4"
-    OPENED_CHEST_DUNGEON_2 = "CHEST_D_B2_9_5"
-    OPENED_CHEST_DUNGEON_3 = "CHEST_D_B2_10_5"
+    OPENED_CHEST_DUNGEON_1 = "OPENED_CHEST_DUNGEON_1"
+    OPENED_CHEST_DUNGEON_2 = "OPENED_CHEST_DUNGEON_2"
+    OPENED_CHEST_DUNGEON_3 = "OPENED_CHEST_DUNGEON_3"
+    OPENED_CHEST_DUNGEON_4 = "OPENED_CHEST_DUNGEON_4"
     DEFEATED_SANTROTO = "DEFEATED_SANTROTO"
     OPENED_MOUNTAIN = "OPENED_MOUNTAIN"
     SWITCH_DEMON_CASTLE_1 = "SWITCH_DEMON_CASTLE_1"
@@ -158,20 +159,26 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
             flag_key=EventFlag.OPENED_CHEST_CASTLE_3, reward_item=ItemCode.LEATHER_ARMOR
         ),
     ),
-    FromPosition(MapId.DUNGEON_B1F, 8, 4): (
+    FromPosition(MapId.DUNGEON_B2F, 3, 3): (
         chest_strat,
-        ChestModeData(flag_key=EventFlag.OPENED_CHEST_DUNGEON_1, reward_gold=100),
+        ChestModeData(flag_key=EventFlag.OPENED_CHEST_DUNGEON_1, reward_gold=50),
+    ),
+    FromPosition(MapId.DUNGEON_B2F, 8, 3): (
+        chest_strat,
+        ChestModeData(
+            flag_key=EventFlag.OPENED_CHEST_DUNGEON_2, reward_item=ItemCode.POTION
+        ),
     ),
     FromPosition(MapId.DUNGEON_B2F, 9, 5): (
         chest_strat,
         ChestModeData(
-            flag_key=EventFlag.OPENED_CHEST_DUNGEON_2, reward_item=ItemCode.KING_ARMOR
+            flag_key=EventFlag.OPENED_CHEST_DUNGEON_3, reward_item=ItemCode.KING_ARMOR
         ),
     ),
     FromPosition(MapId.DUNGEON_B2F, 10, 5): (
         chest_strat,
         ChestModeData(
-            flag_key=EventFlag.OPENED_CHEST_DUNGEON_3, reward_item=ItemCode.KING_SWORD
+            flag_key=EventFlag.OPENED_CHEST_DUNGEON_4, reward_item=ItemCode.KING_SWORD
         ),
     ),
     FromPosition(MapId.DUNGEON_B2F, 8, 7): (
