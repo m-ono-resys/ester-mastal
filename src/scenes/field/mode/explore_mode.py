@@ -25,11 +25,6 @@ class ExploreMode(BaseMode):
             self._wm.push(
                 MessageWindow(
                     self._app,
-                    10,
-                    130,
-                    172,
-                    50,
-                    speed=2,
                     messages=[
                         "おかあさん「だいじょうぶかい？",
                         "いってらっしゃい。」",
@@ -92,11 +87,6 @@ class ExploreMode(BaseMode):
                     if warp.message is not None:
                         message = MessageWindow(
                             app=self._app,
-                            x=10,
-                            y=130,
-                            width=172,
-                            height=50,
-                            speed=2,
                             messages=[warp.message],
                         )
                         self._wm.push(message)
