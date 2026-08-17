@@ -11,6 +11,7 @@ class BattleEngine:
         self.monster = monster
         self.repo = repo
         self.is_finished = False
+        self.tmp_defence = 0
 
     def calculate_physical_damage(self, attacker_atk: int, defender_def: int) -> int:
         """ドラクエ1風ダメージ計算式: (攻撃力 - 防御力/2) / 2 + 乱数"""
@@ -70,6 +71,12 @@ class BattleEngine:
                     logs.extend(self._process_victory())
                     self.is_finished = True
 
+            # バフ魔法の場合
+            case SpellType.DEFENCE_BUFF:
+                buff = spell.effect_value
+                self.tmp_defence += buff
+                logs.append(f"{self.player.name} の まもりが {buff} あがった！")
+
             case _:
                 logs.append("こうかがなかった！")
 
@@ -94,7 +101,7 @@ class BattleEngine:
 
         logs = [f"{self.monster.name} の こうげき！"]
         damage = self.calculate_physical_damage(
-            self.monster.attack, self.player.defense
+            self.monster.attack, self.player.defense + self.tmp_defence
         )
         actual_damage = self.player.take_damage(damage)
         logs.append(f"{self.player.name} は {actual_damage} の ダメージを うけた！")
