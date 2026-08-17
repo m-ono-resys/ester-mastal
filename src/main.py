@@ -8,6 +8,7 @@ from audio import init_audio
 from data.events import EventFlag
 from models.repository import GameRepository
 from scenes.base_scene import BaseScene
+from scenes.ending_scene import EndingScene
 from scenes.title_scene import TitleScene
 
 
@@ -29,6 +30,7 @@ class App:
 
         # 初期状態はタイトル画面
         self.current_scene: BaseScene = TitleScene(self)
+        # self.current_scene: BaseScene = EndingScene(self)
 
         # Pyxel実行開始
         pyxel.run(self.update, self.draw)
