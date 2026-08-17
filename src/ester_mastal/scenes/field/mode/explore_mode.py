@@ -98,14 +98,10 @@ class ExploreMode(BaseMode):
 
                 # エンカウント判定
                 cfg = MAP_CONFIG[self._scene.current_map_id]
-                if (
-                    self._scene.get_tile_type(
-                        self._scene.player_x, self._scene.player_y
-                    )
-                    == "GRASS"
-                    and random.random() < cfg.encount_rate
-                ):
-                    self._scene.trigger_random_battle()
+                if random.random() < cfg.encount_rate:
+                    if cfg.monsters is not None:
+                        monster_code = random.choice(cfg.monsters)
+                        self._scene.trigger_battle_with_monster(monster_code)
                     return ModeSignal()
 
         if self.is_confirm():

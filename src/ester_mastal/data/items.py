@@ -21,8 +21,8 @@ ITEM_MASTER: dict[ItemCode, Item] = {
     ItemCode.COPPER_SWORD: Item(
         ItemCode.COPPER_SWORD.value,
         ItemType.WEAPON,
-        20,
-        13,
+        80,
+        16,
         "銅で できた 剣（こうげき+13）",
     ),
     ItemCode.KING_SWORD: Item(
@@ -42,7 +42,7 @@ ITEM_MASTER: dict[ItemCode, Item] = {
     ItemCode.IRON_ARMOR: Item(
         ItemCode.IRON_ARMOR.value,
         ItemType.ARMOR,
-        50,
+        60,
         23,
         "鉄で できた よろい（まもり+23",
     ),

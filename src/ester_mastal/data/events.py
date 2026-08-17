@@ -91,8 +91,10 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
             name="どうぐや",
             items=[
                 ItemCode.POTION,
+                ItemCode.CLUB,
                 ItemCode.COPPER_SWORD,
                 ItemCode.LEATHER_ARMOR,
+                ItemCode.IRON_ARMOR,
             ],
             greeting_messages=[
                 "いらっしゃいませ！\nここは どうぐや です。\nなにに しますか？"
@@ -208,9 +210,9 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
                     ],
                 ),
             ],
-        )
+        ),
     ),
-        FromPosition(MapId.DEMON_CASTLE_2F, 2, 8): (
+    FromPosition(MapId.DEMON_CASTLE_2F, 2, 8): (
         ext_message_strat,
         SwitchModeData(
             name="スイッチ",
@@ -229,9 +231,9 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
                     ],
                 ),
             ],
-        )
+        ),
     ),
-        FromPosition(MapId.DEMON_CASTLE_2F, 9, 2): (
+    FromPosition(MapId.DEMON_CASTLE_2F, 9, 2): (
         ext_message_strat,
         SwitchModeData(
             name="スイッチ",
@@ -250,9 +252,9 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
                     ],
                 ),
             ],
-        )
+        ),
     ),
-        FromPosition(MapId.DEMON_CASTLE_2F, 9, 8): (
+    FromPosition(MapId.DEMON_CASTLE_2F, 9, 8): (
         ext_message_strat,
         SwitchModeData(
             name="スイッチ",
@@ -271,7 +273,7 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
                     ],
                 ),
             ],
-        )
+        ),
     ),
     FromPosition(MapId.DEMON_CASTLE_3F, 2, 3): (
         ext_message_strat,

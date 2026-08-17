@@ -1,3 +1,7 @@
+# title: エスターマスタル
+# author: おの まさたか と パパ
+
+
 import pyxel
 
 from ester_mastal.audio import init_audio
