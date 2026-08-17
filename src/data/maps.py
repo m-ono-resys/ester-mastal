@@ -39,8 +39,8 @@ class ToPosition:
     message: str | None
 
 
-low_encount = 1.0
-high_encount = 0.0
+low_encount = 0.15
+high_encount = 0.25
 
 # ★ 各マップの Tilemap 0 上の位置 (u, v) と エンカウント率の定義
 MAP_CONFIG: dict[MapId, MapDefinistion] = {

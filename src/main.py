@@ -25,7 +25,7 @@ class App:
         self.repo = GameRepository()
         self.player = self.repo.create_initial_player("といろ")
         self.flags: set[EventFlag] = set()
-        self.flags.add(EventFlag.GOT_ORB)
+        # self.flags.add(EventFlag.GOT_ORB)
 
         # 初期状態はタイトル画面
         self.current_scene: BaseScene = TitleScene(self)
@@ -44,6 +44,8 @@ class App:
     def draw(self):
         """現在のステートのdrawを呼ぶだけ"""
         self.current_scene.draw()
+
+        # キーパッドの案内
         pyxel.blt(1, 176, 0, 32, 0, 16, 16, 8)
         pyxel.text(18, 179, "いどう", 7, self.font)
         pyxel.blt(50, 176, 0, 48, 0, 16, 16, 8)

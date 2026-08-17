@@ -157,7 +157,7 @@ class BattleScene(BaseScene):
                         self.spell_window = EnumSelectWindow(
                             self.app,
                             x=95,
-                            y=120,
+                            y=115,
                             width=87,
                             choices=_spells,
                         )
@@ -171,7 +171,7 @@ class BattleScene(BaseScene):
                         self.item_window = EnumSelectWindow(
                             self.app,
                             x=95,
-                            y=120,
+                            y=115,
                             width=87,
                             choices=_items,
                         )
