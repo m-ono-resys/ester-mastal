@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 import pyxel
 
 from .base_window import BaseWindow
+from .input import is_cancel, is_confirm
 
 if TYPE_CHECKING:
     from .window_manager import WindowManager
@@ -103,7 +104,7 @@ class MessageWindow(BaseWindow):
             return
 
         # 2. 決定キーが押された時の処理
-        if self.is_confirm():
+        if is_confirm() or is_cancel():
             # 文字送り中の場合は「一括全表示（早送り）」
             if self.visible_char_count < len(self.current_text):
                 self.visible_char_count = len(self.current_text)

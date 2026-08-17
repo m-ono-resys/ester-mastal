@@ -3,6 +3,7 @@ import math
 from models.item import ItemCode, ItemRepository
 
 from .base_window import BaseWindow
+from .input import is_cancel, is_confirm, navigate_menu
 
 
 class ShopItemSelectWindow(BaseWindow):
@@ -39,7 +40,7 @@ class ShopItemSelectWindow(BaseWindow):
 
         # ★ 修正: リストが空(0個)の場合でも、キャンセルキーで閉じることは可能にする
         if not self.choices:
-            if self.is_cancel():
+            if is_cancel():
                 window_manager.pop()
             return
 
@@ -47,16 +48,16 @@ class ShopItemSelectWindow(BaseWindow):
         self._selected_idx = max(0, min(self._selected_idx, len(self.choices) - 1))
 
         # 上下キー移動
-        self._selected_idx = self.navigate_menu(len(self.choices), self._selected_idx)
+        self._selected_idx = navigate_menu(len(self.choices), self._selected_idx)
 
         # 決定キー処理
-        if self.is_confirm():
+        if is_confirm():
             # ★ 安全ガード: 念のため範囲内であることを確認してから取得する
             if 0 <= self._selected_idx < len(self.choices):
                 self.result = self.choices[self._selected_idx]
 
         # キャンセルキー処理
-        elif self.is_cancel():
+        elif is_cancel():
             self.result = None
             window_manager.pop()
 

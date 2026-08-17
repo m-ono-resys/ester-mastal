@@ -2,17 +2,22 @@ import pyxel
 
 
 def is_confirm() -> bool:
-    """決定キー判定 (Z / SPACE / RETURN)"""
+    """決定キー判定 (Z / SPACE / RETURN / GAMEPAD1_B)"""
     return (
         pyxel.btnp(pyxel.KEY_Z)
         or pyxel.btnp(pyxel.KEY_SPACE)
         or pyxel.btnp(pyxel.KEY_RETURN)
+        or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)
     )
 
 
 def is_cancel() -> bool:
-    """キャンセルキー判定 (X / ESCAPE)"""
-    return pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE)
+    """キャンセルキー判定 (X / ESCAPE / GAMEPAD1_A)"""
+    return (
+        pyxel.btnp(pyxel.KEY_X)
+        or pyxel.btnp(pyxel.KEY_ESCAPE)
+        or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)
+    )
 
 
 def navigate_menu(length: int, current_idx: int) -> int:

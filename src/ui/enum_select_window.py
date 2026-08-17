@@ -1,6 +1,7 @@
 from enum import Enum
 
 from .base_window import BaseWindow
+from .input import is_cancel, is_confirm, navigate_menu
 
 
 class EnumSelectWindow[T: Enum](BaseWindow):
@@ -32,15 +33,15 @@ class EnumSelectWindow[T: Enum](BaseWindow):
             return
 
         # 上下キー移動
-        self._selected_idx = self.navigate_menu(len(self.choices), self._selected_idx)
+        self._selected_idx = navigate_menu(len(self.choices), self._selected_idx)
 
         # 決定キー処理
-        if self.is_confirm():
+        if is_confirm():
             self.result = self.choices[self._selected_idx]
             # window_manager.pop()  # 選択完了したら自身を閉じる
 
         # キャンセルキー処理
-        elif self.is_cancel():
+        elif is_cancel():
             self.result = None
             window_manager.pop()
 

@@ -4,6 +4,7 @@ import pyxel
 
 from data.events import MAP_EVENTS, EventFlag
 from data.maps import MAP_CONFIG, WARP_POINTS, FromPosition
+from ui.input import is_cancel, is_confirm
 from ui.message_window import MessageWindow
 
 from .base_mode import BaseMode, FieldContext
@@ -36,17 +37,17 @@ class ExploreMode(BaseMode):
                 )
             )
 
-    def is_confirm(self) -> bool:
-        """決定キー判定 (Z / SPACE / RETURN)"""
-        return (
-            pyxel.btnp(pyxel.KEY_Z)
-            or pyxel.btnp(pyxel.KEY_SPACE)
-            or pyxel.btnp(pyxel.KEY_RETURN)
-        )
+    # def is_confirm(self) -> bool:
+    #     """決定キー判定 (Z / SPACE / RETURN)"""
+    #     return (
+    #         pyxel.btnp(pyxel.KEY_Z)
+    #         or pyxel.btnp(pyxel.KEY_SPACE)
+    #         or pyxel.btnp(pyxel.KEY_RETURN)
+    #     )
 
-    def is_cancel(self) -> bool:
-        """キャンセルキー判定 (X / ESCAPE)"""
-        return pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE)
+    # def is_cancel(self) -> bool:
+    #     """キャンセルキー判定 (X / ESCAPE)"""
+    #     return pyxel.btnp(pyxel.KEY_X) or pyxel.btnp(pyxel.KEY_ESCAPE)
 
     def update(self) -> ModeSignal:
 
@@ -105,11 +106,10 @@ class ExploreMode(BaseMode):
                         self._scene.trigger_battle_with_monster(monster_code)
                     return ModeSignal()
 
-        if self.is_confirm():
+        if is_confirm():
             return self._interact()
-            # pass
 
-        elif self.is_cancel():
+        elif is_cancel():
             return PushSignal(MainMenuMode(self._context))
 
         return ModeSignal()
