@@ -6,7 +6,7 @@ class BattleStatusWindow(BaseWindow):
         self,
         app,
         x=10,
-        y=120,
+        y=115,
         width=80,
         height=59,
     ):

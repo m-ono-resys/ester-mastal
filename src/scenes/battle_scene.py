@@ -50,21 +50,19 @@ class BattleScene(BaseScene):
         # 戦闘開始メッセージの表示
         self.show_message([f"{monster.name} が あらわれた！"])
 
-        self.msg_window = MessageWindow(app, x=10, y=120, width=172, height=60, speed=2)
-        self.msg_window.push_messages([f"{monster.name} が あらわれた！"])
+        # self.msg_window = MessageWindow(app, y=115, height=60)
+        # self.msg_window.push_messages([f"{monster.name} が あらわれた！"])
 
     def show_message(self, messages: list[str]):
         """メッセージウィンドウを WindowManager に追加"""
         self.window_manager.push(
-            MessageWindow(
-                self.app, x=10, y=120, width=172, height=60, speed=2, messages=messages
-            )
+            MessageWindow(self.app, y=115, height=59, messages=messages)
         )
 
     def show_command_menu(self):
         """コマンド選択ウィンドウを WindowManager に追加"""
         self.cmd_window = EnumSelectWindow(
-            self.app, x=95, y=120, width=87, choices=list(BattleCommand)
+            self.app, x=95, y=115, width=87, choices=list(BattleCommand)
         )
         self.window_manager.push(self.cmd_window)
 
@@ -117,9 +115,9 @@ class BattleScene(BaseScene):
                     p = self.app.player
                     p.hp = p.max_hp  # HP全回復
                     p.mp = p.max_mp  # MP全回復
-                    p.gold //= 2  # 所持金半分（ドラクエ伝統！）
+                    p.gold //= 2  # 所持金半分
 
-                    # 初期位置（王様の城の座標など）に移動
+                    # 初期位置に移動
                     p.x = 8
                     p.y = 4
                     p.map_id = MapId.TOWN
@@ -127,7 +125,7 @@ class BattleScene(BaseScene):
                     # 全滅復活フラグをONにする
                     self.app.flags.add(EventFlag.PLAYER_DIED)
 
-                    # フィールドシーン（王様の城）へ復帰！
+                    # 自宅へ復帰
                     from .field.field_scene import FieldScene
 
                     self.app.change_state(FieldScene(self.app))
