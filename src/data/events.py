@@ -116,8 +116,8 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
                     messages=[
                         "王さまにきいて ここにきたんだろ。",
                         "ま王のしろのまえには とても高いやまがあるだろ。",
-                        "だからぼくがもっている 天の玉をつかうといい。",
-                        "天の玉を てにいれた！",
+                        f"だからぼくがもっている {ItemCode.CELESTIAL_ORB.value}をつかうといい。",
+                        f"{ItemCode.CELESTIAL_ORB.value}を てにいれた！",
                     ],
                     flag=EventFlag.TALKED_TO_KING,
                     reward_item=ItemCode.CELESTIAL_ORB,
