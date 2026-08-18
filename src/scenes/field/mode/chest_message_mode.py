@@ -45,7 +45,7 @@ class ChestMessageMode(ExtendMessageMode):
             self._set_flag = None
         else:
             # 2. ★ 未開封の場合 ➔ 親クラス(MessageMode)にこのフラグをONにさせるよう設定
-            self._set_flag = data.flag_key
+            self._set_flag = None
 
             # 報酬の付与と固定ログの生成
             reward_texts = []
@@ -55,9 +55,15 @@ class ChestMessageMode(ExtendMessageMode):
                 reward_texts.append(f"{data.reward_gold} ゴールド を てにいれた！")
 
             if data.reward_item:
-                self._player.inventory.append(data.reward_item)
+                # self._player.inventory.append(data.reward_item)
                 item_name = getattr(data.reward_item, "value", str(data.reward_item))
-                reward_texts.append(f"{item_name} を てにいれた！")
+                if self._player.add_item(data.reward_item):
+                    reward_texts.append(f"{item_name} を てにいれた！")
+                    self._set_flag = data.flag_key
+                else:
+                    reward_texts.append(
+                        f"しかし もちものが いっぱいで {item_name} は もてなかった！"
+                    )
 
             # 固定メッセージの構築（「たからばこ を あけた！」 ＋ 獲得報酬）
             if data.open_messages:

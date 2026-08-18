@@ -48,13 +48,28 @@ class ExtendMessageMode(MessageMode):
             self._set_flag = None
             return
 
+        # メッセージとフラグの作業用変数
+        messages = list(dialogue.messages)
+        set_flag = dialogue.set_flag
+
         # 1. 報酬処理（ゴールド＆アイテムの加算）
         if dialogue.reward_gold > 0:
             self._player.gold += dialogue.reward_gold
 
         if dialogue.reward_item:
-            self._player.inventory.append(dialogue.reward_item)
+            item_code = dialogue.reward_item
 
-        # 2. 親クラスが使うメッセージとフラグをセット
-        self._messages = dialogue.messages
-        self._set_flag = dialogue.set_flag
+            # add_item 実行（10個未満なら成功で True、満タンなら False）
+            if not self._player.add_item(item_code):
+                # 満タンで受け取れなかった場合！
+                item_name = getattr(item_code, "value", str(item_code))
+                messages.append(
+                    f"しかし もちものが いっぱいで {item_name} は もてなかった！"
+                )
+
+                # ★ 重要: フラグをONにしないことで、アイテム欄を空けた後に再度話しかければ受け取れるようにする！
+                set_flag = None
+
+            # 3. 親クラス (MessageMode) が使うプロパティにセット
+        self._messages = messages
+        self._set_flag = set_flag

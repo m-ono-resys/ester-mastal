@@ -21,6 +21,9 @@ class Player:
     spells: list[SpellCode] = field(default_factory=list)
     inventory: list[ItemCode] = field(default_factory=list)
 
+    # ★ インベントリの最大所持数定数（10個）
+    MAX_INVENTORY_SIZE: int = 10
+
     # ★ 装備品データ（初期は何も装備していない）
     equipped_weapon: Item | None = None
     equipped_armor: Item | None = None
@@ -81,6 +84,19 @@ class Player:
         return damage
 
     # --- インベントリ操作 ---
+
+    @property
+    def is_inventory_full(self) -> bool:
+        """インベントリが満タン（10個以上）か判定"""
+        return len(self.inventory) >= self.MAX_INVENTORY_SIZE
+
+    def add_item(self, item_code: ItemCode) -> bool:
+        """アイテムをインベントリに追加する。追加成功で True、満タンで失敗なら False"""
+        if self.is_inventory_full:
+            return False
+        self.inventory.append(item_code)
+        return True
+
     def has_item(self, item_code: ItemCode) -> bool:
         return item_code in self.inventory
 

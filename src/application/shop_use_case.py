@@ -14,12 +14,15 @@ class ShopUseCase:
         if not item:
             return ["そんなアイテムはないよ！"]
 
+        if player.is_inventory_full:
+            return ["もちものが いっぱいだよ！"]
+
         if player.gold < item.price:
             return ["おかね が たりないよ！"]
 
         else:
             player.gold -= item.price
-            player.inventory.append(item_code)
+            player.add_item(item_code)
             return [f"{item.name} を かった！", "まいどあり！"]
 
     def sell_item(self, player: Player, item_code: ItemCode) -> list[str]:
