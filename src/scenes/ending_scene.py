@@ -1,6 +1,6 @@
 import pyxel
 
-from audio import play_se
+# from audio import play_se
 from ui.input import is_confirm
 from ui.window import draw_window
 

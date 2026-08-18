@@ -3,7 +3,8 @@ from enum import Enum, auto
 import pyxel
 
 from application.item_use_case import ItemUseCase
-from audio import play_se
+
+# from audio import play_se
 from data.events import EventFlag
 from data.maps import MapId
 from infrastructure.in_memory_item_repository import InMemoryItemRepository
