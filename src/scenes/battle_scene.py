@@ -16,6 +16,7 @@ from models.spell import SpellCode
 from ui.battle_status_window import BattleStatusWindow
 from ui.enum_select_window import EnumSelectWindow
 from ui.message_window import MessageWindow
+from ui.scroll_select_window import ScrollSelectWindow
 from ui.window_manager import WindowManager
 
 from .base_scene import BaseScene
@@ -73,26 +74,6 @@ class BattleScene(BaseScene):
             if self.engine.is_finished:
                 # 戦闘終了 ➔ 勝敗に応じたシーン遷移
                 if self.app.player.is_alive:
-                    # from .field.field_scene import FieldScene
-                    # from .field.mode.message_mode import MessageMode, MessageModeData
-
-                    # field_scene = FieldScene(self.app)
-
-                    # # ボスごとの撃破フラグと捨て台詞メッセージの定義テーブル
-                    # boss_defeat_data = {
-                    #     MonsterCode.SANTROTO.value: (
-                    #         EventFlag.DEFEATED_SANTROTO,
-                    #         ["このわたしがたおされるとは・・・"],
-                    #     ),
-                    #     MonsterCode.DERAMILE.value: (
-                    #         EventFlag.DEFEATED_DERAMILE,
-                    #         [
-                    #             "このかんむりがあるかぎり、やみはほろびない",
-                    #             "またふっかつして こんどこそぜったいにたおしてやる。",
-                    #         ],
-                    #     ),
-                    # }
-
                     monster_name = self.engine.monster.name
 
                     match monster_name:
@@ -148,20 +129,6 @@ class BattleScene(BaseScene):
                             self.app.change_state(FieldScene(self.app))
                             return
 
-                    # # ボスモンスターの場合はフラグ加算と捨て台詞メッセージを設定
-                    # if monster_name in boss_defeat_data:
-                    #     flag, messages = boss_defeat_data[monster_name]
-                    #     self.app.flags.add(flag)
-
-                    #     field_scene.current_event = MessageModeData(
-                    #         name=monster_name,
-                    #         messages=messages,
-                    #     )
-                    #     field_scene.mode_stack.append(MessageMode(field_scene.context))
-
-                    # # 勝利時は一括で FieldScene へ切り替え
-                    # self.app.change_state(field_scene)
-
                 else:
                     p = self.app.player
                     p.hp = p.max_hp  # HP全回復
@@ -208,11 +175,8 @@ class BattleScene(BaseScene):
                     if not _spells:
                         self.show_message(["つかえるじゅもんがない！"])
                     else:
-                        self.spell_window = EnumSelectWindow(
+                        self.spell_window = ScrollSelectWindow(
                             self.app,
-                            x=95,
-                            y=115,
-                            width=87,
                             choices=_spells,
                         )
                         self.window_manager.push(self.spell_window)
@@ -222,11 +186,8 @@ class BattleScene(BaseScene):
                     if not _items:
                         self.show_message(["アイテムをもっていない！"])
                     else:
-                        self.item_window = EnumSelectWindow(
+                        self.item_window = ScrollSelectWindow(
                             self.app,
-                            x=95,
-                            y=115,
-                            width=87,
                             choices=_items,
                         )
                         self.window_manager.push(self.item_window)
