@@ -1,5 +1,6 @@
 import pyxel
 
+from models.item import ItemCode
 from ui.input import is_confirm
 
 from .base_scene import BaseScene
@@ -10,6 +11,20 @@ class TitleScene(BaseScene):
     def __init__(self, app):
         super().__init__(app)
         self.app.player = self.app.repo.create_initial_player("といろ")
+        # デバック用
+        # self.app.player.gold = 1000
+        # self.app.player.inventory = [
+        #     ItemCode.POTION,
+        #     ItemCode.POTION,
+        #     ItemCode.POTION,
+        #     ItemCode.POTION,
+        #     ItemCode.POTION,
+        #     ItemCode.POTION,
+        #     ItemCode.POTION,
+        #     ItemCode.POTION,
+        #     ItemCode.POTION,
+        #     ItemCode.POTION,
+        # ]
         self.app.flags.clear()
 
     def update(self):
