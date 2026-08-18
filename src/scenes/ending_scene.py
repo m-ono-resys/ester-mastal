@@ -10,7 +10,7 @@ from .base_scene import BaseScene
 class EndingScene(BaseScene):
     def __init__(self, app):
         super().__init__(app)
-        play_se(3)  # ★ 勝利ファンファーレ再生！
+        # play_se(3)  # ★ 勝利ファンファーレ再生！
         self.frame_timer = 0
 
     def update(self):

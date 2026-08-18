@@ -194,11 +194,11 @@ class BattleScene(BaseScene):
 
             match cmd:
                 case BattleCommand.ATTACK:
-                    play_se(0)  # 攻撃SE
+                    # play_se(0)  # 攻撃SE
                     logs = self.engine.player_attack()
                     if self.engine.monster.is_alive:
                         m_logs = self.engine.monster_turn()
-                        play_se(2)  # ダメージSE
+                        # play_se(2)  # ダメージSE
                         logs.extend(m_logs)
                     self.show_message(logs)
 
@@ -234,7 +234,7 @@ class BattleScene(BaseScene):
                     logs, success = self.engine.player_escape()
                     if not success:
                         m_logs = self.engine.monster_turn()
-                        play_se(2)  # ダメージSE
+                        # play_se(2)  # ダメージSE
                         logs.extend(m_logs)
                     self.show_message(logs)
 
@@ -249,7 +249,7 @@ class BattleScene(BaseScene):
                 logs = self.engine.player_cast_spell(spell)
                 if self.engine.monster.is_alive:
                     m_logs = self.engine.monster_turn()
-                    play_se(2)  # ダメージSE
+                    # play_se(2)  # ダメージSE
                     logs.extend(m_logs)
 
                 self.show_message(logs)
@@ -263,7 +263,7 @@ class BattleScene(BaseScene):
                 logs = self._item_usecase.use_item(self.app.player, item_code)
                 if self.engine.monster.is_alive:
                     m_logs = self.engine.monster_turn()
-                    play_se(2)  # ダメージSE
+                    # play_se(2)  # ダメージSE
                     logs.extend(m_logs)
 
                 self.show_message(logs)
