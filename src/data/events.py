@@ -203,7 +203,6 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
     FromPosition(MapId.DEMON_CASTLE_2F, 2, 2): (
         ext_message_strat,
         SwitchModeData(
-            name="スイッチ",
             flag_key=EventFlag.SWITCH_DEMON_CASTLE_1,
             dialogues=[
                 Dialogue(
@@ -224,7 +223,6 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
     FromPosition(MapId.DEMON_CASTLE_2F, 2, 7): (
         ext_message_strat,
         SwitchModeData(
-            name="スイッチ",
             flag_key=EventFlag.SWITCH_DEMON_CASTLE_2,
             dialogues=[
                 Dialogue(
@@ -245,7 +243,6 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
     FromPosition(MapId.DEMON_CASTLE_2F, 9, 2): (
         ext_message_strat,
         SwitchModeData(
-            name="スイッチ",
             flag_key=EventFlag.SWITCH_DEMON_CASTLE_3,
             dialogues=[
                 Dialogue(
@@ -266,7 +263,6 @@ MAP_EVENTS: dict[FromPosition, tuple[EventStrategy, BaseModeData | None]] = {
     FromPosition(MapId.DEMON_CASTLE_2F, 9, 7): (
         ext_message_strat,
         SwitchModeData(
-            name="スイッチ",
             flag_key=EventFlag.SWITCH_DEMON_CASTLE_4,
             dialogues=[
                 Dialogue(

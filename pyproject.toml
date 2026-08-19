@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ester-mastal = "ester_mastal:main"
+ester-mastal = "main:App"
 test = "ester_mastal:test_cli"
 
 [dependency-groups]
