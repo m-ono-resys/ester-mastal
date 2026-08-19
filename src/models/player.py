@@ -61,6 +61,12 @@ class Player:
             return True
         return False
 
+    def remove_weapon(self) -> None:
+        self.equipped_weapon = None
+
+    def remove_armor(self) -> None:
+        self.equipped_armor = None
+
     @property
     def is_alive(self) -> bool:
         return self.hp > 0

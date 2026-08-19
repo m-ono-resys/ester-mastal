@@ -67,9 +67,9 @@ class GameRepository:
         """IDから呪文インスタンスを取得"""
         return self.spells_data[spell_id]
 
-    def create_initial_player(self, name: str) -> Player:
+    def create_initial_player(self, name: str, level: int = 0) -> Player:
         """初期（LV1）のプレイヤーを生成"""
-        lv1_data = self.exp_table_data[0]
+        lv1_data = self.exp_table_data[level]
         return Player(
             name=name,
             max_hp=lv1_data.max_hp,

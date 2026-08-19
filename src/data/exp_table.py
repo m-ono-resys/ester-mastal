@@ -16,8 +16,8 @@ class ExpRow:
 
 EXP_TABLE: list[ExpRow] = [
     ExpRow(1, 0, 15, 0, 8, 5, None),
-    ExpRow(2, 7, 22, 6, 12, 8, SpellCode.IMARU),
-    ExpRow(3, 22, 30, 12, 18, 12, SpellCode.IRAMEI),
-    ExpRow(4, 50, 42, 18, 26, 18, SpellCode.AIMETO),
-    ExpRow(5, 100, 60, 26, 36, 25, SpellCode.MASARA),
+    ExpRow(2, 7, 28, 8, 16, 8, SpellCode.IMARU),
+    ExpRow(3, 30, 42, 16, 24, 18, SpellCode.IRAMEI),
+    ExpRow(4, 80, 60, 24, 32, 24, SpellCode.AIMETO),
+    ExpRow(5, 200, 84, 36, 40, 32, SpellCode.MASARA),
 ]

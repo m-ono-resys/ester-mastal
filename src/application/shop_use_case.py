@@ -38,6 +38,12 @@ class ShopUseCase:
             return ["そのアイテムはうれないよ！"]
 
         else:
+            if player.equipped_weapon == item:
+                player.remove_weapon()
+
+            elif player.equipped_armor == item:
+                player.remove_armor()
+
             idx = player.inventory.index(item_code)
             item_name = item.name
             sell_price = math.ceil(item.price / 2)

@@ -1,6 +1,8 @@
 import pyxel
 
+from data.maps import MapId
 from models.item import ItemCode
+from models.spell import SpellCode
 from ui.input import is_confirm
 
 from .base_scene import BaseScene
@@ -11,13 +13,25 @@ class TitleScene(BaseScene):
     def __init__(self, app):
         super().__init__(app)
         self.app.player = self.app.repo.create_initial_player("といろ")
-        # デバック用
+        self.app.flags.clear()
+
+        # デバッグ用
+        # self.app.player = self.app.repo.create_initial_player("デバッグ", 4)
+        # self.app.player.x = 4
+        # self.app.player.y = 3
+        # self.app.player.map_id = MapId.DEMON_CASTLE_3F
         # self.app.player.gold = 1000
+        # self.app.player.spells = [
+        #     SpellCode.IMARU,
+        #     SpellCode.IRAMEI,
+        #     SpellCode.AIMETO,
+        #     SpellCode.MASARA,
+        # ]
         # self.app.player.inventory = [
-        #     ItemCode.POTION,
-        #     ItemCode.POTION,
-        #     ItemCode.POTION,
-        #     ItemCode.POTION,
+        #     ItemCode.KING_ARMOR,
+        #     ItemCode.KING_SWORD,
+        #     ItemCode.IRON_ARMOR,
+        #     ItemCode.COPPER_SWORD,
         #     ItemCode.POTION,
         #     ItemCode.POTION,
         #     ItemCode.POTION,
@@ -25,7 +39,6 @@ class TitleScene(BaseScene):
         #     ItemCode.POTION,
         #     ItemCode.POTION,
         # ]
-        self.app.flags.clear()
 
     def update(self):
         # 決定キーでゲーム開始
