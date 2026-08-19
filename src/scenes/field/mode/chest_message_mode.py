@@ -53,6 +53,7 @@ class ChestMessageMode(ExtendMessageMode):
             if data.reward_gold > 0:
                 self._player.gold += data.reward_gold
                 reward_texts.append(f"{data.reward_gold} ゴールド を てにいれた！")
+                self._set_flag = data.flag_key
 
             if data.reward_item:
                 # self._player.inventory.append(data.reward_item)
