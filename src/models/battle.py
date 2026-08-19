@@ -73,9 +73,12 @@ class BattleEngine:
 
             # バフ魔法の場合
             case SpellType.DEFENCE_BUFF:
-                buff = spell.effect_value
-                self.tmp_defence += buff
-                logs.append(f"{self.player.name} の まもりが {buff} あがった！")
+                if self.tmp_defence < spell.effect_value:
+                    buff = spell.effect_value
+                    self.tmp_defence += buff
+                    logs.append(f"{self.player.name} の まもりが {buff} あがった！")
+                else:
+                    logs.append("こうかがなかった！")
 
             case _:
                 logs.append("こうかがなかった！")
